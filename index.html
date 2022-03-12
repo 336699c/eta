@@ -1,5 +1,5 @@
 <script>
-//v3.01
+//v3.02
 var result = document.URL.split("?")[1]+"Δ";
 var input = window.AppInventor.getWebViewString();
 var _url = document.URL.split("?")[1];
@@ -16,7 +16,7 @@ function httpGet(theUrl, callback)
     xmlHttp.send(null);
 }
 
-function XXX(v) {
+function sort(v) {
   var Q1 = /[A-Z][0-9]+/;
   if (Q1.exec(v))
   	return v;
@@ -37,8 +37,8 @@ switch (_url){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
         if (rr[i]["route"].includes(input)){
-        httpresult[XXX(rr[i]["route"])]=rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
-        sortpend.push(XXX(rr[i]["route"]));
+        httpresult[sort(rr[i]["route"])]=rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
+        sortpend.push(sort(rr[i]["route"]));
         }
     }
 
