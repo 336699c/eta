@@ -1,4 +1,5 @@
 <p id="p0">My First JavaScript</p>
 <script>
-document.getElementById("p0").innerHTML = document.URL.split("?")[1]
+document.getElementById("p0").innerHTML = window.AppInventor.getWebViewString()+"\n"+document.URL.split("=")[1];
+window.AppInventor.setWebViewString = Date.now();
 </script>
