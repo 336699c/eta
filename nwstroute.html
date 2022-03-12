@@ -6,9 +6,7 @@ var input = window.AppInventor.getWebViewString();
 var input = document.URL.split("nwstroute.html?")[1];
 }
 input = input.split(",");
-var result = "";
-var run=0;
-    
+
 function httpGet(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
