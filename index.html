@@ -1,5 +1,5 @@
 <script>
-//v3
+//v3.01
 var result = document.URL.split("?")[1]+"Δ";
 var input = window.AppInventor.getWebViewString();
 var _url = document.URL.split("?")[1];
@@ -43,11 +43,11 @@ switch (_url){
     }
 
     sortpend.sort();
-    //document.write(sortpend);
     for (var i in sortpend){
     result = result + httpresult[sortpend[i]];
     }
     window.AppInventor.setWebViewString (result);
+    document.write(result);
     });
     break;
 }
