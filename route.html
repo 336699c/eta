@@ -1,7 +1,13 @@
 <script>
 //v2.1
-var result = "";
+if(window.AppInventor){
 var input = window.AppInventor.getWebViewString();
+}else{
+var input = document.URL.split("?")[1];
+}
+var result = "";
+
+var _url = "ctb_route";
 var run=0;
     
 function httpGet(theUrl, callback)
@@ -42,8 +48,9 @@ function nwst_route(e){
     result = result + httpresult[sortpend[i]];
     }
     document.write(result);
-    }
     window.AppInventor.setWebViewString (result);
+    }
+    
     }
     
 function kmb_route(e){
@@ -51,9 +58,9 @@ var rr= JSON.parse(e)["data"];
     for (var i in rr){
     
         if (rr[i]["route"].includes(input)){
-        var routenum = rr[i]["route"] + rr[i]["bound"] + rr[i]["service_type"];
-        httpresult[XXX(routenum)+"k"]=rr[i]["route"]+","+rr[i]["dest_tc"]+" 路綫"+rr[i]["service_type"]+",KMB,"+rr[i]["bound"]+"Δ";
-        sortpend.push(XXX(routenum)+"k");
+        var routenum = rr[i]["route"];
+        httpresult[XXX(routenum)+ rr[i]["bound"] + rr[i]["service_type"]+"k"]=rr[i]["route"]+","+rr[i]["dest_tc"]+" 路綫"+rr[i]["service_type"]+",KMB,"+rr[i]["bound"]+"Δ";
+        sortpend.push(XXX(routenum) +rr[i]["bound"] + rr[i]["service_type"]+"k");
         }
     
     }
@@ -64,8 +71,6 @@ var rr= JSON.parse(e)["data"];
     result = result + httpresult[sortpend[i]];
     }
     document.write(result);
-    
-    
     window.AppInventor.setWebViewString (result);
     }
 }
