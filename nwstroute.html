@@ -22,12 +22,12 @@ function httpGet(theUrl, callback)
 
 function data(e){
 var rr = JSON.parse(e)["data"];
-var t=[];
+var t="";
 for (var i in rr){
-t.push(rr[i]["stop"])
+t+=rr[i]["stop"];
 }
   document.write(t);
-  window.AppInventor.setWebViewString (t.toString());
+  window.AppInventor.setWebViewString (t);
 }
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/ctb/"+input[0]+"/"+input[1],function (e){data(e)});
