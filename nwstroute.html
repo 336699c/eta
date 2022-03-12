@@ -27,7 +27,7 @@ for (var i in rr){
 t.push(rr[i]["stop"])
 }
   document.write(t);
-  window.AppInventor.setWebViewString (t);
+  window.AppInventor.setWebViewString (t.toString());
 }
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/ctb/"+input[0]+"/"+input[1],function (e){data(e)});
