@@ -11,6 +11,8 @@ input = input.split(",");
 var result="";
 var run=0;
 var runtimes = 999;
+var temp={};
+var t=[];
 
 function httpGet(theUrl, callback)
 {
@@ -25,9 +27,12 @@ function httpGet(theUrl, callback)
 
 function stopname(e){
 var rr = JSON.parse(e)["data"];
-result+=rr["stop"]+","+rr["name_tc"]+","+rr["lat"]+","+rr["long"]+"Δ";
+temp[rr["stop"]] = rr["stop"]+","+rr["name_tc"]+","+rr["lat"]+","+rr["long"]+"Δ";
 run++;
 if (runtimes<run+1){
+for (var i in temp){
+result+= temp[t];
+}
 document.write(result);
 window.AppInventor.setWebViewString (result);
 }
@@ -36,7 +41,6 @@ window.AppInventor.setWebViewString (result);
 function data(e){
 var rr = JSON.parse(e)["data"];
 runtimes = Object.keys(rr).length;
-var t=[];
 for (var i in rr){
 t.push(rr[i]["stop"])
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+rr[i]["stop"],function (e){stopname(e)});
