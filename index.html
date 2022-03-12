@@ -17,8 +17,18 @@ function httpGet(theUrl, callback)
     xmlHttp.send(null);
 }
 
-
-
+function XXX(v) {
+  var Q1 = /[A-Z][0-9]+/;
+  if (Q1.exec(v))
+  	return v;
+    
+  var YYY = parseInt(v).toString().padStart(4, '0');
+  var mmm = /[A-Z]/g;
+  var nnn = mmm.exec(v);
+  return YYY + (nnn ? nnn[0] : '');
+  
+}
+    
 switch (_url){
     case "ctb_route":  
     case "nwfb_route":
@@ -27,11 +37,14 @@ switch (_url){
     httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/"+_url.split("_")[0],function (e){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
-        httpresult[rr[i]["route"]]=rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
-        sortpend.push(rr[i]["route"]);
+        if (rr[i]["route"].includes(input)){
+        httpresult[XXX(rr[i]["route"])]=rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
+        sortpend.push(XXX(rr[i]["route"]));
+        }
     }
-    //if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
+
     sortpend.sort();
+    //document.write(sortpend);
     for (var i in sortpend){
     result = result + httpresult[sortpend[i]];
     }
@@ -39,4 +52,6 @@ switch (_url){
     });
     break;
 }
+    
+
 </script>
