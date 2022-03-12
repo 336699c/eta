@@ -1,7 +1,9 @@
 <script>
 var result = window.AppInventor.getWebViewString()+"Δ";
 var input = window.AppInventor.getWebViewString();
+var _url = document.URL.split("?")[1];
 document.write(input);
+document.write(_url);  
     
 function httpGet(theUrl, callback)
 {
@@ -14,7 +16,7 @@ function httpGet(theUrl, callback)
     xmlHttp.send(null);
 }
 
-var _url = document.URL.split("?")[1];
+
 
 switch (_url){
     case "ctb_route":   
