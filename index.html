@@ -20,7 +20,17 @@ switch (_url){
     httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
-    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["dest_tc"]+"Δ";
+    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["dest_tc"]+","++rr[i]["co"]+"Δ";
+    }
+    document.write(result);
+    window.AppInventor.setWebViewString (result);
+    });
+    break;
+    case "nwfb_route":   
+    httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/nwfb",function (e){
+    var rr = JSON.parse(e)["data"];
+    for (var i in rr){
+    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["dest_tc"]+","++rr[i]["co"]+"Δ";
     }
     document.write(result);
     window.AppInventor.setWebViewString (result);
