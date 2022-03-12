@@ -1,5 +1,5 @@
 <script>
-var result = window.AppInventor.getWebViewString()+"Δ";
+var result = document.URL.split("?")[1]+"Δ";
 var input = window.AppInventor.getWebViewString();
 var _url = document.URL.split("?")[1];
 document.write(input);
@@ -18,7 +18,8 @@ function httpGet(theUrl, callback)
 
 
 
- 
+switch (_url){
+    case "ctb_route":  
     httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
@@ -26,4 +27,6 @@ function httpGet(theUrl, callback)
     }
     window.AppInventor.setWebViewString (result);
     });
+    break;
+}
 </script>
