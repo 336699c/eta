@@ -1,5 +1,7 @@
 <script>
-var result = "";
+var result="";
+var input = window.AppInventor.getWebViewString();
+
 function httpGet(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
@@ -10,13 +12,20 @@ function httpGet(theUrl, callback)
     xmlHttp.open("GET", theUrl, true); // true for asynchronous 
     xmlHttp.send(null);
 }
-switch(document.URL.split("?")[1]){
-  case "route_nwst":
-  httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",e=>{result=e})
-  break;
+
+var _url = document.URL.split("?")[1];
+// ctb_route
+switch (_url){
+    case "ctb_route":   
+    httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){
+    var rr = JSON.parse(e)["data"];
+    for (var i in rr){
+    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["dest_tc"]+"Δ";
+    }
+    document.write(result);
+    window.AppInventor.setWebViewString (result);
+    });
+    break;
 
 }
-
-document.write(result);
-window.AppInventor.setWebViewString (result);
 </script>
