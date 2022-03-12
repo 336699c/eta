@@ -1,11 +1,17 @@
 <script>
 //v2.1
+
 if(window.AppInventor){
 var input = window.AppInventor.getWebViewString();
 }else{
 var input = document.URL.split("nwstroute.html?")[1];
-}
 input = input.split(",");
+}
+
+
+var result="";
+var run=0;
+var runtimes = 999;
 
 function httpGet(theUrl, callback)
 {
@@ -18,14 +24,24 @@ function httpGet(theUrl, callback)
     xmlHttp.send(null);
 }
 
+function stopname(e){
+var rr = JSON.parse(e)["data"];
+result+=rr["stop"]+","+rr["name_tc"]+","+rr["lat"]+","+rr["long"]+"Δ";
+run++;
+if (runtimes<run+1){
+document.write(result);
+window.AppInventor.setWebViewString (result);
+}
+}
+
 function data(e){
 var rr = JSON.parse(e)["data"];
-var t="";
+runtimes = Object.keys(rr).length;
+var t=[];
 for (var i in rr){
-t+=rr[i]["stop"]+",";
+t.push(rr[i]["stop"])
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+rr[i]["stop"],function (e){stopname(e)});
 }
-  document.write(t);
-  window.AppInventor.setWebViewString (t);
 }
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
