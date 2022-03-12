@@ -1,11 +1,22 @@
-<p id="p0"></p>
 <script>
-
-
-if (document.getElementById("p0").innerHTML == undefined){
-document.getElementById("p0").innerHTML =  "This webpage only works for AppInventor \n 200OK";
-}else{
-document.getElementById("p0").innerHTML = window.AppInventor.getWebViewString()+"\n"+document.URL.split("?")[1];
-window.AppInventor.setWebViewString ("200 OK");
+var result = "";
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
+    xmlHttp.send(null);
 }
+switch(document.URL.split("?")[1]){
+  case "route_nwst":
+  httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",e=>{result=e})
+  break;
+
+}
+
+document.write(result);
+window.AppInventor.setWebViewString (result);
 </script>
