@@ -1,0 +1,68 @@
+<script>
+//v2.1
+
+if(window.AppInventor){
+var input = window.AppInventor.getWebViewString();
+}else{
+var input = document.URL.split("nwstroute.html?")[1];
+}
+input = "7,inbound,ctb";
+input = input.split(",");
+if (input[1]=="inbound"){
+var bound="I";
+}else{
+var bound="O";
+}
+
+var result="";
+var run=0;
+var runtimes = 999;
+var temp={};
+var t=[];
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+function etaget(e){
+var rr = JSON.parse(e)["data"];
+var rt = "";
+var stop=0;
+for (var j in rr){
+if(rr[j]["dir"]==bound){
+rt+= rr[j]["seq"]+","+ rr[j]["dest_tc"]+","+ rr[j]["rmk_tc"]+","+ rr[j]["eta"]+"Γ";
+stop = rr[j]["stop"];
+}
+}
+temp[stop] = rt+"Δ";
+run++;
+if (runtimes<run+1){
+for (var i in t){
+result+= temp[t[i]];
+
+}
+document.write(result);
+window.AppInventor.setWebViewString (result);
+}
+}
+
+function data(e){
+var rr = JSON.parse(e)["data"];
+runtimes = Object.keys(rr).length;
+for (var i in rr){
+t.push(rr[i]["stop"])
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+rr[i]["stop"]+"/"+input[0],function (e){etaget(e)});
+}
+}
+
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
+    
+
+</script>
