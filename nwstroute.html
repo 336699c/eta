@@ -24,7 +24,7 @@ function data(e){
 var rr = JSON.parse(e)["data"];
 var t="";
 for (var i in rr){
-t+=rr[i]["stop"];
+t+=rr[i]["stop"]+",";
 }
   document.write(t);
   window.AppInventor.setWebViewString (t);
