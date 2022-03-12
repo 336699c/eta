@@ -1,8 +1,7 @@
 <script>
 //v2.1
 var result = "";
-var input = "10";
-var _url = "ctb_route";
+var input = window.AppInventor.getWebViewString();
 var run=0;
     
 function httpGet(theUrl, callback)
@@ -44,7 +43,7 @@ function nwst_route(e){
     }
     document.write(result);
     }
-    //window.AppInventor.setWebViewString (result);
+    window.AppInventor.setWebViewString (result);
     }
     
 function kmb_route(e){
@@ -67,7 +66,7 @@ var rr= JSON.parse(e)["data"];
     document.write(result);
     
     
-    //window.AppInventor.setWebViewString (result);
+    window.AppInventor.setWebViewString (result);
     }
 }
 
