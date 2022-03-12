@@ -1,29 +1,11 @@
-<!doctype html>
-<head>
-<title>WebView Javascript Processor</title>
-</head>
-
-<body onload="processJavascript();">
-<b>This page includes a javascript function that reverses text.</b>
-<p>The javascript function incorporates a special App Inventor feature called <i>window.AppInventor.getWebViewString()</i>, which allows App Inventor apps to communicate with the WebViewer component's internal processing of javascript.
-<p>This simple example shows how to use the <i>window.AppInventor.getWebViewString()</i> function to pass data to and from the WebViewer component, and thereby an App Inventor app.
-
+<p id="p0"></p>
 <script>
-    var result = new Date().toString();
-    var appInventorInput = window.AppInventor.getWebViewString();
-        function processJavascript() {
-        if (appInventorInput.length > 0) {
-            document.write( "WebView InputString received FROM app:
-" + appInventorInput );
-            result = appInventorInput.split("").reverse().join("");
-            document.write( "<p/>WebView InputString sending BACK TO app:<br/>" +
-            result );
-        } else {
-            document.write( "No WebView InputString set by app at: <br/>" + result );
-        }
-        window.AppInventor.setWebViewString( result );
-    }
-</script>
 
-</body>
-</html>
+
+if (document.getElementById("p0").innerHTML == undefined){
+document.getElementById("p0").innerHTML =  "This webpage only works for AppInventor \n 200OK";
+}else{
+document.getElementById("p0").innerHTML = window.AppInventor.getWebViewString()+"\n"+document.URL.split("?")[1];
+window.AppInventor.setWebViewString ("200 OK");
+}
+</script>
