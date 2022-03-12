@@ -1,5 +1,5 @@
 <script>
-//v2.1
+//v3
 if(window.AppInventor){
 var input = window.AppInventor.getWebViewString();
 }else{
@@ -59,7 +59,7 @@ var rr= JSON.parse(e)["data"];
     
         if (rr[i]["route"].includes(input)){
         var routenum = rr[i]["route"];
-        httpresult[XXX(routenum)+ rr[i]["bound"] + rr[i]["service_type"]+"k"]=rr[i]["route"]+","+rr[i]["dest_tc"]+" 路綫"+rr[i]["service_type"]+",KMB,"+rr[i]["bound"]+"Δ";
+        httpresult[XXX(routenum)+ rr[i]["bound"] + rr[i]["service_type"]+"k"]=rr[i]["route"]+","+rr[i]["dest_tc"]+" 路綫"+rr[i]["service_type"]+",KMB,"+rr[i]["bound"].toLowerCase()+"Δ";
         sortpend.push(XXX(routenum) +rr[i]["bound"] + rr[i]["service_type"]+"k");
         }
     
