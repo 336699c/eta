@@ -1,5 +1,5 @@
 <script>
-//v2
+//v2.01
 var result = document.URL.split("?")[1]+"Δ";
 var input = window.AppInventor.getWebViewString();
 var _url = document.URL.split("?")[1];
@@ -24,7 +24,7 @@ switch (_url){
     httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
-    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+"i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+"o"+"Δ";
+    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o"+"Δ";
     }
     window.AppInventor.setWebViewString (result);
     });
