@@ -1,4 +1,5 @@
 <script>
+//v2
 var result = document.URL.split("?")[1]+"Δ";
 var input = window.AppInventor.getWebViewString();
 var _url = document.URL.split("?")[1];
@@ -21,6 +22,15 @@ function httpGet(theUrl, callback)
 switch (_url){
     case "ctb_route":  
     httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){
+    var rr = JSON.parse(e)["data"];
+    for (var i in rr){
+    if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+"i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+"o"+"Δ";
+    }
+    window.AppInventor.setWebViewString (result);
+    });
+    break;
+    case "nwfb_route":  
+    httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/nwfb",function (e){
     var rr = JSON.parse(e)["data"];
     for (var i in rr){
     if (rr[i]["route"].includes(input)) result=result+rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+"i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+"o"+"Δ";
