@@ -6,6 +6,7 @@ var input = window.AppInventor.getWebViewString();
 }else{
 var input = document.URL.split("nwstroute.html?")[1];
 }
+
 input = input.split(",");
 
 var result="";
@@ -30,8 +31,9 @@ var rr = JSON.parse(e)["data"];
 temp[rr["stop"]] = rr["stop"]+","+rr["name_tc"]+","+rr["lat"]+","+rr["long"]+"Δ";
 run++;
 if (runtimes<run+1){
-for (var i in temp){
-result+= temp[t];
+for (var i in t){
+result+= temp[t[i]];
+
 }
 document.write(result);
 window.AppInventor.setWebViewString (result);
