@@ -31,22 +31,34 @@ function httpGet(theUrl, callback)
     xmlHttp.send(null);
 }
 
+function timeparse(e){
+if (input.length<4)return e.substring(11,16);
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+}
+
 function etaget(e){
 var rr = JSON.parse(e)["data"];
 var rt = "";
 var stop=0;
+if (rr.length>0){
 for (var j in rr){
 if(rr[j]["dir"]==bound){
-rt+= rr[j]["seq"]+","+ rr[j]["dest_tc"]+","+ rr[j]["rmk_tc"]+","+ rr[j]["eta"]+"Γ";
+rt+= rr[j]["seq"]+","+ rr[j]["dest_tc"]+","+ rr[j]["rmk_tc"]+","+ timeparse(rr[j]["eta"])+"Γ";
 stop = rr[j]["stop"];
 }
 }
-temp[stop] = rt+"Δ";
+}
+temp[stop] = rr.length+","+rt+"Δ";
 run++;
+
 if (runtimes<run+1){
 for (var i in t){
+if(temp[t[i]]){
 result+= temp[t[i]];
-
+}else{
+result+= "0,null,Δ"
+}
 }
 document.write(result);
 window.AppInventor.setWebViewString (result);
