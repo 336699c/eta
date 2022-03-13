@@ -1,0 +1,42 @@
+<script>
+//v2.1
+
+var input = document.URL.split("kmbroute.html?")[1];
+//var input="1,inbound,1";
+input = input.split(",");
+
+
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+result="";
+function parsestopName(e){
+var rr=JSON.parse(e)["data"];
+for (var i in rr){
+result+=rr[i]["stop"]+","+rr[i]["seq"]+". "+stop[rr[i]["stop"]]+"Δ";
+}
+document.write(result);
+};
+
+var stop={};
+function kmbstop(e){
+var rr = JSON.parse(e)["data"];
+for (var i in rr){
+stop[rr[i]["stop"]] = rr[i]["name_tc"];
+}
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+input[0]+"/"+input[1]+"/"+input[2],function (e){parsestopName(e)});
+}
+
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
+    
+
+</script>
