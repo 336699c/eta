@@ -42,7 +42,7 @@ for (var j in rr){
 if(rr[j]["dir"]==bound){
 if (rr[j]["eta_seq"]==1)etaseq1[rr[j]["seq"]] = rr[j]["eta"];
 
-rt+= rr[j]["seq"]+","+ rr[j]["rmk_tc"]+","+ timeparse(rr[j]["eta"])+"Γ";
+rt+= rr[j]["seq"]+","+ rr[j]["rmk_tc"]+","+ timeparse(rr[j]["eta"])+",";
 stop = rr[j]["stop"];
 }
 }
