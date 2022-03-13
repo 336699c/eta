@@ -2,6 +2,7 @@
 //v2.1
 
 var input = document.URL.split("nwsteta.html?")[1];
+
 input = input.split(",");
 if (input[1]=="inbound"){
 var bound="I";
@@ -34,13 +35,14 @@ return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor(
 }
 
 function etaget(e){
+var got = false;
 var rr = JSON.parse(e)["data"];
 var rt = "";
 var stop=0;
 if (rr.length>0){
 for (var j in rr){
 if(rr[j]["dir"]==bound){
-if (rr[j]["eta_seq"]==1)etaseq1[rr[j]["seq"]] = rr[j]["eta"];
+if (!got){etaseq1[rr[j]["seq"]] = rr[j]["eta"];got=true;}
 
 rt+= rr[j]["seq"]+","+ rr[j]["rmk_tc"]+","+ timeparse(rr[j]["eta"])+",";
 stop = rr[j]["stop"];
@@ -56,7 +58,7 @@ for (var i in t){
 if(temp[t[i]]){
 x++;
 if (x!=1 && (etaseq1[x] < etaseq1[x-1]))result+="*,";
-console.log(i+" 　"+(etaseq1[x-1] > etaseq1[x])+"\n"+etaseq1[x-1] +"\n"+etaseq1[x]+" "+x);
+console.log((parseInt(i)+1)+" 　"+(etaseq1[x-1] > etaseq1[x])+"\n"+etaseq1[x-1] +"\n"+etaseq1[x]+" "+x);
 
 result+= temp[t[i]];
 
@@ -64,6 +66,7 @@ result+= temp[t[i]];
 result+= "null,Δ"
 }
 }
+console.log(etaseq1.toString());
 document.write(result);
 window.AppInventor.setWebViewString (result);
 }
