@@ -25,6 +25,7 @@ for (var i in rr){
 result+=rr[i]["stop"]+","+rr[i]["seq"]+". "+stop[rr[i]["stop"]]+"Δ";
 }
 document.write(result);
+window.AppInventor.setWebViewString (result);
 };
 
 var stop={};
