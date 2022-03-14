@@ -1,8 +1,8 @@
 <script>
 //v2.1
 
-//var input = document.URL.split("kmbeta.html?")[1];
-var input = "a,0,001134,5A95921B376A97CB";
+var input = document.URL.split("kmbeta.html?")[1];
+
 input = input.split(",");
 var runtimes = input.length-2;
 var runs = 0;
@@ -45,15 +45,15 @@ for (var i in rr){
 if (route==rr[i]["route"]){
 result +=","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
 }else{
-result += "Δ<br>"+rr[i]["route"]+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
+result += "Δ"+rr[i]["route"]+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
 route = rr[i]["route"];
 }
 
-//window.AppInventor.setWebViewString (result);
+
 }
 runs++;
 if (runs==runtimes){
-document.write(result);
+output(result);
 }
 }
 
@@ -66,15 +66,24 @@ if (rr[i]["service_type"]=="1"){
 if (route==rr[i]["route"]){
 result +=","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
 }else{
-result +="Δ<br>"+rr[i]["route"]+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
+result +="Δ"+rr[i]["route"]+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
 route = rr[i]["route"];
 }
 }
 }
 runs++;
 if (runs==runtimes){
-document.write(result);
+output(result);
 }
+}
+
+function output(e){
+var rr=e.split("Δ");
+rr.sort();
+var p="";
+for (var i in rr)p+=rr[i]+"Δ<br>";
+document.write(p);
+window.AppInventor.setWebViewString (p);
 }
 
 for (var i in input){
