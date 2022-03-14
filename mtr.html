@@ -1,0 +1,55 @@
+<script>
+//v2.1
+
+//var input = document.URL.split("mtr.html?")[1];
+const line={
+"AEL":"機場快綫",
+"TCL":"東涌綫",
+"TML":"屯馬綫",
+"TKL":"將軍澳綫"
+}
+const AEL = ["HOK","KOW","TSY","AIR","AWE"];
+const TCL = ["HOK","KOW","OLY","NAC","LAK","TSY","SUN","TUC"];
+const TML = ["WKS","MOS","HEO","TSH","SHM","CIO","STW","CKT","TAW","HIK","DIH","KAT","SUW","TKW","HOM","HUH","ETS","AUS","NAC","MEF","TWW","KSR","YUL","LOP","TIS","SIH","TUM"];
+const TKL = ["NOP","QUB","YAT","TIK","TKO","LHP","HAH","POA"];
+
+var input = "AEL";
+var runtimes = eval(input).length;
+var runs = 0;
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+
+function timeparse(e){
+if (e===null)return e;
+if (input[1]=="0")return e.substring(11,16);
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+}
+
+var result={};
+function data(e){
+var rr = JSON.parse(e)["data"];
+var station = Object.keys(rr)[0].split("-")[1];
+
+document.write(station + ": "+rr[Object.keys(rr)[0]]+"<br>");
+runs++;
+if (runs==runtimes){
+document.write("end");
+}
+}
+
+var array = eval(input);
+for (var i in array){
+httpGet("https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line="+input+"&sta="+array[i]+"&lang=TC",function (e){data(e)});
+}
+</script>
