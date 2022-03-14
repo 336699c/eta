@@ -54,7 +54,7 @@ function kmb(e){
 var rr = JSON.parse(e[0])["data"];
 for (var i in rr){
 if (rr[i]["service_type"]=="1"){
-result +="Δ"+rr[i]["eta"]+"Γ"+rr[i]["route"]+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
+result +="Δ"+rr[i]["eta"]+"Γ"+rr[i]["route"].padEnd(5," ")+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
 }
 }
 runs++;
