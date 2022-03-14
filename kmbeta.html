@@ -36,11 +36,11 @@ var rr = JSON.parse(e)["data"];
 for (var i in rr){
 if(rr[i]["dir"] == bound){
 if (rawresult==rr[i]["seq"]){
-result+=","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
+result+=","+rr[i]["rmk_tc"]+","+timeparse(rr[i]["eta"]);
 }else{
 if (rreta!=0) result+="Δ";
 if (rr[i]["eta"]<rreta)result+="*,"
-result+=timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
+result+=rr[i]["rmk_tc"]+","+timeparse(rr[i]["eta"]);
 rreta = rr[i]["eta"];
 rawresult=rr[i]["seq"];
 }
