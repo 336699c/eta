@@ -42,7 +42,7 @@ var result = "";
 function nwst(e){
 var rr = JSON.parse(e)["data"];
 for (var i in rr){
-result += "Δ"+rr[i]["eta"]+"Γ"+rr[i]["route"]+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
+result += "Δ"+rr[i]["eta"]+"Γ"+rr[i]["route"].padEnd(5," ")+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
 }
 runs++;
 if (runs==runtimes){
