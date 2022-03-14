@@ -80,6 +80,7 @@ output(result);
 function output(e){
 var rr=e.split("Δ");
 rr.sort();
+rr.shift();
 var p="";
 for (var i in rr)p+=rr[i]+"Δ";
 document.write(p);
