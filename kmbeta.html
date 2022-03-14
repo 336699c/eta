@@ -23,7 +23,7 @@ function httpGet(theUrl, callback)
 }
 
 function timeparse(e){
-if (e===null)return "";
+if (e===null)return e;
 if (input.length<4)return e.substring(11,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
 return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
