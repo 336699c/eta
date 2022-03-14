@@ -28,7 +28,7 @@ function httpGet(theUrl, callback)
 
 function stopname(e){
 var rr = JSON.parse(e)["data"];
-temp[rr["stop"]] = rr["stop"]+","+rr["name_tc"]+","+rr["lat"]+","+rr["long"]+"Δ";
+temp[rr["stop"]] = rr["stop"]+","+rr["name_tc"]+"Δ";
 run++;
 if (runtimes<run+1){
 for (var i in t){
