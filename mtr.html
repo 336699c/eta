@@ -13,9 +13,15 @@ const TCL = ["HOK","KOW","OLY","NAC","LAK","TSY","SUN","TUC"];
 const TML = ["WKS","MOS","HEO","TSH","SHM","CIO","STW","CKT","TAW","HIK","DIH","KAT","SUW","TKW","HOM","HUH","ETS","AUS","NAC","MEF","TWW","KSR","YUL","LOP","TIS","SIH","TUM"];
 const TKL = ["NOP","QUB","YAT","TIK","TKO","LHP","HAH","POA"];
 
+const dict={
+"HOK":"香港","KOW":"九龍","TSY":"青衣","AIR":"機場站","AWE":"博覽館站",
+"OLY":"奧運","NAC":"南昌","LAK":"荔景","SUN":"欣澳","TUC":"東涌",
+"LHP":"康城","POA":"寶琳","HAH":"坑口","TKO":"將軍澳","TIK":"調景嶺","YAT":"油塘","QUB":"鰂魚涌","NOP":"北角",
+"TUM":"屯門","SIH":"兆康","TIS":"天水圍","LOP":"朗屏","YUL":"元朗","KSR":"錦上路","TWW":"荃灣西","MEF":"美孚","AUS":"柯士甸","ETS":"尖東","HUH":"紅磡","HOM":"何文田","TKW":"土瓜灣","SUW":"宋皇臺","KAT":"啟德","DIH":"鑽石山","HIK":"顯徑","TAW":"大圍","CKT":"車公廟","STW":"沙田圍","CIO":"第一城","SHM":"石門","TSH":"大水坑","HEO":"恆安","MOS":"馬鞍山","WKS":"烏溪沙"
+}
 
 var input = document.URL.split("mtr.html?")[1];
-
+//var input ="TML,0";
 input = input.split(",");
 var runtimes = eval(input[0]).length;
 var runs = 0;
@@ -59,8 +65,8 @@ function data(e){
 var rr = JSON.parse(e)["data"];
 var station = Object.keys(rr)[0].split("-")[1];
 var j = rr[Object.keys(rr)[0]];
-if (j["UP"]) 	{up[station] = j["UP"][0]["time"];upd[station] = j["UP"][0]["dest"];}
-if (j["DOWN"]) 	{down[station] = j["DOWN"][0]["time"];downd[station] =j["DOWN"][0]["dest"];}
+if (j["UP"]) 	{up[station] = j["UP"][0]["time"];upd[station] = dict[j["UP"][0]["dest"]];}
+if (j["DOWN"]) 	{down[station] = j["DOWN"][0]["time"];downd[station] =dict[j["DOWN"][0]["dest"]];}
 delay[station] = JSON.parse(e)["isdelay"];
 runs++;
 if (runs==runtimes){
@@ -68,7 +74,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ";
+result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ";
 upf = up[array[i]];
 downf = down[array[i]];
 }
