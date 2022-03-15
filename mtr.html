@@ -74,7 +74,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ";
+result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]]).padEnd(5," ")+" , "+upd[array[i]]+" , "+timeparse(down[array[i]]).padEnd(5," ")+" , "+downd[array[i]]+"Δ";
 upf = up[array[i]];
 downf = down[array[i]];
 }
