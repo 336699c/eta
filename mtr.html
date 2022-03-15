@@ -1,7 +1,6 @@
 <script>
 //v2.1
 
-//var input = document.URL.split("mtr.html?")[1];
 const line={
 "AEL":"機場快綫",
 "TCL":"東涌綫",
@@ -39,20 +38,21 @@ function httpGet(theUrl, callback)
 
 
 function timeparse(e){
-if (e===undefined)return "undefined";
+if (e===undefined)return e;
 if (input[1]=="0")return e.substring(10,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
 return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
 }
 
-function compare(e,r,u){
-if (e===undefined)return "";
-if (r===undefined)return "";
-if (e==0 || r==0)return "";
-if (u=='up'){
-return (e>r?"*":"")
+function compare(i,u){
+if (u=="up"){
+if (i==0)return "";
+if (up[array[i-1]] > up[array[i]])return "*";
+return "";
 }else{
-return (r>e?"*":"")
+if (i==array.length)return "";
+if (down[array[i+1]] > down[array[i]])return "*";
+return "";
 }
 }
 
@@ -74,7 +74,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]]).padEnd(5," ")+" , "+upd[array[i]]+" , "+timeparse(down[array[i]]).padEnd(5," ")+" , "+downd[array[i]]+"Δ";
+result +=delay[array[i]]+","+compare(i,"up")+","+compare(i,"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ<br>";
 upf = up[array[i]];
 downf = down[array[i]];
 }
