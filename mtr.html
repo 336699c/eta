@@ -64,7 +64,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]])+" , "+timeparse(down[array[i]])+"Δ";
+result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]].split(",")[0])+" , "+up[array[i]].split(",")[1]+timeparse(down[array[i]].split(",")[0])+down[array[i]].split(",")[1]+"Δ";
 upf = up[array[i]];
 downf = down[array[i]];
 }
