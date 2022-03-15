@@ -13,8 +13,9 @@ const TCL = ["HOK","KOW","OLY","NAC","LAK","TSY","SUN","TUC"];
 const TML = ["WKS","MOS","HEO","TSH","SHM","CIO","STW","CKT","TAW","HIK","DIH","KAT","SUW","TKW","HOM","HUH","ETS","AUS","NAC","MEF","TWW","KSR","YUL","LOP","TIS","SIH","TUM"];
 const TKL = ["NOP","QUB","YAT","TIK","TKO","LHP","HAH","POA"];
 
-var input = "AEL";
-var runtimes = eval(input).length;
+var input = "TML,0";
+input = input.split(",");
+var runtimes = eval(input[0]).length;
 var runs = 0;
 
 function httpGet(theUrl, callback)
@@ -30,26 +31,50 @@ function httpGet(theUrl, callback)
 
 
 function timeparse(e){
-if (e===null)return e;
-if (input[1]=="0")return e.substring(11,16);
+if (e===undefined)return e;
+if (input[1]=="0")return e.substring(10,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
 return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
 }
 
-var result={};
+function compare(e,r,u){
+if (e===undefined)return "";
+if (r===undefined)return "";
+if (e==0 || r==0)return "";
+if (u=='up'){
+return (e>r?"*":"")
+}else{
+return (r>e?"*":"")
+}
+}
+
+var up={};
+var down={};
+var delay={};
 function data(e){
 var rr = JSON.parse(e)["data"];
 var station = Object.keys(rr)[0].split("-")[1];
-
-document.write(station + ": "+rr[Object.keys(rr)[0]]+"<br>");
+var j = rr[Object.keys(rr)[0]];
+if (j["UP"]) 	up[station] = j["UP"][0]["time"]+","+j["UP"][0]["dest"];
+if (j["DOWN"]) 	down[station] = j["DOWN"][0]["time"]+","+j["DOWN"][0]["dest"];
+delay[station] = JSON.parse(e)["isdelay"];
 runs++;
 if (runs==runtimes){
-document.write("end");
+var upf = 0;
+var downf = 0;
+var result="";
+for (i in array){
+result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]])+" , "+timeparse(down[array[i]])+"Δ";
+upf = up[array[i]];
+downf = down[array[i]];
+}
+document.write(result);
+window.AppInventor.setWebViewString (result);
 }
 }
 
-var array = eval(input);
+var array = eval(input[0]);
 for (var i in array){
-httpGet("https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line="+input+"&sta="+array[i]+"&lang=TC",function (e){data(e)});
+httpGet("https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line="+input[0]+"&sta="+array[i]+"&lang=TC",function (e){data(e)});
 }
 </script>
