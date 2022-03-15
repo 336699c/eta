@@ -13,7 +13,9 @@ const TCL = ["HOK","KOW","OLY","NAC","LAK","TSY","SUN","TUC"];
 const TML = ["WKS","MOS","HEO","TSH","SHM","CIO","STW","CKT","TAW","HIK","DIH","KAT","SUW","TKW","HOM","HUH","ETS","AUS","NAC","MEF","TWW","KSR","YUL","LOP","TIS","SIH","TUM"];
 const TKL = ["NOP","QUB","YAT","TIK","TKO","LHP","HAH","POA"];
 
+
 var input = document.URL.split("mtr.html?")[1];
+
 input = input.split(",");
 var runtimes = eval(input[0]).length;
 var runs = 0;
@@ -51,12 +53,14 @@ return (r>e?"*":"")
 var up={};
 var down={};
 var delay={};
+var upd={};
+var downd={};
 function data(e){
 var rr = JSON.parse(e)["data"];
 var station = Object.keys(rr)[0].split("-")[1];
 var j = rr[Object.keys(rr)[0]];
-if (j["UP"]) 	up[station] = j["UP"][0]["time"]+","+j["UP"][0]["dest"];
-if (j["DOWN"]) 	down[station] = j["DOWN"][0]["time"]+","+j["DOWN"][0]["dest"];
+if (j["UP"]) 	{up[station] = j["UP"][0]["time"];upd[station] = j["UP"][0]["dest"];}
+if (j["DOWN"]) 	{down[station] = j["DOWN"][0]["time"];downd[station] =j["DOWN"][0]["dest"];}
 delay[station] = JSON.parse(e)["isdelay"];
 runs++;
 if (runs==runtimes){
@@ -64,7 +68,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]].split(",")[0])+" , "+up[array[i]].split(",")[1]+timeparse(down[array[i]].split(",")[0])+down[array[i]].split(",")[1]+"Δ";
+result +=delay[array[i]]+","+compare(upf,up[array[i]],"up")+","+compare(downf,down[array[i]],"down")+","+array[i]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ";
 upf = up[array[i]];
 downf = down[array[i]];
 }
