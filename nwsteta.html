@@ -2,7 +2,7 @@
 //v2.1
 
 var input = document.URL.split("nwsteta.html?")[1];
-//var input = ",inbound,nwfb,1";
+//var input = "101,inbound,nwfb,1";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -85,15 +85,25 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+r
 function output(){
 if (kmb && co==1)return;
 var x="";
+var hist = "";
 for (var i in eta){
 var j = eta[i].split("Γ");
 j.sort();
 j.shift();
+var xk = j[0];
 for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+j[k].split(",")[2];
+j.unshift((xk<hist ?"*":""));
+hist = xk;
 x+= "<br>"+i+","+j;
 }
 document.write(x);
 window.AppInventor.setWebViewString (x);
+}
+
+function checketa(e,c){
+if (c==0)return ",";
+document.write(e+"<br>");
+//return (j[e]<j[-1] ?"*,":",")
 }
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
