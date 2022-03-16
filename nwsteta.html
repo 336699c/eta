@@ -2,7 +2,7 @@
 //v2.1
 
 var input = document.URL.split("nwsteta.html?")[1];
-//var input = "101,inbound,nwfb,1";
+//var input = "10,outbound,ctb,1";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -49,7 +49,7 @@ kmb = true;
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){kmbget(e)});
 }
 if (rr[j]["rmk_tc"]!="九巴時段"){
-eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ";
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:rr[j]["stop"]+"Γ")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ";
 }
 }}
 
@@ -82,6 +82,7 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+r
 }
 }
 
+var stop2seq={};
 function output(){
 if (kmb && co==1)return;
 var x="";
@@ -90,21 +91,25 @@ for (var i in eta){
 var j = eta[i].split("Γ");
 j.sort();
 j.shift();
+var xb = j.shift();
+
 var xk = j[0];
 for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+j[k].split(",")[2];
 j.unshift((xk<hist ?"*":""));
+//document.write(xb+"<br>");
+stop2seq[xb] = i+","+j
 hist = xk;
-x+= "<br>"+i+","+j;
-}
-document.write(x);
-window.AppInventor.setWebViewString (x);
 }
 
-function checketa(e,c){
-if (c==0)return ",";
-document.write(e+"<br>");
-//return (j[e]<j[-1] ?"*,":",")
+var result2 = "";
+for (var i in t){
+result2 += stop2seq[t[i]]+"Δ";
 }
+document.write(result2);
+window.AppInventor.setWebViewString (result2);
+}
+
+
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
     
