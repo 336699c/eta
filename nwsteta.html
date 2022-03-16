@@ -2,7 +2,7 @@
 //v2.1
 
 var input = document.URL.split("nwsteta.html?")[1];
-//var input = "101,inbound,nwfb,1";
+//var input = ",inbound,nwfb,1";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -49,7 +49,7 @@ kmb = true;
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){kmbget(e)});
 }
 if (rr[j]["rmk_tc"]!="九巴時段"){
-eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+"Γ";
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ";
 }
 }}
 
@@ -65,7 +65,7 @@ function kmbget(e){
 var rr = JSON.parse(e)["data"];
 for (var j in rr){
 if (rr[j]["dir"]!=bound && rr[j]["eta"]!== null){
-eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+"Γ";
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+",KMBΓ";
 }}
 
 co++;
@@ -89,7 +89,7 @@ for (var i in eta){
 var j = eta[i].split("Γ");
 j.sort();
 j.shift();
-for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1];
+for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+j[k].split(",")[2];
 x+= "<br>"+i+","+j;
 }
 document.write(x);
