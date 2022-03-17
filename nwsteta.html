@@ -1,8 +1,8 @@
 <script>
 //v2.1
 
-var input = document.URL.split("nwsteta.html?")[1];
-//var input = "101,inbound,nwfb,1";
+//var input = document.URL.split("nwsteta.html?")[1];
+var input = "1,inbound,ctb,1";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -94,7 +94,7 @@ j.shift();
 var xb = j.shift();
 
 var xk = j[0];
-for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+j[k].split(",")[2];
+for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+(kmb? (j[k].split(",")[2]):"");
 j.unshift((xk<hist ?"*":""));
 //document.write(xb+"<br>");
 stop2seq[xb] = i+","+j
