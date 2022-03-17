@@ -1,8 +1,8 @@
 <script>
 //v2.1
 
-var input = document.URL.split("nwsteta.html?")[1];
-//var input = "10,outbound,ctb,1";
+//var input = document.URL.split("nwsteta.html?")[1];
+var input = "101,inbound,nwfb,1";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -48,9 +48,9 @@ if (!kmb && rr[j]["rmk_tc"]=="九巴時段"){
 kmb = true;
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){kmbget(e)});
 }
-if (rr[j]["rmk_tc"]!="九巴時段"){
-eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:rr[j]["stop"]+"Γ")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ";
-}
+//if (rr[j]["rmk_tc"]!="九巴時段"){
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:rr[j]["stop"]+"Γ")+((rr[j]["rmk_tc"]!="九巴時段")?(rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ"):"");
+//}
 }}
 
 if (runtimes==run){
