@@ -51,7 +51,7 @@ if (up[array[i-1]] > up[array[i]])return "*";
 return "";
 }else{
 if (i==array.length)return "";
-if (down[array[i+1]] > down[array[i]])return "*";
+if (down[array[parseInt(i)+1]] > down[array[i]])return "*";
 return "";
 }
 }
@@ -74,7 +74,7 @@ var upf = 0;
 var downf = 0;
 var result="";
 for (i in array){
-result +=delay[array[i]]+","+compare(i,"up")+","+compare(i,"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ";
+result +=delay[array[i]]+","+compare(i,"up")+","+compare(i,"down")+","+dict[array[i]]+" , "+timeparse(up[array[i]])+" , "+upd[array[i]]+" , "+timeparse(down[array[i]])+" , "+downd[array[i]]+"Δ<br>";
 upf = up[array[i]];
 downf = down[array[i]];
 }
