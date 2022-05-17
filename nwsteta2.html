@@ -1,0 +1,117 @@
+<script>
+//v3.1
+
+var input = document.URL.split("nwsteta.html?")[1];
+//var input = "1,inbound,ctb,1";
+
+input = input.split(",");
+if (input[1]=="inbound"){
+var bound="I";
+var boundk="O";
+}else{
+var bound="O";
+var boundk="I";
+}
+
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+function timeparse(e){
+if (e===null)return "";
+if (input.length<4)return e.substring(11,16);
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+}
+
+var eta={};
+var run=1;
+var runtimes = 999;
+var t=[];
+var kmb=false;
+var co=0
+
+function nwsteta(e){
+
+var rr = JSON.parse(e)["data"];
+for (var j in rr){
+if (rr[j]["dir"]==bound){
+if (!kmb && rr[j]["rmk_tc"]=="九巴時段"){
+kmb = true;
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){kmbget(e)});
+}
+//if (rr[j]["rmk_tc"]!="九巴時段"){
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:rr[j]["stop"]+"Γ")+((rr[j]["rmk_tc"]!="九巴時段")?(rr[j]["eta"]+","+rr[j]["rmk_tc"]+","+rr[j]["co"]+"Γ"):"");
+//}
+}}
+
+if (runtimes==run){
+co++;
+output();
+}
+run++;
+}
+
+function kmbget(e){
+
+var rr = JSON.parse(e)["data"];
+for (var j in rr){
+if (rr[j]["dir"]!=bound && rr[j]["eta"]!== null){
+eta[rr[j]["seq"]] = (eta[rr[j]["seq"]]?eta[rr[j]["seq"]]:"")+rr[j]["eta"]+","+rr[j]["rmk_tc"]+",KMBΓ";
+}}
+
+co++;
+output();
+}
+
+
+function data(e){
+var rr = JSON.parse(e)["data"];
+runtimes = Object.keys(rr).length;
+for (var i in rr){
+t.push(rr[i]["stop"]);
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+rr[i]["stop"]+"/"+input[0],function (e){nwsteta(e)});
+}
+}
+
+var stop2seq={};
+function output(){
+if (kmb && co==1)return;
+var x="";
+var hist = "";
+for (var i in eta){
+var j = eta[i].split("Γ");
+j.sort();
+j.shift();
+var xb = j.shift();
+
+var xk = j[0];
+for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+(kmb? (j[k].split(",")[2]):"");
+j.unshift((xk<hist ?"*":""));
+//document.write(xb+"<br>");
+stop2seq[xb] = i+","+j
+hist = xk;
+}
+
+var result2 = "";
+for (var i in t){
+result2 += stop2seq[t[i]]+"Δ";
+}
+document.write(result2);
+window.AppInventor.setWebViewString (result2);
+}
+
+
+
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
+    
+
+</script>
