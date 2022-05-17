@@ -77,7 +77,7 @@ function data(e){
 var rr = JSON.parse(e)["data"];
 runtimes = Object.keys(rr).length;
 for (var i in rr){
-if(i>=input[4]-1 && i<=input[5]-1){
+if(i>=parseInt(input[4])-1 && i<=parseInt(input[5])-1){
 t.push(rr[i]["stop"]);
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+rr[i]["stop"]+"/"+input[0],function (e){nwsteta(e)});
 }else{
