@@ -1,5 +1,5 @@
 <script>
-//v3.1
+//v4
 
 var input = document.URL.split("nwsteta.html?")[1];
 //var input = "1,inbound,ctb,1";
@@ -82,6 +82,8 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+r
 }
 }
 
+var chk_v = true;
+
 var stop2seq={};
 function output(){
 if (kmb && co==1)return;
@@ -94,7 +96,10 @@ j.shift();
 var xb = j.shift();
 
 var xk = j[0];
-for (var k in j)j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+(kmb? (j[k].split(",")[2]):"");
+for (var k in j){
+j[k]=timeparse(j[k].split(",")[0]).padEnd(6," ")+","+j[k].split(",")[1]+","+(chk_v?"請更新app至v9 bit.ly/3LmW72E":(kmb? (j[k].split(",")[2]):""));
+chk_v=false;
+}
 j.unshift((xk<hist ?"*":""));
 //document.write(xb+"<br>");
 stop2seq[xb] = i+","+j
