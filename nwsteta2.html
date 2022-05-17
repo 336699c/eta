@@ -1,8 +1,8 @@
 <script>
-//v3.1
+//v9
 
-var input = document.URL.split("nwsteta.html?")[1];
-//var input = "1,inbound,ctb,1";
+//var input = document.URL.split("nwsteta.html?")[1];
+var input = "1,inbound,ctb,1,17,18";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -27,7 +27,7 @@ function httpGet(theUrl, callback)
 
 function timeparse(e){
 if (e===null)return "";
-if (input.length<4)return e.substring(11,16);
+if (input.length<6)return e.substring(11,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
 return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
 }
@@ -77,8 +77,12 @@ function data(e){
 var rr = JSON.parse(e)["data"];
 runtimes = Object.keys(rr).length;
 for (var i in rr){
+if(i>=input[4] && i<=input[5]){
 t.push(rr[i]["stop"]);
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+rr[i]["stop"]+"/"+input[0],function (e){nwsteta(e)});
+}else{
+t.push(rr[i]["stop"]);run++;
+}
 }
 }
 
