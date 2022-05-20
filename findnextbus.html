@@ -46,7 +46,7 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+valid[0],func
 
 function timeparse(e){
 if (e===null)return "";
-if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達"
 return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分")
 }
 
