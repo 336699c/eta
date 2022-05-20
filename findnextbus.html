@@ -21,7 +21,7 @@ var pointer = parseInt(input[3]);
 function data(e){
 var rr = JSON.parse(e)["data"];
 rr.forEach(f=>{routelist.push(f["stop"]);});
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/ctb/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
 }
 
 var lasteta = "9999";
