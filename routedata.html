@@ -5,8 +5,8 @@ var input = document.URL.split("routedata.html?")[1];
 //var input = "1,inbound,kmb";
 
 input = input.split(",");
-var bound=input[1]=="inbound";
-
+var bound=input[1]=="I";
+input[1] = (input[1]=="I"?"inbound":"outbound");
 
 function httpGet(theUrl, callback)
 {
