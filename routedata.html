@@ -28,7 +28,7 @@ window.AppInventor.setWebViewString (output);
 
 function data1(e){
 var rr = JSON.parse(e)["data"];
-var output = rr["route"].padEnd(3," ")+"往："+rr["dest_tc"];
+var output = rr["route"].padEnd(4," ")+"往："+rr["dest_tc"];
 document.write(output);
 window.AppInventor.setWebViewString (output);
 }
