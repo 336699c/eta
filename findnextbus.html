@@ -1,0 +1,64 @@
+<script>
+//v9.0
+
+var input = document.URL.split("findnextbus.html?")[1];
+//var input = "1,outbound,ctb,30";
+input = input.split(",");
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+var routelist = [];
+var pointer = parseInt(input[3]);
+function data(e){
+var rr = JSON.parse(e)["data"];
+rr.forEach(f=>{routelist.push(f["stop"]);});
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/ctb/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
+}
+
+var lasteta = "9999";
+var valid = null;
+var data1 = [];
+function grabeta(e){
+var rr = JSON.parse(e)["data"];
+if((!rr[0] || rr[0]["eta"]<lasteta) && pointer>0){
+pointer--;
+lasteta = (rr[0]?rr[0]["eta"]:lasteta);
+valid = [rr[0]["stop"],rr[0]["seq"],rr[0]["route"],rr[0]["dest_tc"],rr[0]["rmk_tc"]];
+console.log(rr[0]["seq"]);
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/ctb/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
+}else{
+if(rr[0]["seq"]){
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+valid[0],function (e){output(e)});
+}
+}
+}
+
+function timeparse(e){
+if (e===null)return "";
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分")
+}
+
+
+function output(e){
+var rr = JSON.parse(e)["data"];
+var x = "下一班 "+ valid[2] +" 巴士 位於 "+ valid[1] +". "+rr["name_tc"]+ " （"+timeparse(lasteta)+"） 前往 " +valid[3]+(valid[4]?"\n"+valid[4]:"");
+document.write(x);
+
+}
+
+
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
+
+
+
+</script>
