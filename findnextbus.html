@@ -4,7 +4,9 @@
 var input = document.URL.split("findnextbus.html?")[1];
 //var input = "1,outbound,ctb,30";
 input = input.split(",");
-
+if(input[1]=="O")input[1]="outbound";
+if(input[1]=="I")input[1]="inbound";
+    
 function httpGet(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
