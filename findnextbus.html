@@ -55,7 +55,7 @@ function output(e){
 var rr = JSON.parse(e)["data"];
 var x = "下一班 "+ valid[2] +" 巴士 位於 "+ valid[1] +". "+rr["name_tc"]+ " （"+timeparse(lasteta)+"） 前往 " +valid[3]+(valid[4]?"\n"+valid[4]:"");
 document.write(x);
-
+window.AppInventor.setWebViewString (x);
 }
 
 
