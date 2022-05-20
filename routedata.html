@@ -1,0 +1,43 @@
+<script>
+//v4
+
+var input = document.URL.split("routedata.html?")[1];
+//var input = "1,inbound,kmb";
+
+input = input.split(",");
+var bound=input[1]=="inbound";
+
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+function data(e){
+var rr = JSON.parse(e)["data"];
+var output = rr["route"].padEnd(3," ")+"往："+rr[(bound?"dest_tc":"orig_tc")];
+document.write(output);
+window.AppInventor.setWebViewString (output);
+}
+
+function data1(e){
+var rr = JSON.parse(e)["data"];
+var output = rr["route"].padEnd(3," ")+"往："+rr["dest_tc"];
+document.write(output);
+window.AppInventor.setWebViewString (output);
+}
+
+if(input[2]=="kmb" ||input[2] == "KMB"){
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route/"+input[0]+"/"+input[1]+"/1",function (e){data1(e)});
+}else{
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/"+input[2]+"/"+input[0],function (e){data(e)});
+}
+    
+
+</script>
