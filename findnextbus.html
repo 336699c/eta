@@ -4,8 +4,6 @@
 var input = document.URL.split("findnextbus.html?")[1];
 //var input = "1,outbound,ctb,30";
 input = input.split(",");
-if(input[1]=="O")input[1]="outbound";
-if(input[1]=="I")input[1]="inbound";
     
 function httpGet(theUrl, callback)
 {
@@ -59,10 +57,13 @@ window.AppInventor.setWebViewString (x);
 }
 
 if(input[2]=="KMB" || input[2]=="kmb"){
-
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){data2(e)});
 }else{
+if(input[1]=="O")input[1]="outbound";
+if(input[1]=="I")input[1]="inbound";
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
 }
+
 
 
 </script>
