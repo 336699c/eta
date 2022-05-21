@@ -1,0 +1,80 @@
+<script>
+//v4
+
+//var input = document.URL.split("changebus.html?")[1];
+var input = "1,inbound,ctb,1,18";
+
+input = input.split(",");
+if (input[1]=="inbound"){
+var bound="I";
+var boundk="O";
+}else{
+var bound="O";
+var boundk="I";
+}
+
+
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+function timeparse(e){
+if (e===null)return "";
+if (input.length<4)return e.substring(11,16);
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+}
+
+//ctb and nwfb
+var orig_rtlist=[];
+var times = 299;
+var count = 0;
+function nwst(e){
+var rr = JSON.parse(e)["data"];
+times = rr.length*2;
+rr.forEach(e=>{
+orig_rtlist.push(e["stop"]);
+if(parseInt(e["seq"])>parseInt(input[4])){
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
+}else{times=times-2}
+})
+}
+
+var rts=[];
+var nwstcompare={};
+var result = [];
+function nwstrt(e){
+count++;
+var rr = JSON.parse(e)["data"];
+rr.forEach(e=>{
+var orig = parseInt(orig_rtlist.indexOf(e["stop"]));
+if(!rts.includes(e["route"])){rts.push(e["route"]);nwstcompare[e["route"]]=[e["co"],orig]}
+else if(!nwstcompare[e["route"]].includes(orig)){nwstcompare[e["route"]].push(orig)}
+if(e["eta"])
+result.push([orig,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],e["rmk"]]);
+})
+
+if(count >= times){
+var x = "";
+result = result.sort((a,b)=>{return (a[0]>b[0]?1:-1)})
+result.forEach(e=>{x+=e+"Δ"})
+document.write(x);
+	for (var i in nwstcompare){
+    nwstcompare[i] = nwstcompare[i].sort();
+	console.log(i+" "+nwstcompare[i]);
+	}
+};
+}
+
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){nwst(e)});
+    
+
+</script>
