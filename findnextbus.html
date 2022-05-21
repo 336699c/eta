@@ -2,7 +2,7 @@
 //v9.0
 
 var input = document.URL.split("findnextbus.html?")[1];
-//var input = "21,outbound,kmb,8";
+//var input = "21,outbound,kmb,15";
 input = input.split(",");
     
 function httpGet(theUrl, callback)
@@ -73,9 +73,9 @@ result.push([rr[i]["eta"],rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
 }
 }
 }
-buspos = buspos.filter(e=>e<=parseInt(input[3]));
+buspos = buspos.filter(e=>e<parseInt(input[3]));
 buspos.unshift(1);
-lastseq = buspos[buspos.length-1];
+lastseq = buspos.pop();
 
 
 if(input[1]=="O")input[1]="outbound";
@@ -90,8 +90,8 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop/"+rr,function (e){stop
 
 function stop(e){
 var rr = JSON.parse(e)["data"]["name_tc"];
-var tt = result[result.length-1];
-var x = "下一班 "+ input[0] +"（"+timeparse(tt[0])+", "+(parseInt(tt[2])-parseInt(input[3]))+"站）\n位於 "+ tt[2] +". "+rr+ "\n前往 " +tt[3]+(tt[1]?"\n"+tt[1]:"");
+var tt = result[lastseq];
+var x = "下一班 "+ input[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(input[3]))+"站）\n位於 "+ tt[2] +". "+rr+ "\n前往 " +tt[3]+(tt[1]?"\n"+tt[1]:"");
 document.write(x);
 window.AppInventor.setWebViewString (x);
 }
