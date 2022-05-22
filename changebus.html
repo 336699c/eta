@@ -83,7 +83,7 @@ x+=(r?timeparse(r[5]).padEnd(5," "):"      ")+" | "+(t?t[1].toString().padEnd(5,
 }
 x+="Δ";
 })
-console.log(x+rts.toString());
+document.write(x+rts.toString());
 window.AppInventor.setWebViewString (x+rts.sort().toString());
 };
 }
