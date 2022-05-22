@@ -88,7 +88,7 @@ window.AppInventor.setWebViewString (x+rts.sort().toString());
 };
 }
 
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+bound,function (e){nwst(e)});
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+(bound=="I"?"inbound":"outbound"),function (e){nwst(e)});
 
 
 </script>
