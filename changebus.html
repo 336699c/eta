@@ -1,8 +1,8 @@
 <script>
-//v4
+//v5
 
-//var input = document.URL.split("changebus.html?")[1];
-var input = "1,inbound,ctb,1,18";
+var input = document.URL.split("changebus.html?")[1];
+//var input = "1,inbound,ctb,1,1.2.7:11.13";
 
 input = input.split(",");
 if (input[1]=="inbound"){
@@ -13,6 +13,17 @@ var bound="O";
 var boundk="I";
 }
 
+function reduce(e){
+    var x = e.split(".");
+    var output=[];
+    x.forEach(e=>{
+        if(e.includes(":")){
+            for(var i=parseInt(e.split(":")[0]);i<parseInt(e.split(":")[1]);i++)output.push(i);
+                }else{output.push(parseInt(e))}
+    })
+    return output;
+}
+var stopseqs = reduce(input[4]);
 
 function httpGet(theUrl, callback)
 {
@@ -27,9 +38,7 @@ function httpGet(theUrl, callback)
 
 function timeparse(e){
 if (e===null)return "";
-if (input.length<4)return e.substring(11,16);
-if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
-return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.abs(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000))+" 秒"):(Math.abs(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000)))+" 分").padEnd(5," ")
 }
 
 //ctb and nwfb
@@ -41,7 +50,7 @@ var rr = JSON.parse(e)["data"];
 times = rr.length*2;
 rr.forEach(e=>{
 orig_rtlist.push(e["stop"]);
-if(parseInt(e["seq"])>parseInt(input[4])){
+if(stopseqs.includes(parseInt(e["seq"]))){
 httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
 httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
 }else{times=times-2}
@@ -56,8 +65,7 @@ count++;
 var rr = JSON.parse(e)["data"];
 rr.forEach(e=>{
 var orig = parseInt(orig_rtlist.indexOf(e["stop"]));
-if(!rts.includes(e["route"])){rts.push(e["route"]);nwstcompare[e["route"]]=[e["co"],orig]}
-else if(!nwstcompare[e["route"]].includes(orig)){nwstcompare[e["route"]].push(orig)}
+if(!rts.includes(e["route"])){rts.push(e["route"])}
 if(e["eta"])
 result.push([orig,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],e["rmk"]]);
 })
@@ -65,16 +73,22 @@ result.push([orig,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],e["rmk"]]);
 if(count >= times){
 var x = "";
 result = result.sort((a,b)=>{return (a[0]>b[0]?1:-1)})
-result.forEach(e=>{x+=e+"Δ"})
-document.write(x);
-	for (var i in nwstcompare){
-    nwstcompare[i] = nwstcompare[i].sort();
-	console.log(i+" "+nwstcompare[i]);
-	}
+stopseqs.forEach(f=>{
+var _rr = result.filter(e=>e[0]==f-1&&e[1]!=input[0]&&e[2]!=bound);
+var _target = result.filter(e=>e[1]==input[0]&&e[2]==bound&&e[0]==f-1);
+while (Math.max(_rr.length,_target.length)>0){
+var t=_rr.pop();
+var r=_target.pop();
+x+=(r?timeparse(r[5]).padEnd(5," "):"      ")+" | "+(t?t[1].toString().padEnd(5," ")+timeparse(t[5]).padEnd(5," ")+t[4]:"")+"\n";
+}
+x+="Δ";
+})
+console.log(x+rts.toString());
+window.AppInventor.setWebViewString (x+rts.sort().toString());
 };
 }
 
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){nwst(e)});
-    
+
 
 </script>
