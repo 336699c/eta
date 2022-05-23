@@ -33,7 +33,8 @@ if((!rr[0] || rr[0]["eta"]<lasteta) && pointer>0){
 pointer--;
 lasteta = (rr[0]?rr[0]["eta"]:lasteta);
 valid = [rr[0]["stop"],rr[0]["seq"],rr[0]["route"],rr[0]["dest_tc"],rr[0]["rmk_tc"]];
-console.log(rr[0]["seq"]);
+var x = "*下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(input[3])-parseInt(valid[1]))+"站）\n位於 #"+ valid[1] +(valid[4]?"\n"+valid[4]:"");
+window.AppInventor.setWebViewString (x);
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
 }else{
 if(rr[0]["seq"]){
