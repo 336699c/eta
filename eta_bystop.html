@@ -1,11 +1,17 @@
 <script>
-//v2.1
+//v5
 
-var input = document.URL.split("eta_bystop.html?")[1];
+var input = document.URL.split("changebus.html?")[1];
+//var input = "1,inbound,ctb,1,11:13,5X.11.5B.101.26.111";
 
 input = input.split(",");
-var runtimes = input.length-2;
-var runs = 0;
+if (input[1]=="i" || input[1]=="inbound" || input[1]=="I"){
+var bound="I";
+var boundk="O";
+}else{
+var bound="O";
+var boundk="I";
+}
 
 function httpGet(theUrl, callback)
 {
@@ -17,86 +23,145 @@ function httpGet(theUrl, callback)
     xmlHttp.open("GET", theUrl, true); 
     xmlHttp.send(null);
 }
-function kmbhttpGet(theUrl, callback)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback([xmlHttp.responseText,xmlHttp.responseURL.split("stop-eta/")[1]]);
-    }
-    xmlHttp.open("GET", theUrl, true); 
-    xmlHttp.send(null);
+
+function timediff(a,b){
+if(!b)b = new Date();
+else  b = new Date(b);
+a = new Date(a);
+return Math.floor(Math.abs((b-a)/60000));
 }
 
-
-function timeparse(e){
-if (e===null)return e;
-if (input[1]=="0")return e.substring(11,16);
-if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "
-return ((((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分").padEnd(5," ")
+function reduce(e){
+    var x = e.split(".");
+    var output=[];
+    x.forEach(e=>{
+        if(e.includes(":")){
+            for(var i=parseInt(e.split(":")[0]);i<parseInt(e.split(":")[1]);i++)output.push(i);
+                }else{output.push(parseInt(e))}
+    })
+    return output;
 }
+var stopseqs = reduce(input[4]);
 
+var route = input[5].split(".");
+var routeeta =[];
 
-var result = "";
+var orig_rtlist=[];
+var target_rtlist =[];
 function nwst(e){
 var rr = JSON.parse(e)["data"];
-var route = 0;
-for (var i in rr){
-if (route==rr[i]["route"]){
-result +=","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
+rr.forEach(e=>{
+orig_rtlist.push(e["stop"]);
+if(stopseqs.includes(parseInt(e["seq"]))) target_rtlist.push(e["stop"]);
+})
+nwstsearcher();
+}
+
+var pend=null;
+var ng=false;
+var wait=2;
+function nwstsearcher(){
+var f=target_rtlist.shift();
+if(f){
+wait=2;ng=false;pend=null;
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+f+"?lang=zh-hant",function (e){nwstrt(e)});
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+f+"?lang=zh-hant",function (e){nwstrt(e)});
+}
+}
+
+var lasteta="0";
+var eta=[];
+var seq=0;
+function nwstrt(e){
+wait--;
+var rr = JSON.parse(e)["data"];
+var sort=rr.filter(e=>e["route"]==input[0]&&e["eta"]>lasteta);
+try{
+
+lasteta=sort[0]["eta"];
+seq = sort[0]["seq"];
+routeeta.push([seq,input[0],timediff(lasteta)]);
+ng=true;
+
+}catch(e){}
+if(ng){
+rr.forEach(e=>{
+if(route.includes(e["route"])&&e["eta"]>lasteta&&e["eta"]!="")eta.push([seq,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],timediff(e["eta"],lasteta),e["rmk"]]);
+});
+if(pend){
+pend.forEach(e=>{
+if(route.includes(e["route"])&&e["eta"]>lasteta&&e["eta"]!="")eta.push([seq,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],timediff(e["eta"],lasteta),e["rmk"]]);
+});
+}
 }else{
-result += "Δ"+rr[i]["route"].padEnd(5," ")+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk"];
-route = rr[i]["route"];
+pend=rr;
+}
+if(wait==0){
+console.log(eta);
+
+nwstsearcher();
+}
+
 }
 
 
-}
-runs++;
-if (runs==runtimes){
-output(result);
-}
+
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+(bound=="I"?"inbound":"outbound"),function (e){nwst(e)});
+
+/*
+
+
+
+
+
+//ctb and nwfb
+var orig_rtlist=[];
+var times = 299;
+var count = 0;
+function nwst(e){
+var rr = JSON.parse(e)["data"];
+times = rr.length*2;
+rr.forEach(e=>{
+orig_rtlist.push(e["stop"]);
+if(stopseqs.includes(parseInt(e["seq"]))){
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+e["stop"]+"?lang=zh-hant",function (e){nwstrt(e)});
+}else{times=times-2}
+})
 }
 
-function kmb(e){
-var rr = JSON.parse(e[0])["data"];
-var route = 0;
-for (var i in rr){
-if (rr[i]["service_type"]=="1"){
+var rts=[];
+var nwstcompare={};
+var result = [];
+function nwstrt(e){
+count++;
+var rr = JSON.parse(e)["data"];
+rr.forEach(e=>{
+var orig = parseInt(orig_rtlist.indexOf(e["stop"]));
+if(!rts.includes(e["route"])){rts.push(e["route"])}
+if(e["eta"])
+result.push
+})
 
-if (route==rr[i]["route"]){
-result +=","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
-}else{
-result +="Δ"+rr[i]["route"].padEnd(5," ")+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+timeparse(rr[i]["eta"])+","+rr[i]["rmk_tc"];
-route = rr[i]["route"];
+if(count >= times){
+var x = "";
+result = result.sort((a,b)=>{return (a[0]>b[0]?1:-1)})
+stopseqs.forEach(f=>{
+var _rr = result.filter(e=>e[0]==f-1&&e[1]!=input[0]&&e[2]!=bound);
+var _target = result.filter(e=>e[1]==input[0]&&e[2]==bound&&e[0]==f-1);
+while (Math.max(_rr.length,_target.length)>0){
+var t=_rr.pop();
+var r=_target.pop();
+x+=(r?timeparse(r[5]).padEnd(5," "):"      ")+" | "+(t?t[1].toString().padEnd(5," ")+timeparse(t[5]).padEnd(5," ")+t[4]:"")+"\n";
 }
-}
-}
-runs++;
-if (runs==runtimes){
-output(result);
-}
-}
-
-function output(e){
-var rr=e.split("Δ");
-rr.sort();
-rr.shift();
-var p="";
-for (var i in rr)p+=rr[i]+"Δ";
-document.write(p);
-window.AppInventor.setWebViewString (p);
+x+="Δ";
+})
+document.write(x+rts.toString());
+window.AppInventor.setWebViewString (x+rts.sort().toString());
+};
 }
 
-for (var i in input){
-if (i>1){
-if (input[i].length==6){
-runtimes++;
-httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+input[i]+"?lang=zh-hant",function (e){nwst(e)});
-httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+input[i]+"?lang=zh-hant",function (e){nwst(e)});
-}else{
-kmbhttpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+input[i],function (e){kmb(e)});
-}
-}
-}    
+
+*/
 
 </script>
