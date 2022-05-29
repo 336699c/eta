@@ -1,0 +1,14 @@
+<script>
+    var result = new Date().toString();
+    var appInventorInput = window.AppInventor.getWebViewString();
+        if (appInventorInput.length > 0) {
+            document.write( "WebView InputString received FROM app:
+" + appInventorInput );
+            result = appInventorInput.split("").reverse().join("");
+            document.write( "<p/>WebView InputString sending BACK TO app:<br/>" +
+            result );
+        } else {
+            document.write( "No WebView InputString set by app at: <br/>" + result );
+        }
+        window.AppInventor.setWebViewString( result );
+</script>
