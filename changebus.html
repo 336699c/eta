@@ -2,9 +2,10 @@
 //v5
 
 //var input = document.URL.split("changebus.html?")[1];
-var input = "1,inbound,ctb,1,11:13,5X.11.5B.101.26.111";
+var input = "101,outbound,kcn,nwfb,4,4,*";
 
 input = input.split(",");
+input[2] = input[2].toLowerCase();
 if (input[1]=="i" || input[1]=="inbound" || input[1]=="I"){
 var bound="I";
 var boundk="O";
@@ -18,22 +19,12 @@ function httpGet(theUrl, callback)
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText);
-    }
-    xmlHttp.open("GET", theUrl, true); 
-    xmlHttp.send(null);
-}
-
-function kmbhttpGet(theUrl, callback)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
             callback([xmlHttp.responseText,xmlHttp.responseURL]);
     }
     xmlHttp.open("GET", theUrl, true); 
     xmlHttp.send(null);
 }
+
 
 function timediff(a,b){
 if(!b)b = new Date();
@@ -47,105 +38,97 @@ function reduce(e){
     var output=[];
     x.forEach(e=>{
         if(e.includes(":")){
-            for(var i=parseInt(e.split(":")[0]);i<parseInt(e.split(":")[1]);i++)output.push(i);
+            for(var i=parseInt(e.split(":")[0]);i<parseInt(e.split(":")[1])+1;i++)output.push(i);
                 }else{output.push(parseInt(e))}
     })
     return output;
 }
-var stopseqs = reduce(input[4]);
+var nwstseq = reduce(input[4]);
+var kmbseq  = reduce(input[5]);
+var routes   = input[6].split(".");
+var estoutput = 0;
+if(input[2].includes("k"))estoutput+=kmbseq.length;
+if(input[2].includes("c"))estoutput+=nwstseq.length;
+if(input[2].includes("n"))estoutput+=nwstseq.length;
 
-var route = input[5].split(".");
-var routeeta =[];
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+input[0]+"/"+(input[3]=="kmb"?input[1]:(input[1]=="inbound"?"outbound":"inbound"))+"/1",function (e){kmbroutelist(e)});
+if(input[2])
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[3]+"/"+input[0]+"/"+input[1],function (e){nwstroutelist(e)});
 
-var orig_rtlist=[];
-var target_rtlist =[];
-function nwst(e){
-var rr = JSON.parse(e)["data"];
+//routelist generator
+var kmbstopid=[];
+var nwststopid=[];
+function kmbroutelist(e){
+var rr = JSON.parse(e[0])["data"];
 rr.forEach(e=>{
-orig_rtlist.push(e["stop"]);
-if(stopseqs.includes(parseInt(e["seq"]))) target_rtlist.push(e["stop"]);
+kmbstopid.push(e["stop"]);
+if(input[2].includes("k"))
+if(kmbseq.includes(parseInt(e["seq"]))) {
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+e["stop"],function (e){eta(e)});
+}
 })
-nwstsearcher();
 }
 
-var pend=null;
-var ng=false;
-var wait=2;
-function nwstsearcher(){
-var f=target_rtlist.shift();
-if(f){
-wait=2;ng=false;pend=null;
-httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+f+"?lang=zh-hant",function (e){nwstrt(e)});
-httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+f+"?lang=zh-hant",function (e){nwstrt(e)});
-}
-}
-
-var lasteta="0";
-var eta=[];
-var seq=0;
-function nwstrt(e){
-wait--;
-var rr = JSON.parse(e)["data"];
-var sort=rr.filter(e=>e["route"]==input[0]&&e["eta"]>lasteta);
-try{
-
-lasteta=sort[0]["eta"];
-seq = sort[0]["seq"];
-routeeta.push([seq,input[0],timediff(lasteta)]);
-ng=true;
-
-}catch(e){}
-if(ng){
+function nwstroutelist(e){
+var rr = JSON.parse(e[0])["data"];
 rr.forEach(e=>{
-if(route.includes(e["route"])&&e["eta"]>lasteta&&e["eta"]!="")eta.push([seq,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],timediff(e["eta"],lasteta),e["rmk"],e["co"]]);
-if(e["rmk"]=="九巴時段"){
-var value1 = kmbroute.filter(f=>e["route"]==f["route"]&&f["service_type"]=="1"&&f["seq"]==e["seq"]&&e["dir"]!=f["bound"]);
-if(!kmbfetch.includes(value1[0]["stop"])){
-kmbhttpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+value1[0]["stop"]+"?"+lasteta+","+seq,function (e){kmbeta(e)});
-kmbfetch.push(value1[0]["stop"])
+nwststopid.push(e["stop"]);
+if(nwstseq.includes(parseInt(e["seq"]))){
+if(input[2].includes("n"))
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+e["stop"]+"?lang=zh-hant",function (e){eta(e)});
+if(input[2].includes("c"))
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+e["stop"]+"?lang=zh-hant",function (e){eta(e)});
 }
+})
 }
-});
-if(pend){
-pend.forEach(e=>{
-if(route.includes(e["route"])&&e["eta"]>lasteta&&e["eta"]!="")eta.push([seq,e["route"],e["dir"],e["seq"],e["dest"],e["eta"],timediff(e["eta"],lasteta),e["rmk"],e["co"]]);
-if(e["rmk"]=="九巴時段"){
-var value1 = kmbroute.filter(f=>e["route"]==f["route"]&&f["service_type"]=="1"&&f["seq"]==e["seq"]&&e["dir"]!=f["bound"]);
-console.log(kmbfetch);
-if(!kmbfetch.includes(value1[0]["stop"])){
-kmbhttpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+value1[0]["stop"]+"?"+lasteta+","+seq,function (e){kmbeta(e)});
-kmbfetch.push(value1[0]["stop"]);
-}
-}
-});
-}
+
+var result=[];
+function eta(f){
+estoutput--;
+var rr=JSON.parse(f[0])["data"];
+rr.forEach(e=>{
+if(routes.includes(e["route"])||routes.includes("*"))
+if((e["service_type"]?e["service_type"]==1:true))
+if((e["eta"]&&e["rmk"]!="九巴時段")||e["route"]==input[0]){
+result.push([(e["stop"]?e["stop"]:f[1].split("eta/")[1]),e["route"],e["dir"],e["seq"],(e["dest"]?e["dest"]:e["dest_tc"]),e["eta"],(e["rmk"]?e["rmk"]:e["rmk_tc"]),e["co"]])
 }else{
-pend=rr;
+if(e["co"]!="KMB" && !kmbalreadyask.includes(e["route"]+e["stop"]) && e["route"]!=input[0]){
+estoutput++;
+kmbalreadyask.push(e["route"]+e["stop"]);
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+e["route"]+"/1?"+e["stop"]+","+e["dir"]+","+e["seq"],function (e){kmbeta(e)});
 }
-if(wait==0){
-console.log(eta);
-
-nwstsearcher();
+}
+})
+output();
 }
 
+var kmbalreadyask=[];
+function kmbeta(f){
+estoutput--;
+var rr=JSON.parse(f[0])["data"];
+var stop = f[1].split("?")[1].split(",");
+rr=rr.filter(e=>e["dir"]!=stop[1]&&e["seq"]==stop[2]);
+rr.forEach(e=>{
+result.push([stop[0],e["route"],e["dir"],e["seq"],e["dest_tc"],e["eta"],e["rmk_tc"],e["co"]])
+})
+output();
 }
 
-var kmbroute={};
-var kmbfetch=[];
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/",function (e){kmb(e)});
-
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+(bound=="I"?"inbound":"outbound"),function (e){nwst(e)});
-
-function kmbeta(e){
-var pend = JSON.parse(e[0])["data"];
-var lasteta = e[1].split("?")[1].split(",");
-pend.forEach(e=>{
-if(route.includes(e["route"])&&e["eta"]>lasteta&&e["eta"]!=""&&e["service_type"]==1)eta.push([parseInt(lasteta[1]),e["route"],e["dir"],e["seq"],e["dest_tc"],e["eta"],timediff(e["eta"],lasteta[0]),e["rmk_tc"],"kmb"]);
+function output(){
+if(estoutput<1){
+var result2=result.slice();
+var stop_dict = {};
+var target_rt=result.filter(e=>e[1]==input[0]);
+target_rt.forEach(e=>{stop_dict[e[0]]=e[3]});
+target_rt.sort((a,b)=>{
+if(a[3]==b[3])return (a[5]<b[5]?-1:1);
+else return (a[3]<b[3]?-1:1);
 });
-console.log(eta);
+for (var i=0;i<result2.length;i++){
+result2[i].unshift(stop_dict[result2[i][0]]);
 }
-
-function kmb(e){
-kmbroute = JSON.parse(e)["data"];
+console.log(result2);
+console.log(target_rt);
+}
 }
 </script>
