@@ -29,7 +29,7 @@ var valid = null;
 var data1 = [];
 function grabeta(e){
 var rr = JSON.parse(e)["data"];
-if((!rr[0] || rr[0]["eta"]<lasteta) && pointer>0){
+if((!rr[0] || rr[0]["eta"]<lasteta) && new Date(rr[0]["eta"]).getTime() > new Date().getTime()&& pointer>0){
 pointer--;
 lasteta = (rr[0]?rr[0]["eta"]:lasteta);
 valid = [rr[0]["stop"],rr[0]["seq"],rr[0]["route"],rr[0]["dest_tc"],rr[0]["rmk_tc"]];
