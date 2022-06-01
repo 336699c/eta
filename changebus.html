@@ -161,7 +161,7 @@ e[11]= rtname.filter(g=>g.split(",")[0]==e[2])[0];
 })
 var result3="";
 result2.forEach(e=>{
-result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分"+(e[8]?e[8]:"")+","+e[9]+"Δ";
+result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分 "+(e[8]?e[8]:"")+","+e[9]+".pngΔ";
 })
 
 document.getElementById("o").innerHTML=result3;
