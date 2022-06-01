@@ -153,7 +153,9 @@ result2.sort((a,b)=>{return (a[0]<b[0]?-1:1)})
 result2.forEach(e=>{
 if(e[2].length!=6){
 var length = result2.filter(g=>g[1]==e[1]&&g[2].length==6);
+try{
 e[2] = length[0][2];
+}catch(Error){}
 }
 e[11]= rtname.filter(g=>g.split(",")[0]==e[2])[0];
 })
