@@ -2,8 +2,10 @@
 //v5
 
 //var input = document.URL.split("changebus.html?")[1];
-var input = "101,outbound,kcn,nwfb,4,4,*";
-
+//var input = "101,outbound,kcn,nwfb,8:11,8:11,*";
+function f(){
+var input = document.getElementById("i").value;
+var rtname = document.getElementById("d").value.split(",");
 input = input.split(",");
 input[2] = input[2].toLowerCase();
 if (input[1]=="i" || input[1]=="inbound" || input[1]=="I"){
@@ -114,6 +116,7 @@ result.push([stop[0],e["route"],e["dir"],e["seq"],e["dest_tc"],e["eta"],e["rmk_t
 output();
 }
 
+var seqweta={};
 function output(){
 if(estoutput<1){
 var result2=result.slice();
@@ -127,8 +130,46 @@ else return (a[3]<b[3]?-1:1);
 for (var i=0;i<result2.length;i++){
 result2[i].unshift(stop_dict[result2[i][0]]);
 }
-console.log(result2);
+var lasteta="0";var lastetaseq=0;
 console.log(target_rt);
+target_rt.forEach(e=>{
+if(e[4]!=lastetaseq && lasteta<e[6]){
+seqweta[e[0]] = e[6];
+lasteta = e[6];
+lastetaseq = e[4];
 }
+})
+result2.forEach(e=>{
+if(e[6]){
+e.unshift(timediff(seqweta[e[0]],e[6]));
+e.push(timediff(seqweta[e[1]]));
+}else {
+e.unshift(999);
+e.push(999);
+}
+})
+result2.sort((a,b)=>{return (a[0]<b[0]?-1:1)})
+
+result2.forEach(e=>{
+if(e[2].length!=6){
+var length = result2.filter(g=>g[1]==e[1]&&g[2].length==6);
+e[2] = length[0][2];
+}
+e[11]= rtname.filter(g=>g.split(",")[0]==e[2])[0];
+})
+var result3="";
+result2.forEach(e=>{
+result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分"+(e[8]?e[8]:"")+","+e[9]+"Δ";
+})
+console.log(result3);
+}
+}
+
 }
 </script>
+<body>
+     <input type="text" id="i">
+      <input type="text" id="d">
+<button id="b" onclick="f()">提交</button>
+    
+</body>
