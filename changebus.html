@@ -161,6 +161,8 @@ var result3="";
 result2.forEach(e=>{
 result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分"+(e[8]?e[8]:"")+","+e[9]+"Δ";
 })
+
+document.getElementById("o").innerHTML=result3;
 window.AppInventor.setWebViewString (result3);
 }
 }
@@ -171,5 +173,6 @@ window.AppInventor.setWebViewString (result3);
      <input type="text" id="i">
       <input type="text" id="d">
 <button id="b" onclick="f()">提交</button>
+<p id="o">1</p>
     
 </body>
