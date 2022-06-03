@@ -5,7 +5,7 @@
 //var input = "101,outbound,kcn,nwfb,8:11,8:11,*";
 function f(){
 var input = document.getElementById("i").value;
-var rtname = document.getElementById("d").value.split(",");
+var rtname = document.getElementById("d").value.split("\"");
 input = input.split(",");
 input[2] = input[2].toLowerCase();
 if (input[1]=="i" || input[1]=="inbound" || input[1]=="I"){
@@ -163,7 +163,7 @@ var result3="";
 result2.forEach(e=>{
 result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分 "+(e[8]?e[8]:"")+","+e[9]+".pngΔ";
 })
-
+console.log(result2);
 document.getElementById("o").innerHTML=result3;
 window.AppInventor.setWebViewString (result3);
 }
