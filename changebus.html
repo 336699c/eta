@@ -48,6 +48,7 @@ function reduce(e){
 var nwstseq = reduce(input[4]);
 var kmbseq  = reduce(input[5]);
 var routes   = input[6].split(".");
+routes.push(input[0]);
 var estoutput = 0;
 if(input[2].includes("k"))estoutput+=kmbseq.length;
 if(input[2].includes("c"))estoutput+=nwstseq.length;
