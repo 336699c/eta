@@ -1,8 +1,8 @@
 <script>
-//v9.0
+//v10.0
 
 var input = document.URL.split("findnextbus.html?")[1];
-//var input = "21,outbound,kmb,15";
+//var input = "21,outbound,kmb,18";
 input = input.split(",");
     
 function httpGet(theUrl, callback)
@@ -47,7 +47,10 @@ function timeparse(e){
 if (e===null)return "";
 return ((Math.abs((new Date(e).getTime() - new Date().getTime() )/1000)<90)?(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒"):(Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分")
 }
-
+function timeparse2(e){
+if (e===null)return false;
+return (new Date(e).getTime() - new Date().getTime())>0
+}
 
 function output(e){
 var rr = JSON.parse(e)["data"];
@@ -68,11 +71,12 @@ for (var i in rr){
 if(rr[i]["dir"] == input[1]){
 if(lastseq!=rr[i]["seq"]){
 lastseq = rr[i]["seq"];
-if (rr[i]["eta"]<result[result.length-1][0])buspos.push(rr[i]["seq"]);
-result.push([rr[i]["eta"],rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
+if (rr[i]["eta"]<result[result.length-1][0] && timeparse2(rr[i]["eta"])){buspos.push(rr[i]["seq"]);}
+result.push([(timeparse2(rr[i]["eta"])?rr[i]["eta"]:'999'),rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
 }
 }
 }
+console.log(result);
 buspos = buspos.filter(e=>e<parseInt(input[3]));
 buspos.unshift(1);
 lastseq = buspos.pop();
