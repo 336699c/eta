@@ -1,8 +1,8 @@
 <script>
-//v10.0
+//v9.0
 
 var input = document.URL.split("findnextbus.html?")[1];
-//var input = "21,outbound,kmb,18";
+//var input = "4X,inbound,nwfb,27";
 input = input.split(",");
     
 function httpGet(theUrl, callback)
@@ -17,10 +17,11 @@ function httpGet(theUrl, callback)
 }
 
 var routelist = [];
-var pointer = parseInt(input[3]);
+var pointer = parseInt(input[3])-1;
 function data(e){
 var rr = JSON.parse(e)["data"];
 rr.forEach(f=>{routelist.push(f["stop"]);});
+console.log(routelist);
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
 }
 
@@ -35,6 +36,8 @@ lasteta = (rr[0]?rr[0]["eta"]:lasteta);
 valid = [rr[0]["stop"],rr[0]["seq"],rr[0]["route"],rr[0]["dest_tc"],rr[0]["rmk_tc"]];
 var x = "*下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(input[3])-parseInt(valid[1]))+"站）\n位於 #"+ valid[1] +(valid[4]?"\n"+valid[4]:"");
 window.AppInventor.setWebViewString (x);
+if(rr[0]["seq"]>(parseInt(input[3])-1))lasteta="9999";
+//document.write(x+"<br>");
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+input[2]+"/"+routelist[pointer]+"/"+input[0],function (e){grabeta(e)});
 }else{
 if(rr[0]["seq"]){
