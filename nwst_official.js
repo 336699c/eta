@@ -9,7 +9,7 @@ window.setTimeout(function(){
 console.log(document.getElementById("vbus_stop_focus").innerText);
 
 document.getElementById("nextbus_listitem").childNodes.forEach(e=>{
-console.log(e.childNodes[1].childNodes[0].innerText)
+window.AppInventor.setWebViewString(e.childNodes[1].childNodes[0].innerText)
 })
 },500);
 
