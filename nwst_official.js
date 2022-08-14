@@ -11,7 +11,7 @@ window.setTimeout(function(){
 window.AppInventor.setWebViewString(document.getElementById("vbus_stop_focus").innerText+"\n");
 
 document.getElementById("nextbus_listitem").childNodes.forEach(e=>{
-window.AppInventor.setWebViewString(e.childNodes[1].childNodes[0].innerText.replace(/\n/g,"  "))
+window.AppInventor.setWebViewString(e.childNodes[1].childNodes[0].innerText.replace(/\n\t\n/g,"  "))
 })
 },1000);
 
