@@ -1,7 +1,7 @@
 
-window.setTimeout(function(){document.getElementsByClassName("vpadding")[selection[0]].click();},3000);
-window.setTimeout(function(){document.getElementById("routelist2").children[2].childNodes[1].childNodes[0].click()},4000);
-window.setTimeout(function(){hidespecialNote();select()},5000);
+window.setTimeout(function(){document.getElementsByClassName("vpadding")[selection[0]].click();},10000);
+window.setTimeout(function(){document.getElementById("routelist2").children[2].childNodes[1].childNodes[0].click()},11500);
+window.setTimeout(function(){hidespecialNote();select()},13000);
 
 function select(){
 document.getElementById("dtsysstoplist1").childNodes[1].childNodes[1].childNodes[selection[1]*2].click();
