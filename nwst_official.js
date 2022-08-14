@@ -1,3 +1,4 @@
+var selection=[0,7];
 
 window.setTimeout(function(){document.getElementsByClassName("vpadding")[selection[0]].click();},10000);
 window.setTimeout(function(){document.getElementById("routelist2").children[2].childNodes[1].childNodes[0].click()},11500);
