@@ -163,7 +163,7 @@ e[11]= (nou?nou.substring(7,99).replaceAll(","," "):" ");
 })
 var result3="";
 result2.forEach(e=>{
-result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分 "+(e[8]?e[8]:"")+","+e[9]+".png"+","+e[5]+","+e[6]+"Δ";
+result3+=e[3].padEnd(4," ")+"往 "+e[6]+","+e[1]+". "+e[11]+"\n"+e[10].toString().padEnd(3," ")+"分 -> "+e[0].toString().padEnd(3," ")+"分 "+(e[8]?e[8]:"")+","+e[9]+".png"+","+e[3]+","+e[5]+","+e[6]+"Δ";
 })
 console.log(result2);
 document.getElementById("o").innerHTML=result3;
