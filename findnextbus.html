@@ -57,7 +57,7 @@ return (new Date(e).getTime() - new Date().getTime())>0
 
 function output(e){
 var rr = JSON.parse(e)["data"];
-var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(input[3])-parseInt(valid[1]))+"站）\n位於 "+ valid[1] +". "+rr["name_tc"]+ "\n前往 " +valid[3]+(valid[4]?"\n"+valid[4]:"");
+var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(input[3])-parseInt(valid[1]))+"站）\n位於 "+ valid[1] +". "+rr["name_tc"]+(valid[4]?"\n"+valid[4]:"");
 document.write(x);
 window.AppInventor.setWebViewString (x);
 }
@@ -98,7 +98,7 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop/"+rr,function (e){stop
 function stop(e){
 var rr = JSON.parse(e)["data"]["name_tc"];
 var tt = result[lastseq];
-var x = "下一班 "+ input[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(input[3]))+"站）\n位於 "+ tt[2] +". "+rr+ "\n前往 " +tt[3]+(tt[1]?"\n"+tt[1]:"");
+var x = "下一班 "+ input[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(input[3]))+"站）\n位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
 document.write(x);
 window.AppInventor.setWebViewString (x);
 }
