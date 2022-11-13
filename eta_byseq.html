@@ -35,7 +35,7 @@ if (e===null)return e;
 if (input[1]=="0")return e.substring(11,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 ";
 if(((new Date(e).getTime() - new Date().getTime())/1000)<90)return (Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒").padEnd(5," ");
-if(((new Date(e).getTime() - new Date().getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - new Date().getTime() )%60000/1000)).padStart(2,"0")+" 秒").padEnd(5," ");
+if(((new Date(e).getTime() - new Date().getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - new Date().getTime() )%60000/1000)).toString().padStart(2,"0")+" 秒").padEnd(5," ");
 return (Math.floor((new Date(e).getTime() - new Date().getTime() )/60000)+" 分").padEnd(5," ");
 }
 
