@@ -134,8 +134,8 @@ reload();console.log("RELOAD");
 
 reload();
 function reload(){
-document.getElementById("P").childNodes[1].remove();
-result="";
+document.getElementById("P").replaceChild(document.createElement('tbody'),document.getElementById("P").childNodes[2]);
+runs=0;result="";
 for (var i in input){
 if (i>1){
 if (input[i].length==6){
