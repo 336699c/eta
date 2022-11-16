@@ -96,7 +96,7 @@ output(result);
 
 var rr=null;
 function output(e){
-while(document.getElementById("P").childNodes){document.getElementById("P").childNodes[0].remove()};
+while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
 rr=e.split("Δ");
 rr.sort();
 rr.shift();
