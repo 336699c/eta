@@ -38,10 +38,10 @@ tr:nth-child(even) {
 <script>
 //v12
 var input = document.URL.split(".html?")[1];
-//var input = "a,1,001136";
+//var input = "1,001136";
 
 input = input.split(",");
-var runtimes = input.length-2;
+var runtimes = 0;
 var runs = 0;
 
 function httpGet(theUrl, callback)
@@ -68,7 +68,7 @@ function kmbhttpGet(theUrl, callback)
 
 function timeparse(e){
 if (e===null)return e;
-if (input[1]=="0")return e.substring(11,16);
+if (input[0]=="0")return e.substring(11,16);
 if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 ";
 if(((new Date(e).getTime() - new Date().getTime())/1000)<90)return (Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒").padEnd(5," ");
 if(((new Date(e).getTime() - new Date().getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - new Date().getTime() )%60000/1000)).toString().padStart(2,"0")+" 秒").padEnd(5," ");
@@ -142,7 +142,7 @@ reload();console.log("RELOAD");
 
 reload();
 function reload(){
-runs=0;result="";runtimes = input.length-2;
+runs=0;result="";runtimes = input.length-1;
 for (var i in input){
 if (i>1){
 if (input[i].length==6){
