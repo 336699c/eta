@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+
+ <input type="number" id="busroute" style="width:100%">
+
+<div style="overflow-y: scroll; height:400px;">
+<table id="P">
+
+<tbody>
+
+</tbody>
+</table>
+</div>
+</body>
+</html> 
+
+<script>
+//v3
+//var input = document.URL.split("?")[1];
+var input = "37";
+var result = "";
+
+var _url = "ctb_route";
+var run=0;
+    
+function httpGet(theUrl, callback)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+function XXX(v) {
+  var Q1 = /[A-Z][0-9]+/;
+  if (Q1.exec(v))
+  	return v;
+    
+  var YYY = parseInt(v).toString().padStart(4, '0');
+  var mmm = /[A-Z]/g;
+  var nnn = mmm.exec(v);
+  return YYY + (nnn ? nnn[0] : '');
+  
+}
+    
+function nwst_route(e){
+    var rr = JSON.parse(e)["data"];
+    for (var i in rr){
+        if (rr[i]["route"].includes(input)){
+        httpresult[XXX(rr[i]["route"])]=rr[i]["route"]+","+rr[i]["orig_tc"]+","+rr[i]["co"]+",i"+"Δ"+rr[i]["route"]+","+rr[i]["dest_tc"]+","+rr[i]["co"]+",o";
+        sortpend.push(XXX(rr[i]["route"]));
+        }
+    }
+    run++;
+ if (run==3){output()}
+}
+    
+function kmb_route(e){
+var rr= JSON.parse(e)["data"];
+    for (var i in rr){
+    
+        if (rr[i]["route"].includes(input)){
+        var routenum = rr[i]["route"];
+        httpresult[XXX(routenum)+ rr[i]["bound"] + rr[i]["service_type"]+"k"]=rr[i]["route"]+","+rr[i]["dest_tc"]+" ["+rr[i]["service_type"]+"],KMB,"+rr[i]["bound"].toLowerCase();
+        sortpend.push(XXX(routenum) +rr[i]["bound"] + rr[i]["service_type"]+"k");
+        }
+    
+    }
+    run++;
+    if (run==3){output()}
+}
+
+function output(){
+    while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
+    sortpend.sort().reverse();
+    sortpend.forEach((e,i)=>{
+    var data = httpresult[e].split(",");
+    document.getElementById("P").insertRow(0).innerHTML = 
+    `<button style="text-align: left; width:100%" id="`+e+`">
+    <div style="display: inline;"><img src="https://raw.githubusercontent.com/336699c/eta/6077ce3b95f0483094c1795b25302848f47cd9b3/icon/`+data[2].toLowerCase()+`.png" style="width:6%;min-width:50px"></div>
+    <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[0].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[1]+`</pre></div></button>`;
+    });
+}
+
+var httpresult = {};
+var sortpend = [];
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/nwfb",function (e){nwst_route(e)});
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function (e){nwst_route(e)});
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route/",function (e){kmb_route(e)});
+    
+
+</script>
