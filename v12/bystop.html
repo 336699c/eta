@@ -144,7 +144,7 @@ reload();
 function reload(){
 runs=0;result="";runtimes = input.length-1;
 for (var i in input){
-if (i>1){
+if (i>=1){
 if (input[i].length==6){
 runtimes++;
 httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+input[i]+"?lang=zh-hant",function (e){nwst(e)});
