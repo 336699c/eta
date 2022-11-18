@@ -3,7 +3,7 @@
 <body>
  <input type="number" id="busroute" style="width:50%; display: inline;">
  <button id="submit" onclick="submit()" style="display: inline;"> Submit </button>
- <button id=" V " onclick="submit()" style="display: inline;"> Submit </button>
+ <button onclick="expand()" style="display: inline;"><img id="expand_img" src="/icon/max.png"> </button>
 <div style="overflow-y: scroll; height:400px;" id="routetable">
 <table id="P"></table>
 </div>
@@ -16,6 +16,12 @@
 var input = "37";
 var result = "";
 var run=0;
+    
+function expand(){
+var div = document.getElementById("routetable");
+div.style.height = (parseInt(div.style.height)>350?"250px":"450px");
+document.getElementById("expand_img").src = "/icon/"+(parseInt(div.style.height)>350?"max.png":"min.png");
+}
     
 function httpGet(theUrl, callback)
 {
