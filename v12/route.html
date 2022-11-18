@@ -7,6 +7,8 @@
 <div style="overflow-y: scroll; height:400px;" id="routetable">
 <table id="P"></table>
 </div>
+<pre style="text-align: left; width:100%" id="route_name"></pre>
+<table id="stoptable"></table>
 </body>
 </html> 
 
@@ -36,8 +38,7 @@ function httpGet(theUrl, callback)
 
 function XXX(v) {
   var Q1 = /[A-Z][0-9]+/;
-  if (Q1.exec(v))
-  	return v;
+  if (Q1.exec(v))return v;
     
   var YYY = parseInt(v).toString().padStart(4, '0');
   var mmm = /[A-Z]/g;
@@ -64,7 +65,7 @@ var rr= JSON.parse(e)["data"];
     
         if (rr[i]["route"].includes(input)){
         var routenum = rr[i]["route"];
-        sortpend.push([XXX(routenum) +rr[i]["bound"] + rr[i]["service_type"]+"k",rr[i]["route"],rr[i]["dest_tc"]+" ["+rr[i]["service_type"]+"]","KMB",rr[i]["bound"].toLowerCase()]);
+        sortpend.push([XXX(routenum) +rr[i]["bound"] + rr[i]["service_type"]+"k",rr[i]["route"],rr[i]["dest_tc"]+" ["+rr[i]["service_type"]+"]","KMB",rr[i]["bound"].toLowerCase(),rr[i]["service_type"]]);
         }
     
     }
@@ -77,14 +78,30 @@ function output(){
     sortpend.sort().reverse();
     sortpend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
-    `<button style="text-align: left; width:100%" onclick="ROUTE(`+i+`);">
+    `<button style="text-align: left; width:100%" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
     <div style="display: inline;"><img src="/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
     <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[2]+`</pre></div></button>`;
     });
 }
 
 function ROUTE(e){
-console.log(sortpend[e]);
+document.getElementById("route_name").innerHTML = document.getElementById("routename_"+e).innerHTML;
+e = sortpend[e];
+if(e[3]=="KMB"){
+kmb_pend=[e[1],(e[4]=="o"?"outbound":"inbound"),e[5]];
+
+if(Object.keys(kmb_stop).length==0){
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
+}else{
+kmbstop();
+}
+}else{
+nwst_temp={};
+nwst_runtimes=999;
+nwst_t=[];
+nwst_run=0;
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+e[3]+"/"+e[1]+"/"+(e[4]=="o"?"outbound":"inbound"),function (f){nwstdata(f)});
+}
 }
 
 var sortpend = [];
@@ -96,4 +113,59 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/ctb",function 
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route/",function (e){kmb_route(e)});
 }
 
+var nwst_runtimes=999;
+var nwst_t=[];
+var nwst_temp={};
+var nwst_run=0;
+
+function nwstdata(e){
+var rr = JSON.parse(e)["data"];
+nwst_runtimes = Object.keys(rr).length;
+for (var i in rr){
+nwst_t.push(rr[i]["stop"]);
+nwst_temp[rr[i]["stop"]] = [rr[i]["seq"]];
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+rr[i]["stop"],function (e){nwst_stopname(e)});
+}
+}
+
+function nwst_stopname(e){
+var rr = JSON.parse(e)["data"];
+nwst_temp[rr["stop"]].push(rr["stop"],rr["name_tc"]);
+nwst_run++;
+if (nwst_runtimes<nwst_run+1){
+var result2 = nwst_t.map(g=>nwst_temp[g]);
+output_stopname(result2);
+}
+}
+
+function output_stopname(f){
+    while(document.getElementById("stoptable").childNodes.length>0){document.getElementById("stoptable").childNodes[0].remove()};
+    f.reverse();
+    f.forEach((data,i)=>{
+    document.getElementById("stoptable").insertRow(0).innerHTML = 
+    `<button style="text-align: left; width:100%" onclick="ROUTE(`+i+`);">
+    <div style="display: inline;"><img src="" style="width:6%;min-width:30px"></div>
+    <div style="display: inline;"><pre style="display: inline;font-size:4vw;">`+(data[0]+".").padEnd(4," ")+data[2]+`</pre></div></button>`;
+    });
+}
+
+var kmb_stop={};
+var kmb_pend=[];
+var kmb_result=[];
+function kmbstop(e){
+if(e){
+var rr = JSON.parse(e)["data"];
+for (var i in rr){
+kmb_stop[rr[i]["stop"]] = rr[i]["name_tc"];
+}
+};
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+kmb_pend[0]+"/"+kmb_pend[1]+"/"+kmb_pend[2],function (e){parsestopName(e)});
+}
+
+function parsestopName(e){
+var rr=JSON.parse(e)["data"];
+kmb_result = rr.map(e=>[e.stop,e.seq,kmb_stop[e.stop]]);
+rr=rr.map(e=>[e.seq,"",kmb_stop[e.stop]]);
+output_stopname(rr);
+};
 </script>
