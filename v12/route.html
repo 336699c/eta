@@ -3,7 +3,7 @@
 <body>
  <input type="number" id="busroute" style="width:50%; display: inline;">
  <button id="submit" onclick="submit()" style="display: inline;"> Submit </button>
- <button onclick="expand()" style="display: inline;"><img id="expand_img" src="/icon/max.png"> </button>
+ <button onclick="expand()" style="display: inline;"><img id="expand_img" src="/eta/icon/max.png"> </button>
 <div style="overflow-y: scroll; height:400px;" id="routetable">
 <table id="P"></table>
 </div>
@@ -22,7 +22,7 @@ var run=0;
 function expand(){
 var div = document.getElementById("routetable");
 div.style.height = (parseInt(div.style.height)>350?"250px":"450px");
-document.getElementById("expand_img").src = "/icon/"+(parseInt(div.style.height)>350?"max.png":"min.png");
+document.getElementById("expand_img").src = "/eta/icon/"+(parseInt(div.style.height)>350?"max.png":"min.png");
 }
     
 function httpGet(theUrl, callback)
@@ -79,7 +79,7 @@ function output(){
     sortpend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
     `<button style="text-align: left; width:100%" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
-    <div style="display: inline;"><img src="/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
+    <div style="display: inline;"><img src="/eta/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
     <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[2]+`</pre></div></button>`;
     });
 }
