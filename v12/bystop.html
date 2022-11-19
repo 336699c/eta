@@ -33,7 +33,16 @@ tr:nth-child(even) {
 var input = document.URL.split(".html?")[1];
 //var input = "1,001136";
 
+  var cookie_data={};
 input = input.split(",");
+if(input[0][0]=="!"){
+var i2 = parseInt(input[0].replace("!",""));
+var ck = document.cookie.split("; ");
+ck = ck.filter(e=>e.split("=")[0]=="bkmark");
+if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
+input.shift();
+ck[i2].forEach(e=>{input.push(e[2]);cookie_data[e[1]]=e[2];})
+}
 var runtimes = 0;
 var runs = 0;
 
@@ -103,6 +112,7 @@ rr.shift();
 rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
+  console.log(e);
 var row = document.getElementById("P").insertRow(0);
 row.insertCell(0).innerHTML =
 `<td><pre style="font-size:6vw;display: inline;">`+
