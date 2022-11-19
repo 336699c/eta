@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>請選擇書簽</h1>
+
+<table id="B"></table>
+
+</body>
+
+<script>
+function update_bkmark(){
+var ck = document.cookie.split("; ");
+ck = ck.filter(e=>e.split("=")[0]=="bkmark");
+if(ck){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
+while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
+ck.forEach((data,i)=>{
+    document.getElementById("B").insertRow(i).innerHTML = 
+    `<button style="text-align: left; width:100%" onclick="bkmrk(`+i+`);">
+    <pre style="display: inline;font-size:4vw;">書簽 `+i+`</pre>`+
+    `<pre style="display: inline;font-size:3vw;"> `+data[2]+" "+`</pre>`
+    +`</button>`;
+    });
+update_bkmark(); 
+
+function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+"1"}
+</script>
+
+</html> 
+
