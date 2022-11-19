@@ -18,13 +18,13 @@ ck.forEach((data,i)=>{
     document.getElementById("B").insertRow(i).innerHTML = 
     `<button style="text-align: left; width:100%" onclick="bkmrk(`+i+`);">
     <pre style="display: inline;font-size:4vw;">書簽 `+i+`</pre>`+
-    `<pre style="display: inline;font-size:3vw;"> `+data[2]+" "+`</pre>`
+    `<pre style="display: inline;font-size:3vw;"> `+data.map(g=>g[2])+" "+`</pre>`
     +`</button>`;
     });
 }
 update_bkmark(); 
 
-function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+"1"}
+function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+",1"}
 </script>
 
 </html> 
