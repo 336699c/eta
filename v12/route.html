@@ -44,7 +44,7 @@ function add_bkmark(e){
 document.getElementById("B").style.display = "none";
 var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]=="bkmark");
-if(ck){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
+if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
 if(ck[e]){
 ck[e].push(bkmark_prop);
 }else{
