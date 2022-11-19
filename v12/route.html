@@ -3,7 +3,7 @@
 <body>
  <input type="number" id="busroute" style="width:50%; display: inline;">
  <button id="submit" onclick="submit()" style="display: inline;"> Submit </button>
- <button onclick="expand()" style="display: inline;"><img id="expand_img" src="/eta/icon/max.png"> </button>
+ <button onclick="expand()" style="display: inline;"><img id="expand_img" style="width:27px" src="/eta/icon/max.png"> </button>
 <div style="overflow-y: scroll; height:400px;" id="routetable">
 <table id="P"></table>
 </div>
@@ -126,7 +126,7 @@ e = sortpend[e];
 if(e[3]=="KMB"){
 kmb_pend=[e[1],(e[4]=="o"?"outbound":"inbound"),e[5]];
 
-if(Object.keys(kmb_stop).length==0){
+if(kmb_stop.length==0){
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
 }else{
 kmbstop();
