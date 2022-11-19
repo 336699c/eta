@@ -1,5 +1,5 @@
 # Click The Link Below
-Website (https://336699c.github.io/eta/v12/index.html)
+[Website](https://336699c.github.io/eta/v12)
 
 # How To Install:
 Install this app by clicking this link: 
