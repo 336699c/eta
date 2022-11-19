@@ -120,6 +120,9 @@ function output(){
     });
 }
 
+var kmb_stop={};
+var kmb_pend=[];
+ 
 function ROUTE(e){
 document.getElementById("route_name").innerHTML = document.getElementById("routename_"+e).innerHTML;
 e = sortpend[e];
@@ -195,14 +198,13 @@ console.log(bkmark_prop);
 document.getElementById("B").style.display = "block";
 }
 
-var kmb_stop={};
-var kmb_pend=[];
+
 function kmbstop(e){
 if(e){
 var rr = JSON.parse(e)["data"];
-for (var i in rr){
-kmb_stop[rr[i]["stop"]] = rr[i]["name_tc"];
-}
+ rr.forEach(e=>{
+kmb_stop[e.stop] = e.name_tc;
+ })
 };
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+kmb_pend[0]+"/"+kmb_pend[1]+"/"+kmb_pend[2],function (e){parsestopName(e)});
 }
