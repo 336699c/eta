@@ -126,7 +126,7 @@ e = sortpend[e];
 if(e[3]=="KMB"){
 kmb_pend=[e[1],(e[4]=="o"?"outbound":"inbound"),e[5]];
 
-if(kmb_stop.length==0){
+if(!kmb_stop){
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
 }else{
 kmbstop();
