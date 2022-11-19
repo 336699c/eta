@@ -12,7 +12,7 @@
 function update_bkmark(){
 var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]=="bkmark");
-if(ck){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
+if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 ck.forEach((data,i)=>{
     document.getElementById("B").insertRow(i).innerHTML = 
