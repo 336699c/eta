@@ -116,7 +116,7 @@ e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
 row.insertCell(0).innerHTML =
 `<td><pre style="font-size:6vw;display: inline;">`+
-e[1]+"  "+e[7]+`</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
+e[1]+"  "+(Object.keys(cookie_data)>0?cookie_data[e[5]]:"往 "+e[7])+`</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
 timeparse(e[0])+
 `</pre></td>`;
 
