@@ -1,0 +1,12 @@
+
+<iframe id="W"></iframe>
+
+<script>
+var k=document.getElementById("W").contentDocument.createElement("script");
+k.innerHTML="alert('Hello Form Inside');document.write('inside')";
+console.log(
+document.getElementById("W").contentDocument.body.append(k)
+);
+
+console.log(document.getElementById("W").contentDocument.body)
+</script>
