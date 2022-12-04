@@ -244,7 +244,7 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+valid[0],func
 function output2(e){
 console.log(e);
 var rr = JSON.parse(e)["data"];
-var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(INPUT[3])-parseInt(valid[1]))+"站） 位於 "+ valid[1] +". "+rr["name_tc"]+(valid[4]?"\n"+valid[4]:"");
+var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(INPUT[3])-parseInt(valid[1]))+"站） \n位於 "+ valid[1] +". "+rr["name_tc"]+(valid[4]?"\n"+valid[4]:"");
 document.getElementById("Next_bus stop").innerHTML=x;
 }
 
@@ -287,7 +287,7 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop/"+rr,function (e){stop
 function stop(e){
 var rr = JSON.parse(e)["data"]["name_tc"];
 var tt = result_kmbeta[lastseq];
-var x = "下一班 "+ INPUT[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(INPUT[3]))+"站） 位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
+var x = "下一班 "+ INPUT[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(INPUT[3]))+"站） \n位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
 document.getElementById("Next_bus stop").innerHTML=x;
 }
 
