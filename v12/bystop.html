@@ -110,6 +110,7 @@ output(result);
 }
 
 var rr=null;
+var showcase_mode=0;
 function output(e){
 while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
 rr=e.split("Δ");
@@ -121,13 +122,13 @@ rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
-row.insertCell(0).innerHTML=`<button style="font-size:3vw">距離</button>`;
+//row.insertCell(0).innerHTML=`<button style="font-size:3vw">距離</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
 
 row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick=getbus_eta('`+input4getbuseta+`')>站點</button>`;
 row.insertCell(0).innerHTML =
 `<td><pre style="font-size:6vw;display: inline;">`+
-e[1]+`</pre><pre style="font-size:4.5vw;display: inline;">`+(Object.keys(cookie_data).length>0?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"")+`</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
+e[1]+`</pre><pre id="destination_`+i+`" style="font-size:4vw;display: inline;">`+(Object.keys(cookie_data).length>0&&showcase_mode?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"")+`</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
 timeparse(e[0])+
 `</pre></td>`;
 
@@ -140,9 +141,14 @@ row.insertCell(0).innerHTML =
 setInterval(function (){
 if(document.visibilityState=="visible"){
 try{
+showcase_mode++;
+showcase_mode=showcase_mode%15;
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 document.getElementById("Timer_"+i).innerHTML = timeparse(e[0]);
+
+document.getElementById("destination_"+i).innerHTML = (Object.keys(cookie_data).length>0&&showcase_mode>5?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"");
+
 })
 }catch(error){console.log(error)}
 }else{console.log("off-screen")}
