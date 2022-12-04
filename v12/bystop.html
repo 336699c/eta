@@ -37,7 +37,7 @@ tr:nth-child(even) {
 // WEBSITE for v12
 // SCRIPT v2
 //var input = document.URL.split(".html?")[1];
-var input = "1,001137";
+var input = "1,001137,7421C8745B4EDF25";
 
   var cookie_data={};
 input = input.split(",");
@@ -123,7 +123,7 @@ e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
 row.insertCell(0).innerHTML=`<button style="font-size:3vw">距離</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
-console.log(input4getbuseta);
+
 row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick=getbus_eta('`+input4getbuseta+`')>站點</button>`;
 row.insertCell(0).innerHTML =
 `<td><pre style="font-size:6vw;display: inline;">`+
@@ -189,23 +189,31 @@ routelist=[];
 valid = null;
 data1 = [];
 
+buspos=[];
+lastseq=0;
+
+
 if(input[2]=="KMB" || input[2]=="kmb"){
+
 if(input[1]=="outbound")input[1]="O";
 if(input[1]=="inbound")input[1]="I";
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",function (e){data2(e)});
+
 }else{
 if(input[1]=="O")input[1]="outbound";
 if(input[1]=="I")input[1]="inbound";
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
-}
 
 }
+}
+
+
 
 
 function data(e){
 var rr = JSON.parse(e)["data"];
 rr.forEach(f=>{routelist.push(f["stop"]);});
-console.log(routelist);
+
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
 }
 
@@ -230,39 +238,39 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+valid[0],func
 function output2(e){
 console.log(e);
 var rr = JSON.parse(e)["data"];
-var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(INPUT[3])-parseInt(valid[1]))+"站）\n位於 "+ valid[1] +". "+rr["name_tc"]+(valid[4]?"\n"+valid[4]:"");
+var x = "下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(INPUT[3])-parseInt(valid[1]))+"站） 位於 "+ valid[1] +". "+rr["name_tc"]+(valid[4]?"\n"+valid[4]:"");
 document.getElementById("Next_bus stop").innerHTML=x;
 }
 
-/*
+
 //kmb
 
 
-var result=[0];
+var result_kmbeta=[0];
 var buspos=[];
 var lastseq=0;
-
 
 function data2(e){
 var rr = JSON.parse(e)["data"];
 for (var i in rr){
-if(rr[i]["dir"] == input[1]){
+if(rr[i]["dir"] == INPUT[1]){
 if(lastseq!=rr[i]["seq"]){
 lastseq = rr[i]["seq"];
 if (rr[i]["eta"]<result[result.length-1][0] && timeparse2(rr[i]["eta"])){buspos.push(rr[i]["seq"]);}
-result.push([(timeparse2(rr[i]["eta"])?rr[i]["eta"]:'999'),rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
+result_kmbeta.push([(timeparse2(rr[i]["eta"])?rr[i]["eta"]:'999'),rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
 }
 }
 }
-console.log(result);
-buspos = buspos.filter(e=>e<parseInt(input[3]));
+
+console.log(result_kmbeta);
+buspos = buspos.filter(e=>e<parseInt(INPUT[3]));
 buspos.unshift(1);
+console.log(buspos);
 lastseq = buspos.pop();
 
-
-if(input[1]=="O")input[1]="outbound";
-if(input[1]=="I")input[1]="inbound";
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+input[0]+"/"+input[1]+"/1",function (e){rt_stop(e)});
+if(INPUT[1]=="O")INPUT[1]="outbound";
+if(INPUT[1]=="I")INPUT[1]="inbound";
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+INPUT[0]+"/"+INPUT[1]+"/1",function (e){rt_stop(e)});
 }
 
 function rt_stop(e){
@@ -272,13 +280,15 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop/"+rr,function (e){stop
 
 function stop(e){
 var rr = JSON.parse(e)["data"]["name_tc"];
-var tt = result[lastseq];
-var x = "下一班 "+ input[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(input[3]))+"站）\n位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
-document.write(x);
+var tt = result_kmbeta[lastseq];
+var x = "下一班 "+ INPUT[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(INPUT[3]))+"站） 位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
+document.getElementById("Next_bus stop").innerHTML=x;
 }
 
 
-*/
-
+function timeparse2(e){
+if (e===null)return false;
+return (new Date(e).getTime() - new Date().getTime())>0
+}
 
 </script>
