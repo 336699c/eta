@@ -123,7 +123,7 @@ rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
-if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="document.getElementById('nwstframe').style.display='block';document.getElementById('nwstframe').src=('https://mobile.bravobus.com.hk/nwp3/?f=1&l=0&ds=`+e[1].trim()+`','_blank')">距離</button>`;
+if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="document.getElementById('nwstframe').style.display='block';document.getElementById('nwstframe').src='https://mobile.bravobus.com.hk/nwp3/?f=1&l=0&ds=`+e[1].trim()+`'">距離</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
 
 row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick=getbus_eta('`+input4getbuseta+`')>站點</button>`;
