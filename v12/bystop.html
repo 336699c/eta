@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -26,6 +25,8 @@ tr:nth-child(even) {
 </style>
 </head>
 <body>
+<iframe id="nwstframe" width=100% style="height:600px;display:none" sandbox="allow-same-origin allow-scripts" src=""></iframe>
+
 <pre id="Next_bus stop" style="font-size:4vw;"></pre>
 <table id="P">
 <tbody></tbody>
@@ -122,7 +123,7 @@ rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
-if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="window.open('https://mobile.bravobus.com.hk/nwp3/?f=1&l=0&ds=`+e[1].trim()+`','_blank')">距離</button>`;
+if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="document.getElementById('nwstframe').style.display='block';document.getElementById('nwstframe').src=('https://mobile.bravobus.com.hk/nwp3/?f=1&l=0&ds=`+e[1].trim()+`','_blank')">距離</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
 
 row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick=getbus_eta('`+input4getbuseta+`')>站點</button>`;
