@@ -37,7 +37,7 @@ tr:nth-child(even) {
 // WEBSITE for v12
 // SCRIPT v2
 var input = document.URL.split(".html?")[1];
-//var input = "1,001137,7421C8745B4EDF25";
+var input = "1,001137,B3C1A7541DDBB708,7421C8745B4EDF25";
 
   var cookie_data={};
 input = input.split(",");
@@ -257,12 +257,13 @@ var buspos=[];
 var lastseq=0;
 
 function data2(e){
+buspos=[];
 var rr = JSON.parse(e)["data"];
 for (var i in rr){
 if(rr[i]["dir"] == INPUT[1]){
 if(lastseq!=rr[i]["seq"]){
 lastseq = rr[i]["seq"];
-if (rr[i]["eta"]<result[result.length-1][0] && timeparse2(rr[i]["eta"])){buspos.push(rr[i]["seq"]);}
+if (rr[i]["eta"]<result_kmbeta[result_kmbeta.length-1][0] && timeparse2(rr[i]["eta"])){buspos.push(rr[i]["seq"]);}
 result_kmbeta.push([(timeparse2(rr[i]["eta"])?rr[i]["eta"]:'999'),rr[i]["rmk_tc"],rr[i]["seq"],rr[i]["dest_tc"]]);
 }
 }
@@ -270,8 +271,8 @@ result_kmbeta.push([(timeparse2(rr[i]["eta"])?rr[i]["eta"]:'999'),rr[i]["rmk_tc"
 
 console.log(result_kmbeta);
 buspos = buspos.filter(e=>e<parseInt(INPUT[3]));
-buspos.unshift(1);
 console.log(buspos);
+buspos.unshift(1);
 lastseq = buspos.pop();
 
 if(INPUT[1]=="O")INPUT[1]="outbound";
