@@ -10,10 +10,13 @@
 <table id="P"></table>
 </div>
 
-<table id="B" style = "display:none"></table>
+<table id="B" style = "display:none" width=50%></table>
+<div id="header" width=100%>
 
-<pre style="text-align: left; width:100%" id="route_name"></pre>
-<table id="stoptable"></table>
+</div>
+
+<div style="text-align: left; width:100%; background-color: #d2dcff;" id="route_name"></div>
+<table class="stoptable2" id="stoptable" style="width:100%"></table>
 </body>
 </html> 
 
@@ -187,9 +190,9 @@ stop_result=f;
     f.reverse();
     f.forEach((data,i)=>{
     document.getElementById("stoptable").insertRow(0).innerHTML = 
-    `<button style="text-align: left; width:100%" onclick="bkmark_dropdown(`+i+`);">
+    `<button style="text-align: left; padding:7px; width:100%; border:0px; background:`+(i%2==0?"white":"lightgray")+`" onclick="window.scrollTo(0, 0);bkmark_dropdown(`+i+`);">
     <div style="display: inline;"><img src="" style="width:6%;min-width:30px"></div>
-    <div style="display: inline;"><pre style="display: inline;font-size:4vw;">`+(data[0]+".").padEnd(4," ")+data[2]+`</pre></div></button>`;
+    <div style="display: inline;"><pre style="display: inline;font-size:3vw;">`+(data[0]+".").padEnd(4," ")+data[2]+`</pre></div></button>`;
     });
 }
 
