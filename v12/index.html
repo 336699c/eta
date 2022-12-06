@@ -1,21 +1,36 @@
-<!DOCTYPE html>
-<html>
-<body>
+<html><head>
+<style>
+button{
+background-color:lightgray;
+height:65px;
+}
+</style>
+</head><body>
 
-<h1>歡迎使用 巴士到站預報</h1>
+<h1 style="text-align: center; font-size:7vw">歡迎使用 巴士到站預報</h1>
 
-    <div style="margin-left: auto; margin-right: auto; width=50%">
- <a href="https://336699c.github.io/eta/v12/route.html">
-     <img src="/eta/icon/eta_stop.png" width="50%">
-     <p>https://336699c.github.io/eta/v12/route.html</p>
-        </a>   
-    </div>
-
+<a href="https://336699c.github.io/eta/v12/route.html">
+<div style="
+    margin: auto;
+    width: 40%;
+    border: 2px solid black;
+    padding: 10px; 
+    background-color:lightgray">
+ 
+<img src="/eta/icon/eta_stop.png" style="
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;">
+<p style="text-align: center; font-size:4vw;color:black;">查詢巴士路綫</p>
+           
+</div>
+</a>
 
 <br>
-
+<pre style="font-size:3vw">巴士站 書簽</pre>
 <table id="B"></table>
-</body>
+
 
 <script>
 function update_bkmark(){
@@ -36,5 +51,6 @@ update_bkmark();
 function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+",1"}
 </script>
 
-</html> 
+ 
 
+</body></html>
