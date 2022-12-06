@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <body>
- <input type="number" id="busroute" style="width:50%; display: inline;">
- <button id="submit" onclick="submit()" style="display: inline;"> Submit </button>
- <button onclick="expand()" style="display: inline;"><img id="expand_img" style="width:27px" src="/eta/icon/max.png"> </button>
-<div style="overflow-y: scroll; height:400px;" id="routetable">
+<div style="background-color:#b4c4ffff">
+ <input type="number" id="busroute" style="width:50%; display: inline; height:27px; font-size:18px">
+ <button id="submit" onclick="submit()" style="display: inline; padding: 7px 16px;">搜尋</button>
+ <button onclick="expand()" style="display: inline;"><img id="expand_img" style="width:27px;height:27px" src="/eta/icon/max.png"> </button>
+ </div>
+<div style="overflow-y: scroll; height:400px; background-color:#b4c4ffff" id="routetable">
 <table id="P"></table>
 </div>
 
@@ -114,7 +116,7 @@ function output(){
     sortpend.sort().reverse();
     sortpend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
-    `<button style="text-align: left; width:100%" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
+    `<button style="text-align: left; width:100%; background-color:`+(i%2==0?"lightgray":"#bdbdbd")+`; border: none;" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
     <div style="display: inline;"><img src="/eta/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
     <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[2]+`</pre></div></button>`;
     });
