@@ -1,12 +1,9 @@
-# How To Use:
+Website data obtained from data.gov.hk
 
-## [Website](https://336699c.github.io/eta/v12)
-<br>(Developing)
+# [Website](https://336699c.github.io/eta/v12)
+(Developing)
 <br>GUI built in html, js and css
 
-## ＯＲ　Install app [App](https://github.com/336699c/eta/blob/main/bus_eta_new.apk)
+# ＯＲ　Install app [App](https://github.com/336699c/eta/blob/main/bus_eta_new.apk)
 Click view raw
-Created with MIT APP Inventor
-
-# Details:
-Website data obtained from data.gov.hk
+<br>Created with MIT APP Inventor
