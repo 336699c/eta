@@ -3,7 +3,7 @@
 <body>
 <div style="background-color:#b4c4ffff">
  <input type="number" id="busroute" style="width:50%; display: inline; height:27px; font-size:18px">
- <button id="submit" onclick="submit()" style="display: inline; padding: 7px 16px;">搜尋</button>
+ <button id="submit" onclick="submit();expand(false);" style="display: inline; padding: 7px 16px;">搜尋</button>
  <button onclick="expand()" style="display: inline; padding: 7px 16px;"><img id="expand_img" style="width:27px;" src="/eta/icon/max.png"> </button>
  </div>
 <div style="overflow-y: scroll; height:400px; background-color:#b4c4ffff" id="routetable">
@@ -57,9 +57,9 @@ update_bkmark();
 alert("已成功新增書簽");
 }
     
-function expand(){
+function expand(bool){
 var div = document.getElementById("routetable");
-div.style.height = (parseInt(div.style.height)>350?"250px":"450px");
+div.style.height = (bool||parseInt(div.style.height)>350?"250px":"450px");
 document.getElementById("expand_img").src = "/eta/icon/"+(parseInt(div.style.height)>350?"max.png":"min.png");
 }
     
@@ -126,6 +126,7 @@ var kmb_stop={};
 var kmb_pend=[];
  
 function ROUTE(e){
+expand(true);
 document.getElementById("route_name").innerHTML = document.getElementById("routename_"+e).innerHTML;
 e = sortpend[e];
 if(e[3]=="KMB"){
