@@ -122,11 +122,10 @@ rr.shift();
 rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
-let OfficialWebsite=e;
 var row = document.getElementById("P").insertRow(0);
 if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="
-httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/'+OfficialWebsite[2].trim()+'/'+OfficialWebsite[1].trim(),function (f){
-window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds='+OfficialWebsite[2].trim()+'--'+JSON.parse(f).data[(OfficialWebsite[3]=='I'?'orig_en':'dest_en')].replace(' ','_'),'_blank')
+httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/'+`+e[2].trim()+`+'/'+e[1].trim(),function (f){
+window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds='+`+e[2].trim()+`+'--'+`+JSON.parse(f).data[(e[3]=='I'?'orig_en':'dest_en')].replace(' ','_')+`,'_blank')
 });
 ">官網</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
