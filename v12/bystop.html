@@ -121,7 +121,8 @@ rr.sort();
 rr.shift();
 rr.reverse();
 rr.forEach((e,i)=>{
-let OfficialWebsite=e.split(/,/g);
+e=e.split(/,/g);
+let OfficialWebsite=e;
 var row = document.getElementById("P").insertRow(0);
 if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="
 httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/'+OfficialWebsite[2].trim()+'/'+OfficialWebsite[1].trim(),function (f){
