@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
 <body>
 <div style="background-color:#b4c4ffff">
@@ -52,7 +53,7 @@ var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]=="bkmark");
 if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
 if(ck[e]){
-ck[e]bk.push(bkmark_prop);
+ck[e].bk.push(bkmark_prop);
 }else{
 ck[e] = {"bk":[bkmark_prop],"routes":[]};
 };
