@@ -43,8 +43,8 @@ tr:nth-child(even) {
 <script>
 // WEBSITE for v12
 // SCRIPT v2
-//var input = document.URL.split(".html?")[1];
-var input = "1,001137,EBE826ABDCE44F0C";
+var input = document.URL.split(".html?")[1];
+//var input = "1,001137,EBE826ABDCE44F0C";
 
   var cookie_data={};
 input = input.split(",");
@@ -58,6 +58,7 @@ ck[i2].forEach(e=>{input.push(e[1]);cookie_data[e[1]]=e[2];})
 }
 var runtimes = 0;
 var runs = 0;
+var EnabledRoutes=[];
 
 function httpGet(theUrl, callback)
 {
@@ -96,6 +97,7 @@ function nwst(e){
 var rr = JSON.parse(e)["data"];
 for (var i in rr){
 result += "Δ"+rr[i]["eta"]+","+rr[i]["route"].padEnd(5," ")+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+rr[i]["rmk"]+","+rr[i]["dest"];
+if(!EnabledRoutes.includes(rr[i]["route"]))EnabledRoutes.push(rr[i]["route"]);
 }
 runs++;
 if (runs==runtimes){
@@ -109,6 +111,7 @@ for (var i in rr){
 if (rr[i]["service_type"]=="1"){
 result +="Δ"+rr[i]["eta"]+","+rr[i]["route"].padEnd(5," ")+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+rr[i]["rmk_tc"]+","+rr[i]["dest_tc"];
 }
+if(!EnabledRoutes.includes(rr[i]["route"]))EnabledRoutes.push(rr[i]["route"]);
 }
 runs++;
 if (runs==runtimes){
@@ -146,7 +149,14 @@ timeparse(e[0])+
 row.insertCell(0).innerHTML = 
 `<img src="https://raw.githubusercontent.com/336699c/eta/6077ce3b95f0483094c1795b25302848f47cd9b3/icon/`+e[2].toLowerCase()+`.png" style="width:100%;min-width:50px">`;
 
-})
+});
+
+EnabledRoutes=EnabledRoutes.sort((a,b)=>{return (parseInt(a)<parseInt(b)?-1:1)});
+var RoutesCheckList="";
+EnabledRoutes.forEach(q=>{
+RoutesCheckList+=`<input type="checkbox" id="RoutesCheckBox_`+q+`" checked><label>`+q+`</label><br>`
+});
+document.getElementById("selection").innerHTML=RoutesCheckList;
 }
 
 setInterval(function (){
