@@ -43,10 +43,11 @@ tr:nth-child(even) {
 <script>
 // WEBSITE for v12
 // SCRIPT v2
-var input = document.URL.split(".html?")[1];
-//var input = "1,001137,EBE826ABDCE44F0C";
+//var input = document.URL.split(".html?")[1];
+var input = "1,001137,EBE826ABDCE44F0C";
 
-  var cookie_data={};
+var cookie_data={};
+var DisabledRoutes=[];
 input = input.split(",");
 if(input[0][0]=="!"){
 var i2 = parseInt(input[0].replace("!",""));
@@ -54,11 +55,13 @@ var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]=="bkmark");
 if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
 input.shift();
-ck[i2].forEach(e=>{input.push(e[1]);cookie_data[e[1]]=e[2];})
+ck[i2].bk.forEach(e=>{input.push(e[1]);cookie_data[e[1]]=e[2];});
+DisabledRoutes=ck[i2].routes;
 }
 var runtimes = 0;
 var runs = 0;
 var EnabledRoutes=[];
+
 
 function httpGet(theUrl, callback)
 {
@@ -96,6 +99,7 @@ var result = "";
 function nwst(e){
 var rr = JSON.parse(e)["data"];
 for (var i in rr){
+if(!DisabledRoutes.includes(rr[i].route))
 result += "Δ"+rr[i]["eta"]+","+rr[i]["route"].padEnd(5," ")+","+rr[i]["co"]+","+rr[i]["dir"]+","+rr[i]["seq"]+","+rr[i]["stop"]+","+rr[i]["rmk"]+","+rr[i]["dest"];
 if(!EnabledRoutes.includes(rr[i]["route"]))EnabledRoutes.push(rr[i]["route"]);
 }
@@ -109,6 +113,7 @@ function kmb(e){
 var rr = JSON.parse(e[0])["data"];
 for (var i in rr){
 if (rr[i]["service_type"]=="1"){
+if(!DisabledRoutes.includes(rr[i].route))
 result +="Δ"+rr[i]["eta"]+","+rr[i]["route"].padEnd(5," ")+",KMB,"+rr[i]["dir"]+","+rr[i]["seq"]+","+e[1]+","+rr[i]["rmk_tc"]+","+rr[i]["dest_tc"];
 }
 if(!EnabledRoutes.includes(rr[i]["route"]))EnabledRoutes.push(rr[i]["route"]);
@@ -154,9 +159,19 @@ row.insertCell(0).innerHTML =
 EnabledRoutes=EnabledRoutes.sort((a,b)=>{return (parseInt(a)<parseInt(b)?-1:1)});
 var RoutesCheckList="";
 EnabledRoutes.forEach(q=>{
-RoutesCheckList+=`<input type="checkbox" id="RoutesCheckBox_`+q+`" checked><label>`+q+`</label><br>`
+RoutesCheckList+=`<input type="checkbox" id="RoutesCheckBox_`+q+`" onclick="CheckBoxClick('`+q+`')" `+(DisabledRoutes.includes(q)?"":"checked")+` ><label>`+q+`</label><br>`
 });
 document.getElementById("selection").innerHTML=RoutesCheckList;
+}
+
+function CheckBoxClick(t){
+if(DisabledRoutes.includes(t))DisabledRoutes.splice(DisabledRoutes.indexOf(t),1);
+else DisabledRoutes.push(t);
+if(i2){
+ck[i2].routes=DisabledRoutes;
+document.cookie = `bkmark=`+JSON.stringify(ck)+`; path=/eta/v12/ ; expires=`+new Date(2047,2,28).toUTCString();
+}
+console.log(DisabledRoutes)
 }
 
 setInterval(function (){
