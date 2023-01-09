@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
+
 <style>
 td , th {
   text-align: left;
@@ -32,14 +34,18 @@ tr:nth-child(even) {
 <table id="P">
 <tbody></tbody>
 </table>
+
+<div id="selection">
+</div>
+
 </body>
 </html> 
 
 <script>
 // WEBSITE for v12
 // SCRIPT v2
-var input = document.URL.split(".html?")[1];
-//var input = "1,001137,B3C1A7541DDBB708,7421C8745B4EDF25";
+//var input = document.URL.split(".html?")[1];
+var input = "1,001137,7421C8745B4EDF25";
 
   var cookie_data={};
 input = input.split(",");
@@ -79,7 +85,7 @@ function kmbhttpGet(theUrl, callback)
 function timeparse(e){
 if (e===null)return e;
 if (input[0]=="0")return e.substring(11,16);
-if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 ";
+if (new Date().getTime() > new Date(e).getTime()) return "即將抵達 "+(Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒");
 if(((new Date(e).getTime() - new Date().getTime())/1000)<90)return (Math.floor((new Date(e).getTime() - new Date().getTime() )/1000)+" 秒").padEnd(5," ");
 if(((new Date(e).getTime() - new Date().getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - new Date().getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - new Date().getTime() )%60000/1000)).toString().padStart(2,"0")+" 秒").padEnd(5," ");
 return (Math.floor((new Date(e).getTime() - new Date().getTime() )/60000)+" 分").padEnd(5," ");
