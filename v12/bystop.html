@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
 
 <style>
@@ -45,7 +44,7 @@ tr:nth-child(even) {
 // WEBSITE for v12
 // SCRIPT v2
 //var input = document.URL.split(".html?")[1];
-var input = "1,001137,7421C8745B4EDF25";
+var input = "1,001137,EBE826ABDCE44F0C";
 
   var cookie_data={};
 input = input.split(",");
@@ -285,7 +284,7 @@ console.log(result_kmbeta);
 buspos = buspos.filter(e=>e<parseInt(INPUT[3]));
 console.log(buspos);
 buspos.unshift(1);
-lastseq = buspos.pop();
+//lastseq = buspos.pop();
 
 if(INPUT[1]=="O")INPUT[1]="outbound";
 if(INPUT[1]=="I")INPUT[1]="inbound";
@@ -299,9 +298,16 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop/"+rr,function (e){stop
 
 function stop(e){
 var rr = JSON.parse(e)["data"]["name_tc"];
-var tt = result_kmbeta[lastseq];
-var x = "下一班 "+ INPUT[0] +"（"+timeparse(tt[0])+", "+(-parseInt(tt[2])+parseInt(INPUT[3]))+"站） \n位於 "+ tt[2] +". "+rr+(tt[1]?"\n"+tt[1]:"");
-document.getElementById("Next_bus stop").innerHTML=x;
+//var tt = result_kmbeta[lastseq];
+var x=[];
+buspos = buspos.reverse();
+buspos.length=3;
+buspos.forEach(tt=>{
+tt=result_kmbeta[tt];
+x.push(INPUT[0] +"（"+timeparse(tt[0])+", "+(parseInt(INPUT[3])-parseInt(tt[2]))+"站） \n位於 "+ tt[2] +". "+rr+"  "+tt[1]);
+});
+x[0]="下一班 "+x[0];
+document.getElementById("Next_bus stop").innerHTML=x.join("\n");
 }
 
 
