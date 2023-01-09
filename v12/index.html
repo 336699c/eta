@@ -52,7 +52,7 @@ ck.forEach((data,i)=>{
     `<label style="display: inline;font-size:3vw;"> `+data.map(g=>g[2]).join(" ")+` </label>`
     +`</button>`;
     Row.insertCell(0).innerHTML = 
-    `<button style="text-align: left; width:25px; font-size:4vw;" onclick="rmbk(`+i+`);">X</button>`;
+    `<button style="text-align: left; width:75px; font-size:4vw;" onclick="rmbk(`+i+`);">X</button>`;
     });
 }
 update_bkmark(); 
@@ -62,6 +62,7 @@ function rmbk(i){
 parseCookie();
 ck[i]={"bk":[],"routes":[]};
 document.cookie = `bkmark=`+JSON.stringify(ck)+`; path=/eta/v12/ ; expires=`+new Date(2047,2,28).toUTCString();
+update_bkmark()
 }
 </script>
 
