@@ -1,8 +1,7 @@
 <html><head>
 <style>
-button{
-background-color:lightgray;
-height:65px;
+tr:nth-child(even) {
+  background-color: #dddddd;
 }
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,7 +30,8 @@ height:65px;
 
 <br>
 <pre style="font-size:3vw">巴士站 書簽</pre>
-<table id="B"></table>
+<table id="B" style="width:100%"><tbody style="width:100%">
+</tbody></table>
     
 <br>
 <button style="text-align: left; width:100%" onclick="rmvall()"> Remove All </button>
@@ -51,12 +51,12 @@ while(document.getElementById("B").childNodes.length>0){document.getElementById(
 ck.forEach((data,i)=>{
     var Row = document.getElementById("B").insertRow(i);
     Row.insertCell(0).innerHTML = 
-    `<button style="text-align: left; width:100%" onclick="bkmrk(`+i+`);">
+    `<button style="text-align: left; width:100%; background:#0000; border:0px" onclick="bkmrk(`+i+`);">
     <pre style="display: inline;font-size:4vw;">書簽 `+i+`</pre>`+
     `<label style="display: inline;font-size:3vw;"> `+data.bk.map(g=>g[2]).join(" ")+` </label>`
     +`</button>`;
     Row.insertCell(0).innerHTML = 
-    `<button style="text-align: left; width:75px; font-size:4vw;" onclick="rmbk(`+i+`);">X</button>`;
+    `<button style="width:75px; font-size:4vw;" onclick="rmbk(`+i+`);">X</button>`;
     });
 }
 update_bkmark(); 
