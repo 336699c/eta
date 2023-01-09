@@ -5,6 +5,7 @@ background-color:lightgray;
 height:65px;
 }
 </style>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
 </head><body style="background-color:d2dcff">
 
@@ -49,7 +50,7 @@ ck.forEach((data,i)=>{
     Row.insertCell(0).innerHTML = 
     `<button style="text-align: left; width:100%" onclick="bkmrk(`+i+`);">
     <pre style="display: inline;font-size:4vw;">書簽 `+i+`</pre>`+
-    `<label style="display: inline;font-size:3vw;"> `+data.map(g=>g[2]).join(" ")+` </label>`
+    `<label style="display: inline;font-size:3vw;"> `+data.bk.map(g=>g[2]).join(" ")+` </label>`
     +`</button>`;
     Row.insertCell(0).innerHTML = 
     `<button style="text-align: left; width:75px; font-size:4vw;" onclick="rmbk(`+i+`);">X</button>`;
