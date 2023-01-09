@@ -52,9 +52,9 @@ var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]=="bkmark");
 if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = [];}
 if(ck[e]){
-ck[e].push(bkmark_prop);
+ck[e]bk.push(bkmark_prop);
 }else{
-ck[e] = [bkmark_prop];
+ck[e] = {"bk":[bkmark_prop],"routes":[]};
 };
 document.cookie = `bkmark=`+JSON.stringify(ck)+`; path=/eta/v12/ ; expires=`+new Date(2047,2,28).toUTCString();
 update_bkmark();   
