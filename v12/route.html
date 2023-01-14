@@ -1,20 +1,41 @@
 <!DOCTYPE html>
 <html>
- <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
+
+<style>
+input.busrt{
+width:calc(100% - 150px); 
+display: inline;
+height:27px; 
+font-size:18px; 
+min-width:100px;
+}
+
+button.bt2{
+display: inline; 
+padding: 7px 16px;
+background-color: #d3d3d3a0;
+border-color: lightgray;
+}
+
+
+</style>
 <body>
 <div style="background-color:#b4c4ffff">
- <input type="number" id="busroute" style="width:50%; display: inline; height:27px; font-size:18px">
- <button id="submit" onclick="submit();expand(false);" style="display: inline; padding: 7px 16px;background-color: #d3d3d3a0;border-color: lightgray;">搜尋</button>
- <button onclick="expand()" style="display: inline; padding: 7px 16px;background-color: #d3d3d3a0;border-color: lightgray;"><img id="expand_img" style="width:18px;height:16px;" src="/eta/icon/max.png"> </button>
- </div>
+ <input class="busrt" type="number" id="busroute">
+ <button id="submit" onclick="submit();expand(false);" class="bt2">搜尋</button>
+ <button onclick="expand()" class="bt2">
+ <img id="expand_img" style="width:18px;height:16px;" src="/eta/icon/max.png"> 
+ </button>
+</div>
+
 <div style="overflow-y: scroll; height:400px; background-color:#b4c4ffff" id="routetable">
 <table id="P"></table>
 </div>
 
 <table id="B" style = "display:none" width=50%></table>
-<div id="header" width=100%>
-
+<div id="header" width=100% style="padding-top:12px">
 </div>
 
 <div style="text-align: left; width:100%; background-color: #d2dcff;" id="route_name"></div>
@@ -24,7 +45,6 @@
 
 <script>
 //v3
-//var input = document.URL.split("?")[1];
 var input = "37";
 var result = "";
 var run=0;
@@ -121,9 +141,9 @@ function output(){
     sortpend.sort().reverse();
     sortpend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
-    `<button style="text-align: left; width:100%; background-color:`+(i%2==0?"lightgray":"#bdbdbd")+`; border: none;" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
+    `<button style="text-align: left; width:100%; background-color:`+(i%2==0?"#ddda":"#fffa")+`; border: none;" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
     <div style="display: inline;"><img src="/eta/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
-    <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[2]+`</pre></div></button>`;
+    <div style="display: inline;"><pre style="display: inline;font-size:45px;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:30px;">往: `+data[2]+`</pre></div></button>`;
     });
 }
 
@@ -198,7 +218,6 @@ stop_result=f;
     });
 }
 
-//console.log(document.getElementById("B").style.display = "block")
 var bkmark_prop = [];
 function bkmark_dropdown(e){
 bkmark_prop = stop_result[e];
