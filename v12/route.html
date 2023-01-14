@@ -143,7 +143,7 @@ function output(){
     document.getElementById("P").insertRow(0).innerHTML = 
     `<button style="text-align: left; width:100%; background-color:`+(i%2==0?"#ddda":"#fffa")+`; border: none;" id="routename_`+i+`" onclick="ROUTE(`+i+`);">
     <div style="display: inline;"><img src="/eta/icon/`+data[3].toLowerCase()+`.png" style="width:6%;min-width:30px"></div>
-    <div style="display: inline;"><pre style="display: inline;font-size:45px;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:30px;">往: `+data[2]+`</pre></div></button>`;
+    <div style="display: inline;"><pre style="display: inline;font-size:5vw;">`+data[1].padEnd(6," ")+`</pre><pre style="display: inline;font-size:3vw;">往: `+data[2]+`</pre></div></button>`;
     });
 }
 
