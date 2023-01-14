@@ -40,6 +40,11 @@ tr:nth-child(even) {
 .p13{background-color:#dcc !important}
 .p14{background-color:#ddd !important}
 
+.bt2{
+  font-size:3vw;
+  width:75px;
+  height:75px;
+}
 
 </style>
 <script src="/eta/script/cookie.js"></script>
@@ -61,8 +66,8 @@ tr:nth-child(even) {
 <script>
 // WEBSITE for v12
 // SCRIPT v2
-//var input = document.URL.split(".html?")[1];
-var input = "1,001137,EBE826ABDCE44F0C";
+var input = document.URL.split(".html?")[1];
+//var input = "1,001137,EBE826ABDCE44F0C";
 
 var cookie_data={};
 var DisabledRoutes=[];
@@ -156,14 +161,14 @@ rr.forEach((e,i)=>{
 e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
 if(Get_Cookie("settings",{}).colored)row.classList.add("p"+(input.indexOf(e[5])>14?0:input.indexOf(e[5])));
-if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="
+if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button class="bt2" onclick="
 httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/`+e[2].trim()+`/`+e[1].trim()+`',function (f){
 window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds=`+e[1].trim()+`--'+JSON.parse(f).data[('`+e[3]+`'=='I'?'orig_en':'dest_en')].replaceAll(' ','_'),'_blank')
 });
 ">官網</button>`;
 let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
 
-row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick=getbus_eta('`+input4getbuseta+`')>距離</button>`;
+row.insertCell(0).innerHTML=`<button class="bt2" onclick=getbus_eta('`+input4getbuseta+`')>距離</button>`;
 row.insertCell(0).innerHTML =
 `<td><pre style="font-size:6vw;display: inline;">`+
 e[1]+`</pre><pre id="destination_`+i+`" style="font-size:4vw;display: inline;">`+(Object.keys(cookie_data).length>0&&showcase_mode?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"")+`</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
