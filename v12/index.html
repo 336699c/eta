@@ -6,6 +6,20 @@ tr:nth-child(even) {
 tr:nth-child(odd) {
   background-color: #fff9;
 }
+img{
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+.settings{
+font-size:20px;
+border:0px;
+width:100px;
+height:50px;
+border-radius: 15px;
+background-color:#fdf;
+}
 </style>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
@@ -13,7 +27,7 @@ tr:nth-child(odd) {
 
 <h1 style="text-align: center; font-size:7vw">歡迎使用 巴士到站預報</h1>
 
-<a href="https://336699c.github.io/eta/v12/route.html">
+<a href="/eta/v12/route.html">
 <div style="
     margin: auto;
     width: 40%;
@@ -21,23 +35,21 @@ tr:nth-child(odd) {
     padding: 10px; 
     background-color:lightgray">
  
-<img src="/eta/icon/eta_stop.png" style="
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 50%;">
+<img src="/eta/icon/eta_stop.png">
 <p style="text-align: center; font-size:4vw;color:black;">查詢巴士路綫</p>
            
 </div>
 </a>
 
 <br>
-<pre style="font-size:3vw">巴士站 書簽</pre>
+<a href="/eta/v12/settings.html"><button class="settings" align="right">設置</button></a>
+<br>
+<br>
+<div style="padding:0 0 0 0; background-color:#fff9;border-radius:6px;width:100%">
+<label style="font-size:20px">巴士站 書簽</label>
 <table id="B" style="width:100%"><tbody style="width:100%">
 </tbody></table>
-    
-<br><br><br><br>
-<button onclick="rmvall()"> Remove All </button>
+</div>
 </body>
 
 <script>
@@ -63,12 +75,7 @@ ck.forEach((data,i)=>{
     });
 }
 update_bkmark(); 
-
-function rmvall(){
-document.cookie = `bkmark=`+JSON.stringify([])+`; path=/eta/v12/ ; expires=`+new Date(2047,2,28).toUTCString();
-update_bkmark()
-}
-    
+   
 function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+",1"}
 function rmbk(i){
 parseCookie();
