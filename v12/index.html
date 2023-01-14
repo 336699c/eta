@@ -21,6 +21,7 @@ border-radius: 15px;
 background-color:#fdf;
 }
 </style>
+<script src="/eta/script/cookie.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="/eta/icon/eta_stop.png">
 </head><body style="background-color:d2dcff">
@@ -76,7 +77,7 @@ ck.forEach((data,i)=>{
 }
 update_bkmark(); 
    
-function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+",1"}
+function bkmrk(i){window.location.href="/eta/v12/bystop.html?!"+i+","+Get_Cookie("settings",{"preset":1}).preset}
 function rmbk(i){
 parseCookie();
 ck[i]={"bk":[],"routes":[]};
