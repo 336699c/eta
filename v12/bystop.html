@@ -20,9 +20,25 @@ td:nth-child(3,4) {
 width:10%;
 }
 
-tr:nth-child(even) {
+tr:nth-child(0) {
   background-color: #dddddd;
 }
+
+.p0{background-color:#fff;}
+.p1{background-color:#eff;}
+.p2{background-color:#fef;}
+.p3{background-color:#ffe;}
+.p4{background-color:#eef;}
+.p5{background-color:#efe;}
+.p6{background-color:#fee;}
+.p7{background-color:#fff;}
+.p8{background-color:#cdd;}
+.p9{background-color:#dcd;}
+.p10{background-color:#ddc;}
+.p11{background-color:#ccd;}
+.p12{background-color:#cdc;}
+.p13{background-color:#dcc;}
+.p14{background-color:#ddd;}
 
 </style>
 </head>
@@ -137,6 +153,7 @@ rr.reverse();
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
+row.classList.add("p"+(input.indexOf(e[5])>14?0:input.indexOf(e[5])));
 if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button style="font-size:3vw" onclick="
 httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/`+e[2].trim()+`/`+e[1].trim()+`',function (f){
 window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds=`+e[1].trim()+`--'+JSON.parse(f).data[('`+e[3]+`'=='I'?'orig_en':'dest_en')].replaceAll(' ','_'),'_blank')
