@@ -167,7 +167,7 @@ CODATA = {
 "bound":e[4],
 "service":e[5]
 };
-console.log(CODATA);
+console.log(e);
 
 if(CODATA.co=="KMB"){
 kmb_pend=[CODATA.route,CODATA.bound,CODATA.service];
@@ -184,7 +184,7 @@ nwst_temp={};
 nwst_runtimes=999;
 nwst_t=[];
 nwst_run=0;
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+(CODATA.bound=="o"?"outbound":"inbound"),function (f){nwstdata(f)});
+httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+CODATA.bound,function (f){nwstdata(f)});
 }
 
 }
@@ -277,7 +277,23 @@ httpGet("https://rt.data.gov.hk/v1/transport/citybus-nwfb/eta/"+CODATA.co+"/"+bk
 
 function ETAresult(e,id){
 e=JSON.parse(e).data.filter(q=>q.dir==CODATA.bound[0].toUpperCase());
-document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=e.map(q=>timeparse(q.eta)).join("    ");
+document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=e.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+"</b>":timeparse(q.eta))).join("    ");
+if(CODATA.co!="KMB"){
+var x=false;
+e.forEach(q=>{if(q.rmk_tc=="九巴時段")x=true});
+if(x)
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+CODATA.route+"/"+(CODATA.bound=="outbound"?"inbound":"outbound")+"/1",function (g){
+
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/eta/"+JSON.parse(g).data[bkmark_prop[0]-1].stop+"/"+CODATA.route+"/1",function (e){
+
+document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=
+document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML+
+"<br>九巴 "+JSON.parse(e).data.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+"</b>":timeparse(q.eta))).join("    ");
+});
+
+});
+
+}
 console.log(e);
 }
 
