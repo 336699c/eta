@@ -242,12 +242,18 @@ console.log(bkmark_prop);
 document.getElementById("BkMark_"+e).innerHTML=`
 <div style="padding:10px 10px 10px 10px; background-color:#ddd; border-radius:12px">
 <button onclick="window.scrollTo(0, 0);document.getElementById('B').style.display = 'block'">書簽</button>
+<button onclick="SameStop('`+bkmark_prop[1]+`')">同站路綫</button>
 <pre style="font-size:3vw" id="RouteETA_`+bkmark_prop[0]+`"></pre>
+<iframe style="font-size:3vw;display: none; width:100%; height:300px" id="SAMESTOP_`+bkmark_prop[1]+`"></iframe>
 </div>
 `;
 ETA();
 }
 
+function SameStop(f){
+document.getElementById("SAMESTOP_"+f).style.display="block";
+document.getElementById("SAMESTOP_"+f).src = "https://336699c.github.io/eta/v12/bystop.html?1,"+f
+}
 
 function kmbstop(e){
 if(e){
@@ -277,7 +283,7 @@ httpGet("https://rt.data.gov.hk/v1/transport/citybus-nwfb/eta/"+CODATA.co+"/"+bk
 
 function ETAresult(e,id){
 e=JSON.parse(e).data.filter(q=>q.dir==CODATA.bound[0].toUpperCase());
-document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=e.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+"</b>":timeparse(q.eta))).join("    ");
+document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=e.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+" "+q.rmk_tc+"</b>":timeparse(q.eta)+" "+q.rmk_tc)).join("    ");
 if(CODATA.co!="KMB"){
 var x=false;
 e.forEach(q=>{if(q.rmk_tc=="九巴時段")x=true});
@@ -288,7 +294,7 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/eta/"+JSON.parse(g).data[bk
 
 document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML=
 document.getElementById("RouteETA_"+bkmark_prop[0]).innerHTML+
-"<br>九巴 "+JSON.parse(e).data.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+"</b>":timeparse(q.eta))).join("    ");
+"<br>九巴 "+JSON.parse(e).data.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+" "+q.rmk_tc+"</b>":timeparse(q.eta)+" "+q.rmk_tc)).join("    ");
 });
 
 });
