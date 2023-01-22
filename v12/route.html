@@ -243,6 +243,7 @@ document.getElementById("BkMark_"+e).innerHTML=`
 <div style="padding:10px 10px 10px 10px; background-color:#ddd; border-radius:12px">
 <button onclick="window.scrollTo(0, 0);document.getElementById('B').style.display = 'block'">書簽</button>
 <button onclick="SameStop('`+bkmark_prop[1]+`')">同站路綫</button>
+<button onclick="bkmark_dropdown(`+e+`)">Reload</button>
 <pre style="font-size:3vw" id="RouteETA_`+bkmark_prop[0]+`"></pre>
 <iframe style="font-size:3vw;display: none; width:100%; height:300px" id="SAMESTOP_`+bkmark_prop[1]+`"></iframe>
 </div>
