@@ -163,7 +163,7 @@ httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/`+e[2].trim()+
 window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds=`+e[1].trim()+`--'+JSON.parse(f).data[('`+e[3]+`'=='I'?'orig_en':'dest_en')].replaceAll(' ','_'),'_blank')
 });
 ">官網</button>`;
-let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4]]);
+let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4],e[5]]);
 
 row.insertCell(0).innerHTML=`<button class="bt2" onclick=getbus_eta('`+input4getbuseta+`')>距離</button>`;
 row.insertCell(0).innerHTML =
@@ -242,7 +242,7 @@ var valid = null;
 var data1 = [];
 
 function getbus_eta(input){
-//[rt_number,inbound,co,station_no]
+//[rt_number,inbound,co,station_no,station_id]
 //input = ["10","inbound","ctb","9"];
 input = JSON.parse(input);
 INPUT=input;
@@ -276,7 +276,8 @@ httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2
 function data(e){
 var rr = JSON.parse(e)["data"];
 rr.forEach(f=>{routelist.push(f["stop"]);});
-
+var pointer2 = rr.filter(q=>q.stop==INPUT[4])[0].seq;
+if(pointer2)pointer=pointer2-1;
 httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
 }
 
