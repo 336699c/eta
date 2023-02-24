@@ -1,4 +1,4 @@
-function HTTP_REQUEST(theUrl, callback)
+function httpGet(theUrl, callback)
 {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
