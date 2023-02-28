@@ -345,7 +345,7 @@ buspos = buspos.reverse();
 if(buspos.length>3)buspos.length=3;
 buspos.forEach(tt=>{
 tt=result_kmbeta[tt];
-x.push(INPUT[0] +"（"+timeparse(tt[0])+", "+(parseInt(INPUT[3])-parseInt(tt[2]))+"站） \n位於 "+ tt[2] +". "+rr2[tt[2]]+"  "+tt[1]);
+x.push(INPUT[0] +"（"+timeparse(tt[0])+", "+(parseInt(INPUT[3])-parseInt(tt[2]))+"站） \n位於 "+ tt[2] +". "+kmbstops[rr2[tt[2]].stop]+"  "+tt[1]);
 });
 x[0]="下一班 "+x[0];
 document.getElementById("Next_bus stop").innerHTML=x.join("\n");
