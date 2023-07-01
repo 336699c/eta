@@ -144,7 +144,7 @@ nwst_temp={};
 nwst_runtimes=999;
 nwst_t=[];
 nwst_run=0;
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+CODATA.bound,function (f){nwstdata(f)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+CODATA.bound,function (f){nwstdata(f)});
 }
 
 }
@@ -180,7 +180,7 @@ nwst_runtimes = Object.keys(rr).length;
 for (var i in rr){
 nwst_t.push(rr[i]["stop"]);
 nwst_temp[rr[i]["stop"]] = [rr[i]["seq"]];
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+rr[i]["stop"],function (e){nwst_stopname(e)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/stop/"+rr[i]["stop"],function (e){nwst_stopname(e)});
 }
 }
 
