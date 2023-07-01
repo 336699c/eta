@@ -63,8 +63,8 @@ tr:nth-child(even) {
 <script>
 // WEBSITE for v12
 // SCRIPT v2
-var input = document.URL.split(".html?")[1];
-//var input = "1,001137,EBE826ABDCE44F0C";
+//var input = document.URL.split(".html?")[1];
+var input = "1,001137,EBE826ABDCE44F0C";
 
 var cookie_data={};
 var DisabledRoutes=[];
@@ -160,7 +160,7 @@ e=e.split(/,/g);
 var row = document.getElementById("P").insertRow(0);
 if(Get_Cookie("settings",{}).colored)row.classList.add("p"+(input.indexOf(e[5])>14?0:input.indexOf(e[5])));
 if(e[2]!="KMB")row.insertCell(0).innerHTML=`<button class="bt2" onclick="
-httpGet('https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route/`+e[2].trim()+`/`+e[1].trim()+`',function (f){
+httpGet('https://rt.data.gov.hk/v2/transport/citybus/route/`+e[2].trim()+`/`+e[1].trim()+`',function (f){
 window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds=`+e[1].trim()+`--'+JSON.parse(f).data[('`+e[3]+`'=='I'?'orig_en':'dest_en')].replaceAll(' ','_'),'_blank')
 });
 ">官網</button>`;
@@ -224,9 +224,7 @@ runs=0;result="";runtimes = input.length-1;
 for (var i in input){
 if (i>=1){
 if (input[i].length==6){
-runtimes++;
 httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+input[i]+"?lang=zh-hant",function (e){nwst(e)});
-httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/nwfb/"+input[i]+"?lang=zh-hant",function (e){nwst(e)});
 }else{
 kmbhttpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+input[i],function (e){kmb(e)});
 }
@@ -266,7 +264,7 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+input[0]+"/1",f
 }else{
 if(input[1]=="O")input[1]="outbound";
 if(input[1]=="I")input[1]="inbound";
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/route-stop/"+input[2]+"/"+input[0]+"/"+input[1],function (e){data(e)});
 
 }
 }
@@ -279,7 +277,7 @@ var rr = JSON.parse(e)["data"];
 rr.forEach(f=>{routelist.push(f["stop"]);});
 var pointer2 = rr.filter(q=>q.stop==INPUT[4])[0].seq;
 if(pointer2)pointer=pointer2-1;
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
 }
 
 function grabeta(e){
@@ -292,10 +290,10 @@ valid = [rr[0]["stop"],rr[0]["seq"],rr[0]["route"],rr[0]["dest_tc"],rr[0]["rmk_t
 var x = "*下一班 "+ valid[2] +"（"+timeparse(lasteta)+", "+(parseInt(INPUT[3])-parseInt(valid[1]))+"站）\n位於 #"+ valid[1] +(valid[4]?"\n"+valid[4]:"");
 if(rr[0]["seq"]>(parseInt(INPUT[3])-1))lasteta="9999";
 document.getElementById("Next_bus stop").innerHTML=x;
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/"+INPUT[2]+"/"+routelist[pointer]+"/"+INPUT[0],function (e){grabeta(e)});
 }else{
 if(rr[0]["seq"]){
-httpGet("https://rt.data.gov.hk/v1.1/transport/citybus-nwfb/stop/"+valid[0],function (e){output2(e)});
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/stop/"+valid[0],function (e){output2(e)});
 }
 }
 }
