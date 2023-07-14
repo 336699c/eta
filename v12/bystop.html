@@ -11,10 +11,10 @@ td , th {
 }
 
 td:nth-child(1) {
-width:10%;
+width:8%;
 }
 td:nth-child(2) {
-width:70%;
+width:72%;
 }
 td:nth-child(3,4) {
 width:10%;
@@ -71,7 +71,10 @@ var input = document.URL.split(".html?")[1];
 //var input = "1,001137,EBE826ABDCE44F0C";
 
 var RTLIST={}
-httpGet("https://raw.githubusercontent.com/996633c/test/main/_rtlist.json",q=>{RTLIST=JSON.parse(q)})
+var STOPLIST={}
+var loaded = 0
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{RTLIST=JSON.parse(q);loaded++})
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_stoplist.json",q=>{STOPLIST=JSON.parse(q);loaded++})
 
 var cookie_data={};
 var DisabledRoutes=[];
@@ -88,7 +91,6 @@ DisabledRoutes=ck[i2].routes;
 var runtimes = 0;
 var runs = 0;
 var EnabledRoutes=[];
-var kmbstops={};
 
 function httpGet(theUrl, callback)
 {
@@ -110,9 +112,6 @@ function kmbhttpGet(theUrl, callback)
     xmlHttp.open("GET", theUrl, true); 
     xmlHttp.send(null);
 }
-
-httpGet("https://raw.githubusercontent.com/996633c/eta2/data/kmb_stop.json",q=>{kmbstops=JSON.parse(q);output(result);})
-
 
 function timeparse(e){
 if (e===null)return e;
@@ -155,12 +154,12 @@ output(result);
 
 function getPrice(e){
 try{
-return "$"+RTLIST[e[2]][e[1].trim()].td[Object.keys(RTLIST[e[2]][e[1].trim()].td)[0]].full_FARE[e[3]=="I"?"1":"2"][e[4]][0][0]+"\n"
+return "$"+RTLIST[e[2]][e[1].trim()].fare[e[3]+(e[2]=="KMB"?"1":"")][e[4]][0].padEnd(5," ")+STOPLIST[e[5]]["data"]["name_tc"]+"\n"
+//.td[Object.keys(RTLIST[e[2]][e[1].trim()].td)[0]].full_FARE[][e[4]][0][0]+"\n"
 }catch{return ""}
 }
 
 var rr=null;
-var showcase_mode=0;
 function output(e){
 while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
 rr=e.split("Δ");
@@ -182,8 +181,8 @@ let input4getbuseta = JSON.stringify([e[1].trim(),e[3],e[2].toLowerCase(),e[4],e
 
 row.insertCell(0).innerHTML=`<button class="bt2" onclick=getbus_eta('`+input4getbuseta+`')>距離</button>`;
 row.insertCell(0).innerHTML =
-`<td><pre style="font-size:6vw;display: inline;">`+e[1]+`</pre><pre id="destination_`+i+`" style="font-size:4vw;display: inline;">`+(Object.keys(cookie_data).length>0&&showcase_mode?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"")
-+`</pre><br><pre style="display: inline;font-size:4vw;color:#666">`+getPrice(e)+
+`<td><pre style="font-size:6vw;display: inline;">`+e[1]+`</pre><pre style="font-size:4vw;display: inline;"> 往 `+e[7]+(e[6]?"\n"+e[6]:"")+`</pre>
+<br><pre style="display: inline;font-size:3.5vw;color:#666">`+getPrice(e)+
 `</pre><pre style="display: inline;font-size:5vw;color:#444" id="Timer_`+i+`">`+
 timeparse(e[0])+
 `</pre></td>`;
@@ -211,21 +210,20 @@ document.cookie = `bkmark=`+JSON.stringify(ck)+`; path=/eta/v12/ ; expires=`+new
 console.log(DisabledRoutes)
 }
 
+
 setInterval(function (){
 if(document.visibilityState=="visible"){
 try{
-showcase_mode++;
-showcase_mode=showcase_mode%15;
 rr.forEach((e,i)=>{
 e=e.split(/,/g);
 document.getElementById("Timer_"+i).innerHTML = timeparse(e[0]);
 
-document.getElementById("destination_"+i).innerHTML = (Object.keys(cookie_data).length>0&&showcase_mode>5?cookie_data[e[5]]:" 往 "+e[7])+(e[6]?"\n"+e[6]:"");
-
+if (loaded==2){loaded++; output(result)}
 })
 }catch(error){console.log(error)}
 }else{console.log("off-screen")}
 },1000);
+
 
 setInterval(function (){
 if(document.visibilityState=="visible"){
@@ -358,7 +356,7 @@ buspos = buspos.reverse();
 if(buspos.length>3)buspos.length=3;
 buspos.forEach(tt=>{
 tt=result_kmbeta[tt];
-x.push(INPUT[0] +"（"+timeparse(tt[0])+", "+(parseInt(INPUT[3])-parseInt(tt[2]))+"站） \n位於 "+ tt[2] +". "+kmbstops[rr2[tt[2]].stop]+"  "+tt[1]);
+x.push(INPUT[0] +"（"+timeparse(tt[0])+", "+(parseInt(INPUT[3])-parseInt(tt[2]))+"站） \n位於 "+ tt[2] +". "+STOPLIST[rr2[tt[2]].stop]["data"]["name_tc"]+"  "+tt[1]);
 });
 x[0]="下一班 "+x[0];
 document.getElementById("Next_bus stop").innerHTML=x.join("\n");
