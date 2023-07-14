@@ -154,9 +154,9 @@ output(result);
 
 function getPrice(e){
 try{
-return "$"+RTLIST[e[2]][e[1].trim()].fare[e[3]+(e[2]=="KMB"?"1":"")][e[4]][0].padEnd(5," ")+STOPLIST[e[5]]["data"]["name_tc"]+"\n"
+return "$"+RTLIST[e[2]][e[1].trim()].fare[e[3]+(e[2]=="KMB"?"1":"")][e[4]].map(q=>q[0]).toString().padEnd(9," ")+STOPLIST[e[5]]["data"]["name_tc"]+"\n"
 //.td[Object.keys(RTLIST[e[2]][e[1].trim()].td)[0]].full_FARE[][e[4]][0][0]+"\n"
-}catch{return ""}
+}catch(f){try{return STOPLIST[e[5]]["data"]["name_tc"]+"\n"}catch(g){return ""}}
 }
 
 var rr=null;
