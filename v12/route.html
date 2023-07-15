@@ -44,7 +44,13 @@ border-color: lightgray;
 </html> 
 
 <script>
-//v4
+//v5
+var RTLIST={}
+var STOPLIST={}
+var loaded = 0
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{RTLIST=JSON.parse(q);loaded++})
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_stoplist.json",q=>{STOPLIST=JSON.parse(q);loaded++})
+
 var input = "37";
 var CODATA = {};
 var ROUTES = [];
@@ -113,6 +119,8 @@ function XXX(v) {
 httpGet("https://raw.githubusercontent.com/996633c/eta2/data/routes.json",function (e){ROUTES = JSON.parse(e)});
 
 
+
+
 var kmb_stop={};
 var kmb_pend=[];
  
@@ -132,19 +140,17 @@ console.log(e);
 if(CODATA.co=="KMB"){
 kmb_pend=[CODATA.route,CODATA.bound,CODATA.service];
 
-if(Object.keys(kmb_stop)==0){
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
-}else{
-kmbstop();
-}
-
+//httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop",function (e){kmbstop(e)});
+parsestopName()
 }else{
 
 nwst_temp={};
 nwst_runtimes=999;
 nwst_t=[];
 nwst_run=0;
-httpGet("https://rt.data.gov.hk/v2/transport/citybus/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+CODATA.bound,function (f){nwstdata(f)});
+
+nwstdata(RTLIST[CODATA.co][CODATA.route].var[CODATA.bound=="inbound"?"I":"O"].stops)
+//httpGet("https://rt.data.gov.hk/v2/transport/citybus/route-stop/"+CODATA.co+"/"+CODATA.route+"/"+CODATA.bound,function (f){nwstdata(f)});
 }
 
 }
@@ -174,14 +180,12 @@ var nwst_t=[];
 var nwst_temp={};
 var nwst_run=0;
 
-function nwstdata(e){
-var rr = JSON.parse(e)["data"];
-nwst_runtimes = Object.keys(rr).length;
-for (var i in rr){
-nwst_t.push(rr[i]["stop"]);
-nwst_temp[rr[i]["stop"]] = [rr[i]["seq"]];
-httpGet("https://rt.data.gov.hk/v2/transport/citybus/stop/"+rr[i]["stop"],function (e){nwst_stopname(e)});
-}
+function nwstdata(rr){
+nwst_temp = rr.map((w,i)=>[i+1,w,STOPLIST[w].data.name_tc])
+nwst_t = nwst_temp.map(w=>w)
+output_stopname(nwst_t);
+
+//httpGet("https://rt.data.gov.hk/v2/transport/citybus/stop/"+rr[i]["stop"],function (e){nwst_stopname(e)});
 }
 
 function nwst_stopname(e){
@@ -224,22 +228,19 @@ ETA(bkmark_prop[1],bkmark_prop[0]);
 
 function SameStop(f){
 document.getElementById("SAMESTOP_"+f).style.display="block";
-document.getElementById("SAMESTOP_"+f).src = "https://336699c.github.io/eta/v12/bystop.html?1,"+f
+document.getElementById("SAMESTOP_"+f).src = "https://336699c.github.io/eta/v12/bystop.html?1,"+RemoveSame(STOPLIST[f].alt,f)
 }
 
-function kmbstop(e){
-if(e){
-var rr = JSON.parse(e)["data"];
- rr.forEach(e=>{
-kmb_stop[e.stop] = e.name_tc;
- })
-};
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+kmb_pend[0]+"/"+kmb_pend[1]+"/"+kmb_pend[2],function (e){parsestopName(e)});
+function RemoveSame(f,s){
+f.push(s);
+var tmp = [];
+f.forEach(w=>{if(!tmp.includes(w))tmp.push(w)});
+return tmp;
 }
 
-function parsestopName(e){
-var rr=JSON.parse(e)["data"];
-rr=rr.map(e=>[e.seq,e.stop,kmb_stop[e.stop]]);
+function parsestopName(){
+var rr=RTLIST.KMB[kmb_pend[0]].var[(kmb_pend[1]=="inbound"?"I":"O")+kmb_pend[2]].stops.map((e,i)=>[i+1,e,STOPLIST[e].data.name_tc]);
+//httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+kmb_pend[0]+"/"+kmb_pend[1]+"/"+kmb_pend[2],function (e){parsestopName(e)});
 output_stopname(rr);
 };
 </script>
@@ -263,16 +264,16 @@ if(CODATA.co!="KMB"){
 var x=false;
 fi2.forEach(q=>{if(q.rmk_tc=="九巴時段")x=true});
 if(x)
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+CODATA.route+"/"+(CODATA.bound=="outbound"?"inbound":"outbound")+"/1",function (g){
+//httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-stop/"+CODATA.route+"/"+(CODATA.bound=="outbound"?"inbound":"outbound")+"/1",function (g){
 
-httpGet("https://data.etabus.gov.hk/v1/transport/kmb/eta/"+JSON.parse(g).data[id-1].stop+"/"+CODATA.route+"/1",function (e){
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/eta/"+STOPLIST[fi2[0].stop].alt[0]+"/"+CODATA.route+"/1",function (e){
 
 document.getElementById("RouteETA_"+id).innerHTML=
 document.getElementById("RouteETA_"+id).innerHTML+
 "<br>九巴 "+JSON.parse(e).data.map((q,i)=>(i==0?"<b>"+timeparse(q.eta)+" "+q.rmk_tc+"</b>":timeparse(q.eta)+" "+q.rmk_tc)).join("    ");
 });
 
-});
+//});
 
 }
 console.log(e);
