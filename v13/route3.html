@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
+
+<style>
+div.route{
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  background-color:#b4c4ffff;
+  top: 0;
+  left: 0;
+  right: 0;
+  width:100%;
+  overflow:auto;
+}
+
+td.s1{
+	width:30px;
+}
+td.s2{
+	width:calculate(100%-20px);
+	font-size: 1.7em;
+}
+
+.rss{
+background-color: #ffffffff;
+border: 1px;
+width:100%;
+}
+
+.stopid{
+color: gray;
+font-family:'Helvetica';
+width:6%;
+}
+
+.stopname2{
+font-family:'Helvetica';
+font-size:1.1em;
+text-align: left;
+width:90%;
+}
+
+tbody{
+width:100%
+}
+
+.stoptable{
+width:100%;
+text-align: left;
+}
+
+.stopid2{
+width:30px
+}
+.stopname3{
+width:65%
+}
+.eta{
+width:30%
+}
+.bus{
+width:50px
+}
+
+label.eta_time_0{
+font-size:15px
+}
+label.eta_time_1{
+font-size:10px
+}
+label.eta_time_2{
+font-size:10px
+}
+label.eta_time_3{
+font-size:10px
+}
+label.eta_time_4{
+font-size:10px
+}
+</style>
+
+</head>
+<body>
+<div class="route">
+	<table id="rttable" class="rttable"></table>
+</div>
+
+<div class="stops">
+	<table id="stoptable" class="stoptable"></table>
+</div>
+
+<script>
+function httpGet(theUrl, callback, parm)
+{
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() { 
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+            callback(xmlHttp.responseText,parm);
+    }
+    xmlHttp.open("GET", theUrl, true); 
+    xmlHttp.send(null);
+}
+
+String.prototype.replacement = function(r){return this.replace(/\{\#\d\}/g, m => r.shift() || m);}
+
+var eta_All={};
+eta_All.timeparse = function(e,mode){
+	if (e===null)return e;
+	if (mode)return e.substring(11,16);
+	var d2 = new Date();
+	if (d2.getTime() > new Date(e).getTime()) return "即將抵達 "+(Math.floor((new Date(e).getTime() - d2.getTime() )/1000)+" 秒");
+	if(((new Date(e).getTime() - d2.getTime())/1000)<90)return (Math.floor((new Date(e).getTime() - d2.getTime() )/1000)+" 秒").padEnd(5," ");
+	if(((new Date(e).getTime() - d2.getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - d2.getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - d2.getTime() )%60000/1000)).toString().padStart(2,"0")+" 秒").padEnd(5," ");
+	return (Math.floor((new Date(e).getTime() - d2.getTime() )/60000)+" 分").padEnd(5," ");
+}
+</script>
+
+<script>
+var _rtlist={}
+var _stoplist={};
+var rss2 = 0;
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{_rtlist=JSON.parse(q);rss2++;regen()})
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_stoplist.json",q=>{_stoplist=JSON.parse(q);rss2++;regen()})
+
+var RT_data = [];
+var INPUT = document.location.href.split("?")[1].split("+");
+function regen(){
+	if(rss2!=2)return;
+	INPUT = document.location.href.split("?")[1].split("+");
+	var resultT = document.getElementById("rttable").insertRow();
+	var s2 = resultT.insertCell(0);
+	var s1 = resultT.insertCell(0);
+	RT_data = _rtlist[INPUT[0]][INPUT[1]]["var"][INPUT[2]]
+	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <small>往 </small>{#1}</label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
+	s2.className ="s2"
+	s1.className ="s1"
+	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([INPUT[0]]);
+	
+	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
+	var stoplist = document.getElementById("stoptable");
+	RT_data.stops.forEach((w,i)=>{
+		var s = stoplist.insertRow().insertCell(0);
+		s.className = "rss";
+		s.innerHTML = `<button onclick="click2('{#0}')" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">{#0}</label></td><td class="stopname3"><label class="stopname2"><big>{#1}</big><br>車費: \${#2}<br><small>{#3}</small></label></td></div><td class="bus" id="bus_{#5}"> </td><td class="eta" id="eta_{#5}"></td></table></button><div id="stop_{#5}">`.replacement([
+			w,
+			i+1,
+			_stoplist[w].data.name_tc,
+			Fare[i]=="-1"||Fare[i]=="-2"?"NaN":Fare[i].map(e=>e[0]),
+			w,w,w,w
+		])
+	});
+	if (INPUT[0]=="KMB"){
+		KMB_eta(INPUT[1],INPUT[2][0],INPUT[2][1])
+	}else{
+		CTB_eta(INPUT[1],INPUT[2])
+		}
+}
+
+var ETA_RESULT={};
+var COJOIN_ETA=false;
+function KMB_eta(rt,bound,service,spec){
+	httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+rt+"/"+service,(f,g)=>{
+		var s={};
+		JSON.parse(f).data.filter(w=>w.dir==g[1]).forEach(w=>{
+			if(!s[w.seq])s[w.seq]=[];
+			s[w.seq].push({"eta":w.eta,"seq":w.eta_seq,"rmk":w.rmk_tc,"co":"KMB"})
+		});
+		
+		if(spec){
+		var ns=0;
+		Object.keys(s).forEach(w=>{
+			var stopCTB = _stoplist[_rtlist.KMB[g[0]].var[g[1]+"1"].stops[w-1]].alt.filter(w=>w.length==6)[0];
+			var seqCTB = RT_data.stops.indexOf(stopCTB)+1;
+			if(seqCTB && ns<seqCTB)ns=seqCTB;
+			else {ns++;seqCTB=ns};
+			console.log(seqCTB);
+			if(!ETA_RESULT[seqCTB])ETA_RESULT[seqCTB]=[];
+			ETA_RESULT[seqCTB] = ETA_RESULT[seqCTB].concat(s[w])
+		});
+		apply_eta(ETA_RESULT);
+		}else{
+		ETA_RESULT=s;
+		apply_eta(s);
+		}
+		console.log(s)
+	},[rt,bound,service])
+}
+
+var counter = 0;
+function CTB_eta(rt,bound){	
+	var counter = RT_data.stops.length;
+	ETA_RESULT={};
+	COJOIN_ETA=false;
+	RT_data.stops.forEach(w=>{
+		httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+w+"/"+rt,(f,g)=>{
+			counter--;
+			var s = JSON.parse(f).data;
+			if (s.filter(w=>w.dir==g).length!=0)s=s.filter(w=>w.dir==g);
+			s.forEach(w=>{
+			var seq = RT_data.stops.indexOf(w.stop)+1;
+			if(!ETA_RESULT[seq])ETA_RESULT[seq]=[];
+			ETA_RESULT[seq].push({"eta":w.eta,"seq":seq,"rmk":w.rmk_tc,"co":"CTB"})
+			if(w.rmk_tc=="九巴時段" && !COJOIN_ETA){
+				COJOIN_ETA=true;
+				KMB_eta(rt,bound=="I"?"O":"I",1,true)
+			}
+			});
+			if (counter==0){
+				ETA_RESULT=ETA_RESULT;
+				apply_eta(ETA_RESULT);
+				console.log(ETA_RESULT)
+			}
+		},bound)
+	})
+}
+
+function apply_eta(s){
+	var lastTime = 0;
+	RT_data.stops.forEach((w,i)=>{
+		if(s[i+1]){s[i+1] = s[i+1].filter(w=>w&&w.eta).sort((a,b)=>{return a.eta<b.eta?-1:1})}
+		if (s[i+1] && s[i+1][0] && new Date(s[i+1][0].eta).getTime() < lastTime){
+			document.getElementById("bus_"+w).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([s[i+1][0].co]);
+		}else{
+			document.getElementById("bus_"+w).innerHTML = ""
+		}
+		document.getElementById("eta_"+w).innerHTML = format_eta(s[i+1])
+		if(s[i+1] && s[i+1][0])lastTime = new Date(s[i+1][0].eta).getTime();
+	})
+}
+
+function format_eta(f){
+	if(!f)return ""
+	var n=""
+	f.forEach((w,i)=>{
+		n+=`<label class="eta_time_{#0}"><b>`.replacement([i])+eta_All.timeparse(w.eta,0)+"</b> "+(COJOIN_ETA?"<small>"+w.co+" </small>":"")+w.rmk+`</label><br>`;
+	})
+	return n
+}
+
+function click2(s){console.log(s)}
+
+setInterval(function (){
+if(document.visibilityState=="visible"){
+try{
+apply_eta(ETA_RESULT)
+}catch(error){console.log(error)}
+}else{console.log("off-screen")}
+},1000);
+
+setInterval(function (){
+if(document.visibilityState=="visible"){
+if (INPUT[0]=="KMB"){
+	KMB_eta(INPUT[1],INPUT[2][0],INPUT[2][1])
+}else{
+	CTB_eta(INPUT[1],INPUT[2])
+}
+console.log("RELOAD");
+}else{console.log("off-screen")}
+},45000);
+</script>
+</body>
+</html> 
+
