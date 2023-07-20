@@ -80,6 +80,11 @@ font-size:10px
 label.eta_time_4{
 font-size:10px
 }
+
+iframe{
+width:100%;
+height:400px;
+}
 </style>
 
 </head>
@@ -141,6 +146,7 @@ function regen(){
 	
 	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
 	var stoplist = document.getElementById("stoptable");
+	var ORIG=[];
 	RT_data.stops.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
@@ -148,9 +154,13 @@ function regen(){
 			w,
 			i+1,
 			_stoplist[w].data.name_tc,
-			Fare[i]=="-1"||Fare[i]=="-2"?"NaN":Fare[i].map(e=>e[0]),
-			w,w,w,w
-		])
+			!Fare[i]||Fare[i]=="-1"||Fare[i]=="-2"?"NaN":Fare[i].map(e=>e[0]),
+			w,
+			ORIG.includes(w)?"NaN":w,
+			ORIG.includes(w)?"NaN":w,
+			w
+		]);
+		ORIG.push(w)
 	});
 	if (INPUT[0]=="KMB"){
 		KMB_eta(INPUT[1],INPUT[2][0],INPUT[2][1])
@@ -219,6 +229,7 @@ function CTB_eta(rt,bound){
 
 function apply_eta(s){
 	var lastTime = 0;
+	var applied=[];
 	RT_data.stops.forEach((w,i)=>{
 		if(s[i+1]){s[i+1] = s[i+1].filter(w=>w&&w.eta).sort((a,b)=>{return a.eta<b.eta?-1:1})}
 		if (s[i+1] && s[i+1][0] && new Date(s[i+1][0].eta).getTime() < lastTime){
@@ -226,8 +237,9 @@ function apply_eta(s){
 		}else{
 			document.getElementById("bus_"+w).innerHTML = ""
 		}
-		document.getElementById("eta_"+w).innerHTML = format_eta(s[i+1])
+		if(!applied.includes(w))document.getElementById("eta_"+w).innerHTML = format_eta(s[i+1])
 		if(s[i+1] && s[i+1][0])lastTime = new Date(s[i+1][0].eta).getTime();
+		applied.push(w);
 	})
 }
 
@@ -240,7 +252,17 @@ function format_eta(f){
 	return n
 }
 
-function click2(s){console.log(s)}
+function click2(s){
+document.getElementById("stop_"+s).innerHTML = `<iframe src="{#0}"></iframe>`.replacement(["/eta/v12/bystop.html?1,"+RemoveSame(_stoplist[s].alt,s)])
+}
+
+function RemoveSame(f,s){
+f.push(s);
+var tmp = [];
+f.forEach(w=>{if(!tmp.includes(w))tmp.push(w)});
+return tmp;
+}
+
 
 setInterval(function (){
 if(document.visibilityState=="visible"){
