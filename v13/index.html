@@ -71,9 +71,9 @@ ck.forEach((data,i)=>{
 	.replacement([
 		`window.location.href='`+"/eta/v12/bystop.html?0,"+data.stops.join(",")+"'",
 		i+"",
-		data.stops.map(w=>_stoplist[w].data.name_tc).join("、")
+		data.stops.map(w=>_stoplist[w].data.name_tc).join("、<br>")
 	]);
-	Row.insertCell(0).innerHTML = 
+	Row.insertCell(1).innerHTML = 
     `<button style="width:75px; font-size:4vw;" onclick="rmbk();">X</button>`.replacement([i]);
 	
     });
