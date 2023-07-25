@@ -25,7 +25,7 @@ eta_All.timeparse = function(e,mode){
 function Get_Cookie(value,noresult){
 var ck = document.cookie.split("; ");
 ck = ck.filter(e=>e.split("=")[0]==value);
-if(ck.length>0){ck = JSON.parse(ck[0].split("=")[1]);}else{ck = noresult;}
+if(ck.length>0){ck = JSON.parse(ck[0].substring(ck[0].indexOf("=")+1));}else{ck = noresult;}
 return ck;
 }
 function Save_Cookie(key,value,path){
@@ -35,13 +35,14 @@ document.cookie = key+`=`+JSON.stringify(value)+`; path=`+path+` ; expires=`+new
 function parseCookie(value){
 	var cookie = Get_Cookie(value,null);
 	if (!cookie)return;
-	cookie = JSON.parse(cookie).map(w=>w.stops = window.atob(JSON.parse(w.stops)));
+	cookie = cookie.map(w=>w.stops = JSON.parse(window.atob(w.stops)));
 	return cookie
 }
 
 function SaveCookie(value,key){
+	value.map(w=>w.stops = window.btoa(JSON.stringify(w.stops)));
 document.cookie = `{#0}={#1}; path=/eta/v13/ ; expires ='Wed, 27 Mar 2047 16:00:00 GMT'`.replacement([
 	key,
-	JSON.stringify(value.map(w=>w.stops = window.btoa(JSON.stringify(w.stops))))
+	JSON.stringify(value)
 ])
 }
