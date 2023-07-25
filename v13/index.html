@@ -20,6 +20,12 @@ height:50px;
 border-radius: 15px;
 background-color:#fdf;
 }
+.stop_button{
+text-align: left;
+width:100%; 
+border:1px; 
+background-color:#0000"
+}
 </style>
 <script src="/eta/v13/script/main.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -63,8 +69,13 @@ if(!ck)return;
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 ck.forEach((data,i)=>{
     var Row = document.getElementById("B").insertRow(i);
+	Row.insertCell(0).innerHTML = 
+    `<button style="width:75px; font-size:4vw;" onclick="rmbk({#1});">X</button>`.replacement([i+""]);
+	
+
+	
     Row.insertCell(0).innerHTML = 
-	`<button style="text-align: left; width:100%; border:1px" onclick="{#0}">
+	`<button class="stop_button" onclick="{#0}">
 	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
 	<label style="display: inline;font-size:10px;"> {#2} </label>
 	</button>`
@@ -73,16 +84,13 @@ ck.forEach((data,i)=>{
 		i+"",
 		data.stops.map(w=>_stoplist[w].data.name_tc).join("、<br>")
 	]);
-	Row.insertCell(1).innerHTML = 
-    `<button style="width:75px; font-size:4vw;" onclick="rmbk();">X</button>`.replacement([i]);
-	
-    });
+    });	
 }
 
    
 function rmbk(i){
 ck = parseCookie("bookmark");
-ck[i]={"stops":[],"routes":[],"preference":{"time":0,"routes":[]}};
+ck[i]={"stops":[],"preference":{"time":0,"routes":[]}};
 SaveCookie(ck,"bookmark");
 update_bkmark()
 }
