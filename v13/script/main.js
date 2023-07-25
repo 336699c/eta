@@ -31,3 +31,17 @@ return ck;
 function Save_Cookie(key,value,path){
 document.cookie = key+`=`+JSON.stringify(value)+`; path=`+path+` ; expires=`+new Date(2047,2,28).toUTCString();
 }
+
+function parseCookie(value){
+	var cookie = Get_Cookie(value,null);
+	if (!cookie)return;
+	cookie = JSON.parse(cookie).map(w=>w.stops = window.atob(JSON.parse(w.stops)));
+	return cookie
+}
+
+function SaveCookie(value,key){
+document.cookie = `{#0}={#1}; path=/eta/v13/ ; expires ='Wed, 27 Mar 2047 16:00:00 GMT'`.replacement([
+	key,
+	JSON.stringify(value.map(w=>w.stops = window.btoa(JSON.stringify(w.stops))))
+])
+}
