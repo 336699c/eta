@@ -147,38 +147,43 @@ function overlay_off() {
 }
 
 function update_bkmark(xid){
-//var ck = [{"stops":["001136","001137"]}]
-
 var ck = parseCookie("bookmark");
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 ck.forEach((data,i)=>{
     var Row = document.getElementById("B").insertRow(i);
     Row.insertCell(0).innerHTML = 
-	`<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},{#1})">
+	`<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},'{#1}')">
 	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
 	<label style="display: inline;font-size:10px;"> {#2} </label>
 	</button>`
 	.replacement([
-		i,xid,
+		i+"",xid+"",
 		i+"",
-		data.stops.map(w=>_stoplist[w].data.name_tc).join("、")
+		data.stops.map(w=>_stoplist[w].data.name_tc).join("、<br>")
 	])
     });
 	
 document.getElementById("B").insertRow(ck.length).innerHTML = 
-    `<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},{#1})">
+    `<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},'{#1}')">
 	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
 	</button>`.replacement([
-		i,xid,
+		ck.length,xid,
 		ck.length+" [新]"
 	])
 }
 
 function addBookMark(id,value){
 	var cookie2 = parseCookie("bookmark");
+	if(cookie2[id] && cookie2[id].stops.includes(value)){
+		alert("書簽#{#1} 已包含 {#0}，未能設置書簽".replacement([id,_stoplist[value].data.name_tc]));
+		return;
+	}
+		
 	if(cookie2[id]) cookie2[id].stops.push(value);
-	else cookie2[id].stops=[value];
-	SaveCookie(cookie2);
+	else cookie2[id] = {"stops":[value],"preference":{"time":0,"routes":[]}};
+	SaveCookie(cookie2,"bookmark");
+	overlay_off();
+	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
 }
 </script>
 
