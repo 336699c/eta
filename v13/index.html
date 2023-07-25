@@ -21,7 +21,7 @@ border-radius: 15px;
 background-color:#fdf;
 }
 </style>
-<script src="https://raw.githubusercontent.com/336699c/eta/main/v13/script/main.js"></script>
+<script src="/eta/v13/script/main.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
 </head><body style="background-color:d2dcff">
@@ -52,36 +52,38 @@ background-color:#fdf;
 </body>
 
 <script>
+var _stoplist={};
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_stoplist.json",q=>{_stoplist=JSON.parse(q);update_bkmark()})
+
 var ck=[];
 
 function update_bkmark(){
-ck = Get_Cookie("bookmark",[]);
+var ck = parseCookie("bookmark");
+if(!ck)return;
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 ck.forEach((data,i)=>{
     var Row = document.getElementById("B").insertRow(i);
-	data.stops = JSON.parse(window.atob(data.stops));
     Row.insertCell(0).innerHTML = 
-	`<button style="text-align: left; width:100%; background:#0000; border:0px" onclick="{#0}">
-	<pre style="display: inline;font-size:4vw;">書簽 {#1}</pre>
-	<label style="display: inline;font-size:3vw;"> {#2} </label>
+	`<button style="text-align: left; width:100%; border:1px" onclick="{#0}">
+	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
+	<label style="display: inline;font-size:10px;"> {#2} </label>
 	</button>`
 	.replacement([
-		'window.location.href="/eta/v12/bystop.html?0,'+data.stops.join(",")
-		i,
-		data.bk.map(g=>g[2]).join(" "),
-		
-	])
-	
+		`window.location.href='`+"/eta/v12/bystop.html?0,"+data.stops.join(",")+"'",
+		i+"",
+		data.stops.map(w=>_stoplist[w].data.name_tc).join("、")
+	]);
 	Row.insertCell(0).innerHTML = 
-    `<button style="width:75px; font-size:4vw;" onclick="rmbk({#0});">X</button>`.replacement([i]);
+    `<button style="width:75px; font-size:4vw;" onclick="rmbk();">X</button>`.replacement([i]);
+	
     });
 }
-update_bkmark(); 
+
    
 function rmbk(i){
-parseCookie();
-ck[i]={"stops":'e30=',"routes":[],"preference":{"time":0,"routes":[]}};
-document.cookie = `bookmark=`+JSON.stringify(ck)+`; path=/eta/v13/ ; expires=`+new Date(2047,2,28).toUTCString();
+ck = parseCookie("bookmark");
+ck[i]={"stops":[],"routes":[],"preference":{"time":0,"routes":[]}};
+SaveCookie(ck,"bookmark");
 update_bkmark()
 }
 </script>
