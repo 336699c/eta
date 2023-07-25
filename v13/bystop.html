@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+<script src="/eta/v13/script/main.js"></script>
+
+<link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
+
+<style>
+table.eta_list td:nth-child(1){
+width:8%;
+min-height:75px
+}
+
+table.eta_list td:nth-child(2){
+padding-left:5px;
+width:75%
+}
+
+table.eta_list td:nth-child(3,4){
+width:6%;
+min-height:40px
+}
+
+tr:nth-child(even) {
+  background-color: #ddd;
+}
+
+.p0{background-color:#fff !important}
+.p1{background-color:#eff !important}
+.p2{background-color:#fef !important}
+.p3{background-color:#ffe !important}
+.p4{background-color:#eef !important}
+.p5{background-color:#efe !important}
+.p6{background-color:#fee !important}
+.p7{background-color:#fff !important}
+.p8{background-color:#cdd !important}
+.p9{background-color:#dcd !important}
+.p10{background-color:#ddc !important}
+.p11{background-color:#ccd !important}
+.p12{background-color:#cdc !important}
+.p13{background-color:#dcc !important}
+.p14{background-color:#ddd !important}
+
+.bt2{
+  font-size:2vw;
+  width:100%;
+  min-height:40px;
+}
+
+label{
+font-family: 'system-ui'
+}
+</style>
+<script src="/eta/script/cookie.js"></script>
+</head>
+<body>
+
+
+<pre id="Next_bus stop" style="font-size:4vw;"></pre>
+<table id="P" class="eta_list"><tbody></tbody></table>
+
+<div id="selection"></div>
+
+</body>
+</html> 
+
+
+<script>
+//v13
+//INIT
+var input = {};
+document.URL.split(".html?")[1].split("&").map(w=>input[w.substring(0,w.indexOf("="))] = w.substring(w.indexOf("=")+1).split(","))
+
+var _rtlist={}
+var _stoplist={}
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{_rtlist=JSON.parse(q);})
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_stoplist.json",q=>{_stoplist=JSON.parse(q);main()})
+
+function getByStopETA(f,func2,parm2){
+if (f.length==6){
+httpGet("https://rt.data.gov.hk/v1/transport/batch/stop-eta/ctb/"+f+"?lang=zh-hant",func2,parm2);
+}else{
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+f,func2,parm2);
+}
+}
+
+var RetrievedETA = [];
+function main(){
+RetrievedETA=[];
+input.stops.forEach(w=>{
+	getByStopETA(w,(g,j)=>{
+		JSON.parse(g).data.forEach(h=>{
+			if(!input.nort || !input.nort.includes(h.route))
+			if(!h.service_type || h.service_type==1)
+				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
+		});
+		output()
+	},w)
+})
+}
+
+function output(){
+while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
+
+RetrievedETA = RetrievedETA.filter(w=>w.eta).sort((a,b)=>{return a.eta<b.eta?1:-1});
+console.log(RetrievedETA);
+RetrievedETA.forEach((e,i)=>{
+
+var row = document.getElementById("P").insertRow(0);
+if(input.color)row.classList.add("p"+(input.stops.indexOf(e.stop)+1));
+
+if(e.co=="CTB")row.insertCell(0).innerHTML=`<button class="bt2" onclick="
+window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds={#0}--{#1}','_blank')
+">官網</button>`.replacement([
+	e.route,
+	_rtlist.CTB[e.route].var[e.dir].dest_en.replaceAll(' ','_')
+]);
+
+row.insertCell(0).innerHTML=`<button class="bt2" onclick=getbus_eta('{#0}')>距離</button>`.replacement([JSON.stringify(e)]);
+
+row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}</pre><pre style="font-size:4vw;display: inline;padding:15px 0 0 5px"> {#1}</pre>
+<br><pre style="display: inline;font-size:3.5vw;color:#666">{#2}</pre><br><pre style="display: inline;font-size:5vw;color:#444" id="Timer_{#3}">{#4}</pre>`.replacement([
+	e.route.padEnd(5," "),
+	e.dest,
+	(e.rmk?e.rmk+"\n":"")+getPrice(e).padEnd(9," ")+e.seq+". "+_stoplist[e.stop].data.name_tc,
+	i+"",	
+	eta_All.timeparse(e.eta)
+])
+
+
+row.insertCell(0).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:100%; min-width:40px">`.replacement([e.co]);
+})
+}
+
+function getPrice(e){
+try{
+return "$"+_rtlist[e.co][e.route].fare[e.dir][_rtlist[e.co][e.route].var[e.dir].stops.indexOf(e.stop)].map(q=>q[0]).toString()
+}catch(f){return ""}
+}
+
+setInterval(function (){
+if(document.visibilityState=="visible"){
+main();console.log("RELOAD");
+}else{console.log("off-screen")}
+},45000);
+
+setInterval(function (){
+if(document.visibilityState=="visible"){
+try{
+	RetrievedETA.forEach((e,i)=>{
+	document.getElementById("Timer_"+i).innerHTML = eta_All.timeparse(e.eta)
+	})
+}catch(error){console.log(error)}
+}
+},1000);
+
+</script>
+
+<script>
+
+function getbus_eta(f){
+f = JSON.parse(f);
+if(f.co=="KMB"){
+httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+f.route+"/1",(g,parm)=>{
+	var eta = JSON.parse(g).data.filter(w=>w.dir==parm[0][0] && w.eta_seq==1 && w.seq<=parm[2]);
+	eta= eta.filter((h,k)=>(k-1)>0 && h.eta<eta[k-1].eta);
+	eta = eta.map(w=>w.seq+". "+_stoplist[_rtlist.KMB[w.route].var[w.dir+"1"].stops[w.seq]].data.name_tc+" ("+eta_All.timeparse(w.eta)+", "+(parm[2]-w.seq)+"站)")
+	document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於<br>"+eta.join("<br>");
+},[f.dir,f.route,f.seq]);
+}else{
+CTB_lastBus="9999";
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[f.route].var[f.dir].stops[_rtlist.CTB[f.route].var[f.dir].stops.indexOf(f.stop)-1]+"/"+f.route,CTB_nextBus,[f.dir,f.route,f.seq])
+}
+}
+
+var CTB_lastBus = "9999";
+function CTB_nextBus(g,parm){
+	var eta = JSON.parse(g).data[0];
+	
+	if(CTB_lastBus>eta.eta){
+	CTB_lastBus=eta.eta;
+	httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[eta.route].var[eta.dir].stops[_rtlist.CTB[eta.route].var[eta.dir].stops.indexOf(eta.stop)-1]+"/"+eta.route,CTB_nextBus,parm);
+	document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta)+", "+(parm[2]-eta.seq)+"站)";
+	}else{
+	return;
+	}
+}
+</script>
