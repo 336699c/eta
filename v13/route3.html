@@ -78,9 +78,23 @@ iframe{
 width:100%;
 height:400px;
 }
+
+#overlay {
+  position: fixed; /* Sit on top of the page content */
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="/eta/v13/script/main.js"></script>
 
 </head>
 <body>
@@ -114,30 +128,57 @@ height:400px;
 
 </div>
 
-
+<div id="overlay">
+	<button onclick="overlay_off()" style="float: right; width:50px; height:50px; background-color:#aaf; font-size:30px"> X </button>
+	<br>
+	<div>
+	<table id="B" width=100%></table>
+	</div>
+</div>
 <script>
-function httpGet(theUrl, callback, parm)
-{
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            callback(xmlHttp.responseText,parm);
-    }
-    xmlHttp.open("GET", theUrl, true); 
-    xmlHttp.send(null);
+//overlay
+function overlay_on(xid) {
+  update_bkmark(xid);
+  document.getElementById("overlay").style.display = "block";
 }
 
-String.prototype.replacement = function(r){return this.replace(/\{\#\d\}/g, m => r.shift() || m);}
+function overlay_off() {
+  document.getElementById("overlay").style.display = "none";
+}
 
-var eta_All={};
-eta_All.timeparse = function(e,mode){
-	if (e===null)return e;
-	if (mode)return e.substring(11,16);
-	var d2 = new Date();
-	if (d2.getTime() > new Date(e).getTime()) return "即將抵達 "+(Math.floor((new Date(e).getTime() - d2.getTime() )/1000)+" 秒");
-	if(((new Date(e).getTime() - d2.getTime())/1000)<90)return (Math.floor((new Date(e).getTime() - d2.getTime() )/1000)+" 秒").padEnd(5," ");
-	if(((new Date(e).getTime() - d2.getTime())/1000)<480)return ((Math.floor((new Date(e).getTime() - d2.getTime() )/60000))+" 分 "+ (Math.floor((new Date(e).getTime() - d2.getTime() )%60000/1000)).toString().padStart(2,"0")+" 秒").padEnd(5," ");
-	return (Math.floor((new Date(e).getTime() - d2.getTime() )/60000)+" 分").padEnd(5," ");
+function update_bkmark(xid){
+//var ck = [{"stops":["001136","001137"]}]
+
+var ck = parseCookie("bookmark");
+while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
+ck.forEach((data,i)=>{
+    var Row = document.getElementById("B").insertRow(i);
+    Row.insertCell(0).innerHTML = 
+	`<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},{#1})">
+	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
+	<label style="display: inline;font-size:10px;"> {#2} </label>
+	</button>`
+	.replacement([
+		i,xid,
+		i+"",
+		data.stops.map(w=>_stoplist[w].data.name_tc).join("、")
+	])
+    });
+	
+document.getElementById("B").insertRow(ck.length).innerHTML = 
+    `<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},{#1})">
+	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
+	</button>`.replacement([
+		i,xid,
+		ck.length+" [新]"
+	])
+}
+
+function addBookMark(id,value){
+	var cookie2 = parseCookie("bookmark");
+	if(cookie2[id]) cookie2[id].stops.push(value);
+	else cookie2[id].stops=[value];
+	SaveCookie(cookie2);
 }
 </script>
 
@@ -289,7 +330,7 @@ function format_eta(f){
 
 //MODE 1 
 function click2(s){
-document.getElementById("stop_"+s).innerHTML = `<table><td><button>書簽</button></td><td><button onclick="updateNowStop('{#1}')">轉車易</button></td></table><br><iframe src="{#0}"></iframe>`.replacement([s,"/eta/v12/bystop.html?1,"+RemoveSame(_stoplist[s].alt,s)])
+document.getElementById("stop_"+s).innerHTML = `<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td><button onclick="updateNowStop('{#1}')">轉車易</button></td></table><br><iframe src="{#0}"></iframe>`.replacement([s,s,"/eta/v12/bystop.html?1,"+RemoveSame(_stoplist[s].alt,s)])
 }
 
 function RemoveSame(f,s){
