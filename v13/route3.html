@@ -182,7 +182,7 @@ function addBookMark(id,value){
 	value2.forEach(w=>{if(!repeat2.includes(w))repeat2.push(w)});
 	
 	console.log(repeat2)
-	if(cookie2[id]) cookie2[id] = cookie2[id].stops.concat(repeat2);
+	if(cookie2[id]) cookie2[id].stops = cookie2[id].stops.concat(repeat2);
 	else cookie2[id] = {"stops":repeat2,"preference":{"time":0,"routes":[]}};
 	SaveCookie(cookie2,"bookmark");
 	overlay_off();
