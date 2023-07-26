@@ -80,7 +80,7 @@ ck.forEach((data,i)=>{
 	<label style="display: inline;font-size:10px;"> {#2} </label>
 	</button>`
 	.replacement([
-		`window.location.href='`+"/eta/v13/bystop.html?color=1&stops="+data.stops.join(",")+"&bkmark="+i+"&nort="+data.nort.join(",")+"'",
+		`window.location.href='`+"/eta/v13/bystop.html?color=1&stops="+data.stops.join(",")+"&bkmark="+i+"&nort="+(data.nort?data.nort.join(","):"")+"'",
 		i+"",
 		data.stops.map(w=>_stoplist[w].data.name_tc).join("、<br>")
 	]);
