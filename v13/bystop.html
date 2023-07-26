@@ -129,7 +129,9 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 ])
 
 
-row.insertCell(0).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:100%; min-width:40px">`.replacement([e.co]);
+row.insertCell(0).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:100%; min-width:40px">`.replacement([
+	((e.co=="CTB"&& /^[A,NA]/.test(e.route) ) ? "ctb_airport" : e.co)
+]);
 })
 }
 
@@ -178,10 +180,15 @@ var CTB_lastBus = "9999";
 function CTB_nextBus(g,parm){
 	var eta = JSON.parse(g).data[0];
 	
-	if(CTB_lastBus>eta.eta){
-	CTB_lastBus=eta.eta;
+	if(eta.rmk=="九巴時段")return;
+	if(!eta.eta || CTB_lastBus>eta.eta){
+		if(eta.eta){
+			CTB_lastBus=eta.eta;
+			document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta)+", "+(parm[2]-eta.seq)+"站)";	
+		}
+		if(eta.seq==2)return;
 	httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[eta.route].var[eta.dir].stops[_rtlist.CTB[eta.route].var[eta.dir].stops.indexOf(eta.stop)-1]+"/"+eta.route,CTB_nextBus,parm);
-	document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta)+", "+(parm[2]-eta.seq)+"站)";
+	
 	}else{
 	return;
 	}

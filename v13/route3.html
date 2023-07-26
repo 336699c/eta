@@ -53,7 +53,7 @@ text-align: left;
 }
 
 .stopid2{
-width:30px
+width:20px
 }
 .stopname3{
 width:65%
@@ -69,8 +69,8 @@ label.eta_time_1{
 font-size:15px;
 color:black;
 }
-label.eta_time_2,label.eta_time_3,label.eta_time_4{
-font-size:10px;
+label.eta_time_2,label.eta_time_3,label.eta_time_4,label.eta_time_5,label.eta_time_6,label.eta_time_7{
+font-size:11px;
 color:gray;
 }
 
@@ -335,7 +335,7 @@ function format_eta(f){
 
 //MODE 1 
 function click2(s){
-document.getElementById("stop_"+s).innerHTML = `<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td><button onclick="updateNowStop('{#1}')">轉車易</button></td></table><br><iframe src="{#0}"></iframe>`.replacement([s,s,"/eta/v12/bystop.html?1,"+RemoveSame(_stoplist[s].alt,s)])
+document.getElementById("stop_"+s).innerHTML = `<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td><button onclick="updateNowStop('{#1}')">轉車易</button></td></table><br><iframe src="{#0}"></iframe>`.replacement([s,s,"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)])
 }
 
 function RemoveSame(f,s){
