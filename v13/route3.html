@@ -162,7 +162,7 @@ document.getElementById("B").insertRow(ck.length).innerHTML =
     `<button style="text-align: left; width:100%; border:1px" onclick="addBookMark({#0},'{#1}')">
 	<pre style="display: inline;font-size:20px;">書簽{#1} </pre>
 	</button>`.replacement([
-		ck.length,xid,
+		ck.length+"",xid,
 		ck.length+" [新]"
 	]);
 	
@@ -177,9 +177,13 @@ function addBookMark(id,value){
 	}
 	
 	var value2 = _stoplist[value].alt.concat([value]);
-	value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
-	if(cookie2[id]) cookie2[id].stops.concat(value2);
-	else cookie2[id] = {"stops":value2,"preference":{"time":0,"routes":[]}};
+	if(cookie2[id])value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
+	var repeat2=[];
+	value2.forEach(w=>{if(!repeat2.includes(w))repeat2.push(w)});
+	
+	console.log(repeat2)
+	if(cookie2[id]) cookie2[id] = cookie2[id].stops.concat(repeat2);
+	else cookie2[id] = {"stops":repeat2,"preference":{"time":0,"routes":[]}};
 	SaveCookie(cookie2,"bookmark");
 	overlay_off();
 	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
