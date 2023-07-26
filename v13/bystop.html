@@ -65,7 +65,7 @@ font-family: 'system-ui'
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 </style>
-<script src="/eta/script/cookie.js"></script>
+<script src="/eta/v13/script/main.js"></script>
 </head>
 <body>
 
@@ -92,7 +92,11 @@ font-family: 'system-ui'
 //overlay
 function overlay_off() {
   document.getElementById("overlay").style.display = "none";
-  var s="";
+  var s="";	
+  var ck = parseCookie("bookmark");
+  ck[input.bkmark].stops = input.stops;
+  ck[input.bkmark].preference = {"time":input.time,"nort":input.nort,"color":input.color}
+  SaveCookie(ck,"bookmark");
   window.location.href = "/eta/v13/bystop.html?"+Object.keys(input).map(w=>w=w+"="+ (input[w] instanceof Array ? input[w].join(",") : input[w])).join("&")
   
 }
@@ -113,25 +117,6 @@ routes.sort().forEach((data,i)=>{
 	
 document.getElementById("overlay").style.display = "block";
 }
-
-function addBookMark(id,value){
-	var cookie2 = parseCookie("bookmark");
-	if(cookie2[id] && cookie2[id].stops.includes(value)){
-		alert("書簽#{#1} 已包含 {#0}，未能設置書簽".replacement([id,_stoplist[value].data.name_tc]));
-		return;
-	}
-	
-	var value2 = _stoplist[value].alt.concat([value]);
-	value2.forEach(w=>{
-		value2 = value2.concat(_stoplist[w].alt)
-	})
-	value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
-	if(cookie2[id]) cookie2[id].stops.concat(value2);
-	else cookie2[id] = {"stops":value2,"preference":{"time":0,"routes":[]}};
-	SaveCookie(cookie2,"bookmark");
-	overlay_off();
-	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
-}
 </script>
 
 <script>
@@ -140,7 +125,7 @@ function addBookMark(id,value){
 var input = {};
 document.URL.split(".html?")[1].split("&").map(w=>input[w.substring(0,w.indexOf("="))] = w.substring(w.indexOf("=")+1).split(","))
 
-input.time=parseInt(input.time[0]);
+input.time= (input.time? parseInt(input.time[0]) : 0);
 
 var _rtlist={}
 var _stoplist={}
