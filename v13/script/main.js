@@ -34,7 +34,7 @@ document.cookie = key+`=`+JSON.stringify(value)+`; path=`+path+` ; expires=`+new
 
 function parseCookie(value){
 	var cookie = Get_Cookie(value,null);
-	if (!cookie)return;
+	if (!cookie)return [];
 	cookie.map(w=>w.stops = JSON.parse(window.atob(w.stops)));
 	return cookie
 }

@@ -177,9 +177,6 @@ function addBookMark(id,value){
 	}
 	
 	var value2 = _stoplist[value].alt.concat([value]);
-	value2.forEach(w=>{
-		value2 = value2.concat(_stoplist[w].alt)
-	})
 	value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
 	if(cookie2[id]) cookie2[id].stops.concat(value2);
 	else cookie2[id] = {"stops":value2,"preference":{"time":0,"routes":[]}};

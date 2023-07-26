@@ -22,7 +22,7 @@ width:6%;
 min-height:40px
 }
 
-tr:nth-child(even) {
+table.eta_list tr:nth-child(even) {
   background-color: #ddd;
 }
 
@@ -51,6 +51,19 @@ tr:nth-child(even) {
 label{
 font-family: 'system-ui'
 }
+
+#overlay {
+  position: fixed; /* Sit on top of the page content */
+  display: none; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+}
 </style>
 <script src="/eta/script/cookie.js"></script>
 </head>
@@ -60,11 +73,59 @@ font-family: 'system-ui'
 <pre id="Next_bus stop" style="font-size:4vw;"></pre>
 <table id="P" class="eta_list"><tbody></tbody></table>
 
-<div id="selection"></div>
+<button style="width:200px;height:50px;font-size:4vw;" onclick="overlay_on()">設置</button>
+
+<div id="overlay">
+	<button onclick="overlay_off()" style="float: right; width:50px; height:50px; background-color:#aaf; font-size:30px"> X </button>
+	<br>
+	<div>
+	<table id="B" width=100% style="background-color:#aaad"></table>
+	</div>
+</div>
 
 </body>
 </html> 
 
+<script>
+//overlay
+function overlay_off() {
+  document.getElementById("overlay").style.display = "none";
+}
+
+function overlay_on(){
+while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
+var table = 
+routes.forEach((data,i)=>{
+	document.getElementById("B").insertRow(i).insertCell(0).innerHTML = 
+	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label>{#2}</label><br>`.replacement([
+		data,
+		(input.nort&&input.nort.includes(data))?"":"checked",
+		data
+	])
+});
+	
+document.getElementById("overlay").style.display = "block";
+}
+
+function addBookMark(id,value){
+	var cookie2 = parseCookie("bookmark");
+	if(cookie2[id] && cookie2[id].stops.includes(value)){
+		alert("書簽#{#1} 已包含 {#0}，未能設置書簽".replacement([id,_stoplist[value].data.name_tc]));
+		return;
+	}
+	
+	var value2 = _stoplist[value].alt.concat([value]);
+	value2.forEach(w=>{
+		value2 = value2.concat(_stoplist[w].alt)
+	})
+	value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
+	if(cookie2[id]) cookie2[id].stops.concat(value2);
+	else cookie2[id] = {"stops":value2,"preference":{"time":0,"routes":[]}};
+	SaveCookie(cookie2,"bookmark");
+	overlay_off();
+	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
+}
+</script>
 
 <script>
 //v13
@@ -86,11 +147,13 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+f,func2,parm2);
 }
 
 var RetrievedETA = [];
+var routes=[];
 function main(){
 RetrievedETA=[];
 input.stops.forEach(w=>{
 	getByStopETA(w,(g,j)=>{
 		JSON.parse(g).data.forEach(h=>{
+			if(!routes.includes(h.route))routes.push(h.route);
 			if(!input.nort || !input.nort.includes(h.route))
 			if(!h.service_type || h.service_type==1)
 				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
