@@ -137,16 +137,11 @@ height:400px;
 </div>
 <script>
 //overlay
-function overlay_on(xid) {
-  update_bkmark(xid);
-  document.getElementById("overlay").style.display = "block";
-}
-
 function overlay_off() {
   document.getElementById("overlay").style.display = "none";
 }
 
-function update_bkmark(xid){
+function overlay_on(xid){
 var ck = parseCookie("bookmark");
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 ck.forEach((data,i)=>{
@@ -169,7 +164,9 @@ document.getElementById("B").insertRow(ck.length).innerHTML =
 	</button>`.replacement([
 		ck.length,xid,
 		ck.length+" [新]"
-	])
+	]);
+	
+document.getElementById("overlay").style.display = "block";
 }
 
 function addBookMark(id,value){
@@ -178,9 +175,14 @@ function addBookMark(id,value){
 		alert("書簽#{#1} 已包含 {#0}，未能設置書簽".replacement([id,_stoplist[value].data.name_tc]));
 		return;
 	}
-		
-	if(cookie2[id]) cookie2[id].stops.push(value);
-	else cookie2[id] = {"stops":[value],"preference":{"time":0,"routes":[]}};
+	
+	var value2 = _stoplist[value].alt.concat([value]);
+	value2.forEach(w=>{
+		value2 = value2.concat(_stoplist[w].alt)
+	})
+	value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
+	if(cookie2[id]) cookie2[id].stops.concat(value2);
+	else cookie2[id] = {"stops":value2,"preference":{"time":0,"routes":[]}};
 	SaveCookie(cookie2,"bookmark");
 	overlay_off();
 	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
