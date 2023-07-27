@@ -88,8 +88,9 @@ height:400px;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  background-color: rgba(0,0,0,0.8); /* Black background with opacity */
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  overflow-y:scroll;
 }
 </style>
 
@@ -110,16 +111,23 @@ height:400px;
 </div>
 <div class="CHANGEBUS" id="CHANGEBUS">
 	<div class="chg_details">
-		<button onclick="CHANGE_SCREEN(1)" style="float: right; width:40px; height:40px; background-color:#aaf; font-size:30px"> X </button>
-		<label>目的地: </label>
+		<button onclick="CHANGE_SCREEN(1)" style="float: right; width:40px; height:40px; background-color:#faa; font-size:20px; border-radius: 50px"> X </button>
 		<table>
+		<tr><label>目的地: </label>
+		</tr>
 		<tr>
 		<td><input id="dest"></input></td>
-		<td><button onclick="search('dest')">搜尋</button></td>
-		<td><select id="dest_select"></select></td>
+		<td><button onclick="search('dest')">搜尋巴士站</button></td>
 		</tr>
+		<td><select id="dest_select"></select></td>
+		<td><button onclick="RtSearch()">搜尋路綫!</button></td>
+		</tr>
+		<tr style="padding-top:10px">
+		<td><button onclick="Filter()">Filter</button></td>
+		</tr>
+		
 		</table>
-<button onclick="RtSearch()">搜尋路綫!</button>
+
 	</div>
 
 	<div class="chg_pend">
@@ -129,7 +137,7 @@ height:400px;
 </div>
 
 <div id="overlay">
-	<button onclick="overlay_off()" style="float: right; width:50px; height:50px; background-color:#aaf; font-size:30px"> X </button>
+	<button onclick="overlay_off()" style="float: right; width:40px; height:40px; background-color:#faa; font-size:20px; border-radius: 50px"> X </button>
 	<br>
 	<div>
 	<table id="B" width=100%></table>
@@ -187,6 +195,33 @@ function addBookMark(id,value){
 	SaveCookie(cookie2,"bookmark");
 	overlay_off();
 	alert("已新增 {#0} 至書簽#{#1}".replacement([_stoplist[value].data.name_tc,id]));
+}
+
+var CHANGEBUS_filter=[];
+var CHANGEBUS_buslist=[];
+function Filter(){
+while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
+
+CHANGEBUS_buslist.sort().forEach((data,i)=>{
+    var Row = document.getElementById("B").insertRow(i);
+    Row.insertCell(0).innerHTML = 
+	`<input type="checkbox" onclick="CHANGEBUS_filterRoute('{#0}')" {#1} ><label style="color:#fff">{#2}</label><br>`.replacement([
+		data,
+		(CHANGEBUS_filter&&CHANGEBUS_filter.includes(data))?"":"checked",
+		data
+	])
+    });
+	
+document.getElementById("overlay").style.display = "block";
+}
+
+function CHANGEBUS_filterRoute(rt){
+	if(!CHANGEBUS_filter)CHANGEBUS_filter=[];
+	if(CHANGEBUS_filter.includes(rt)){
+		CHANGEBUS_filter.splice(CHANGEBUS_filter.indexOf(rt));
+	}else{
+		CHANGEBUS_filter.push(rt);
+	}
 }
 </script>
 
@@ -350,12 +385,20 @@ return tmp;
 
 
 setInterval(function (){
-if(document.visibilityState=="visible"){
+if(document.visibilityState=="visible" && NOWMODE==1){
 try{
 apply_eta(ETA_RESULT)
 }catch(error){console.log(error)}
 }
 },1000);
+
+setInterval(function (){
+if(document.visibilityState=="visible" && NOWMODE==2){
+try{
+ChangeBusOutput();
+}catch(error){console.log(error)}
+}
+},5000);
 
 setInterval(function (){
 if(document.visibilityState=="visible"){
@@ -369,7 +412,7 @@ switch(NOWMODE){
 	console.log("RELOAD");
 	break;
 	case 2:
-	
+		RtSearch()
 	break;
 	
 }
@@ -450,19 +493,22 @@ updateChangeBus()
 function updateChangeBus(){
 	CHANGEBUSDATA.eta=[];
 	CHANGEBUSDATA.heta={};
+	CHANGEBUS_buslist=[];
 	if(COJOIN_ETA){
 		KMB_eta(INPUT[1],FIND_Coor_ROUTE(INPUT[1],INPUT[2]),1,true,k=>{
 			Object.keys(k).forEach(w=>{
-			CHANGEBUSDATA.heta[RT_data.stops[w]] = k[w][0].eta
+			if(!CHANGEBUSDATA.heta[RT_data.stops[w]])CHANGEBUSDATA.heta[RT_data.stops[w]] = k[w][0].eta
 			})
 		})
 	}
 	CHANGEBUSDATA.stops.forEach(w=>{getByStopETA(w,(g,j)=>{
 		JSON.parse(g).data.filter(w=>!w.service_type || w.service_type==1).forEach(h=>{
-			if(CHANGEBUSDATA.routes.map(q=>q[0]+"+"+q[1]).includes(h.co+"+"+h.route)){
+			if(h.route==INPUT[1] && h.eta_seq==1 && h.eta){
+				CHANGEBUSDATA.heta[h.stop?h.stop:j] = h.eta;
+				console.log(h.stop);
+			}else if(CHANGEBUSDATA.routes.map(q=>q[0]+"+"+q[1]).includes(h.co+"+"+h.route)){
+				if(!CHANGEBUS_buslist.includes(h.route) && h.eta)CHANGEBUS_buslist.push(h.route)
 				CHANGEBUSDATA.eta.push({"route":h.route,"stop":h.stop?h.stop:j,"dest":h.dest?h.dest:h.dest_tc,"seq":h.eta_seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
-			}else if(h.route==INPUT[1] && h.eta_seq==1 && h.eta){
-				CHANGEBUSDATA.heta[h.stop?h.stop:j] = h.eta
 			}
 		});
 		ChangeBusOutput()
@@ -475,13 +521,13 @@ function updateChangeBus(){
 function CHANGEBUS_mapeta(stop){
 if(CHANGEBUSDATA.heta[stop])return CHANGEBUSDATA.heta[stop];
 if(CHANGEBUSDATA.heta[CHANGEBUS_stopMapper[stop]])return CHANGEBUSDATA.heta[CHANGEBUS_stopMapper[stop]];
-console.log("PROBLEM "+stop)
+//console.log("PROBLEM "+stop)
 }
 
 function ChangeBusOutput(){
-	var result = CHANGEBUSDATA.eta.map(w=>[w,new Date(w.eta).getTime()-new Date(CHANGEBUS_mapeta(w.stop)).getTime(),CHANGEBUS_mapeta(w.stop)])
+	var result = CHANGEBUSDATA.eta.map(w=>[w,new Date(w.eta).getTime()-new Date(CHANGEBUS_mapeta(w.stop)).getTime(),CHANGEBUS_mapeta(w.stop),w.eta])
 	console.log(result)
-	result = result.filter(w=>w[1]>0).sort((a,b)=>{return a[1]>b[1]?1:-1});
+	result = result.filter(w=>w[1]>0&&!CHANGEBUS_filter.includes(w.route)).sort((a,b)=>{return a[3]>b[3]?1:-1});
 	console.log(result);
 	ChangeBusList = document.getElementById("chg_pend2");
 	ChangeBusList.innerHTML = "";
@@ -494,7 +540,7 @@ function ChangeBusOutput(){
 			w[0].co,
 			w[0].route,
 			eta_All.timeparse(w[2])+" --> "+ (w[1]>60000?Math.floor(w[1]/60000)+"分 "+Math.floor((w[1]%60000)/1000)+"秒":Math.floor(w[1]/1000)+"秒"),
-			"往: "+w[0].dest+" ($"+_rtlist[w[0].co][w[0].route].fare[w[0].dir][_rtlist[w[0].co][w[0].route].var[w[0].dir].stops.indexOf(w[0].stop)][0][0]+")",
+			"$"+_rtlist[w[0].co][w[0].route].fare[w[0].dir][_rtlist[w[0].co][w[0].route].var[w[0].dir].stops.indexOf(w[0].stop)][0][0] + " 往: "+w[0].dest,
 			_stoplist[w[0].stop].data.name_tc,
 			" --> "+CHANGEBUSDATA.result.find(r=>r[0]==w[0].co+"+"+w[0].route)[1]
 		]);
