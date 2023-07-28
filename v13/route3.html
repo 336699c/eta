@@ -103,7 +103,6 @@ height:400px;
 <div id="ROUTESTOP_header" class="route">
 		<table id="rttable" class="rttable"></table>
 </div>
-
 <div class="ROUTESTOP" id="ROUTESTOP">
 	<div class="stops">
 		<table id="stoptable" class="stoptable"></table>
@@ -239,6 +238,12 @@ var _rtlist2=[];
 var NOWMODE = 1;
 
 //MODE_1 byroute INIT
+
+function busimg(co,rt){
+	return ((co=="CTB"&& /^[A,NA]/.test(rt) ) ? "ctb_airport" : 
+		((co=="KMB"&& /^[A,NA]/.test(rt) ) ? "lwb" : co
+	))
+}
 function regen(){
 	if(rss2!=2)return;
 	_rtlist2 = getRtList2();
@@ -250,7 +255,7 @@ function regen(){
 	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <small>往 </small>{#1}</label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
 	s2.className ="s2"
 	s1.className ="s1"
-	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([INPUT[0]]);
+	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([busimg(INPUT[0],INPUT[1])]);
 	
 	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
 	var stoplist = document.getElementById("stoptable");
@@ -352,7 +357,7 @@ function apply_eta(s){
 	RT_data.stops.forEach((w,i)=>{
 		if(s[i+1]){s[i+1] = s[i+1].filter(w=>w&&w.eta).sort((a,b)=>{return a.eta<b.eta?-1:1})}
 		if (s[i+1] && s[i+1][0] && new Date(s[i+1][0].eta).getTime() < lastTime){
-			document.getElementById("bus_"+w).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([s[i+1][0].co]);
+			document.getElementById("bus_"+w).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([busimg(s[i+1][0].co,INPUT[1])]);
 		}else{
 			document.getElementById("bus_"+w).innerHTML = ""
 		}
@@ -537,7 +542,7 @@ function ChangeBusOutput(){
 		s.innerHTML = `<table><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
 		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><b>{#2}</b><br><small>{#4}</small></label></td>
 		</table>`.replacement([
-			w[0].co,
+			busimg(w[0].co,w[0].route),
 			w[0].route,
 			eta_All.timeparse(w[2])+" --> "+ (w[1]>60000?Math.floor(w[1]/60000)+"分 "+Math.floor((w[1]%60000)/1000)+"秒":Math.floor(w[1]/1000)+"秒"),
 			"$"+_rtlist[w[0].co][w[0].route].fare[w[0].dir][_rtlist[w[0].co][w[0].route].var[w[0].dir].stops.indexOf(w[0].stop)][0][0] + " 往: "+w[0].dest,
