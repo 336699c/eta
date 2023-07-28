@@ -151,7 +151,7 @@ input.stops.forEach(w=>{
 			if(!routes.includes(h.route))routes.push(h.route);
 			if(!input.nort || !input.nort.includes(h.route))
 			if(!h.service_type || h.service_type==1)
-				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
+				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"rmk":h.rmk?h.rmk:h.rmk_tc,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
 		});
 		output()
 	},w)
