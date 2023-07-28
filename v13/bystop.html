@@ -106,8 +106,17 @@ while(document.getElementById("B").childNodes.length>0){document.getElementById(
 document.getElementById("B").insertRow(0).insertCell(0).innerHTML = `<input type="checkbox" onclick="input.time=input.time?0:1" {#1}><label>時間: 抵站時分</label>`.replacement([
 	input.time?"checked":"",
 ])
+
+document.getElementById("B").insertRow().insertCell(0).innerHTML = "選擇巴士站";
+input.stops.forEach(w=>{
+	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
+	`<input type="checkbox" onclick="StopSelect('{#0}')" checked ><label>{#2}</label><br>`.replacement([
+		w,w+" "+_stoplist[w].data.name_tc
+	])
+});
+document.getElementById("B").insertRow().insertCell(0).innerHTML = "選擇路綫";
 routes.sort().forEach((data,i)=>{
-	document.getElementById("B").insertRow(i+1).insertCell(0).innerHTML = 
+	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
 	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label>{#2}</label><br>`.replacement([
 		data,
 		(input.nort&&input.nort.includes(data))?"":"checked",
@@ -262,6 +271,14 @@ function RouteSelect(rt){
 		input.nort.splice(input.nort.indexOf(rt));
 	}else{
 		input.nort.push(rt);
+	}
+}
+
+function StopSelect(st){
+	if(input.stops.includes(st)){
+		input.stops.splice(input.stops.indexOf(st));
+	}else{
+		input.stops.push(st);
 	}
 }
 </script>
