@@ -64,8 +64,39 @@ font-family: 'system-ui'
   background-color: rgba(0,0,0,0.5); /* Black background with opacity */
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
+
+//ETA STOP LIST
+.x3{
+font-size:3vw;
+color:#000000;
+}
+
+.eta_display_title{
+color:#0056b8;
+font-size:3.5vw;
+padding-left:12px;
+font-weight: bold;
+}
+
+.eta_display_button{
+border:none;
+background-color:#ffffff;
+color:#000000;
+font-size:3vw;
+width:100%;
+text-align:left;
+}
+.eta_display_button_s{
+border:none;
+background-color:#0056b8;
+color:#ffffff;
+font-size:3vw;
+width:100%;
+text-align:left;
+}
 </style>
 <script src="/eta/v13/script/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -94,30 +125,41 @@ function overlay_off() {
   document.getElementById("overlay").style.display = "none";
   var s="";	
   var ck = parseCookie("bookmark");
-  ck[input.bkmark].stops = input.stops;
-  ck[input.bkmark].preference = {"time":input.time,"nort":input.nort,"color":input.color}
-  SaveCookie(ck,"bookmark");
-  window.location.href = "/eta/v13/bystop.html?"+Object.keys(input).map(w=>w=w+"="+ (input[w] instanceof Array ? input[w].join(",") : input[w])).join("&")
+  if(ck && ck.length>1){
+	  ck[input.bkmark].stops = input.stops;
+	  ck[input.bkmark].preference = {"time":input.time,"nort":input.nort,"color":input.color}
+	  SaveCookie(ck,"bookmark");
+  }
+  window.location.href = "/eta/v13/bystop.html?"+Object.keys(input).map(w=>w=w+"="+ (input[w] instanceof Array ? input[w].join(",") : input[w])).join("&");
+  //main();
   
 }
 
 function overlay_on(){
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
-document.getElementById("B").insertRow(0).insertCell(0).innerHTML = `<input type="checkbox" onclick="input.time=input.time?0:1" {#1}><label>時間: 抵站時分</label>`.replacement([
-	input.time?"checked":"",
-])
+document.getElementById("B").insertRow(0).insertCell(0).innerHTML = `<div>
+	<label class="eta_display_title">預計抵站時間顯示方式</label>
+	<br>
+	<button class="eta_display_button{#0}" id="eta_d0" onclick="input.time=0;$('#eta_d0').removeClass('eta_display_button').addClass('eta_display_button_s');$('#eta_d1').removeClass('eta_display_button_s').addClass('eta_display_button');"><label>倒數分鐘 (2 分 30 秒)</label></button>
+	<br>
+	<button class="eta_display_button{#1}" id="eta_d1" onclick="input.time=1;$('#eta_d1').removeClass('eta_display_button').addClass('eta_display_button_s');$('#eta_d0').removeClass('eta_display_button_s').addClass('eta_display_button');"><label>抵站時分 (16:30)</label></button>
 
-document.getElementById("B").insertRow().insertCell(0).innerHTML = "選擇巴士站";
+	</div>`.replacement(
+		[ input.time==0?"_s":" ",
+		  input.time==1?"_s":" "  ]
+	)
+
+document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇巴士站</label>";
 input.stops.forEach(w=>{
 	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
-	`<input type="checkbox" onclick="StopSelect('{#0}')" checked ><label>{#2}</label><br>`.replacement([
-		w,w+" "+_stoplist[w].data.name_tc
+	`<input type="checkbox" onclick="StopSelect('{#0}')" checked ><label class="x3">{#2}</label><br>`.replacement([
+		w,_stoplist[w].data.name_tc+" <small>"+w+"</small>"
 	])
 });
-document.getElementById("B").insertRow().insertCell(0).innerHTML = "選擇路綫";
-routes.sort().forEach((data,i)=>{
+document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇路綫</label>";
+routes.sort(rtsorter).forEach((data,i)=>{
 	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
-	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label>{#2}</label><br>`.replacement([
+	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label class="x3">{#2}</label><br>`.replacement([
 		data,
 		(input.nort&&input.nort.includes(data))?"":"checked",
 		data
@@ -126,6 +168,7 @@ routes.sort().forEach((data,i)=>{
 	
 document.getElementById("overlay").style.display = "block";
 }
+
 </script>
 
 <script>
@@ -241,7 +284,15 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+f.route+"/1",(g
 },[f.dir,f.route,f.seq]);
 }else{
 CTB_lastBus="9999";
-httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[f.route].var[f.dir].stops[_rtlist.CTB[f.route].var[f.dir].stops.indexOf(f.stop)-1]+"/"+f.route,CTB_nextBus,[f.dir,f.route,f.seq])
+var stopindex = _rtlist.CTB[f.route].var[f.dir].stops.indexOf(f.stop)-1;
+httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[f.route].var[f.dir].stops[stopindex]+"/"+f.route,CTB_nextBus,
+{
+dir:f.dir,
+route:f.route,
+seq:f.seq,
+nowstop:f.stop,
+nowstopid:stopindex
+})
 }
 }
 
@@ -249,16 +300,20 @@ var CTB_lastBus = "9999";
 function CTB_nextBus(g,parm){
 	var eta = JSON.parse(g).data[0];
 	
-	if(eta.rmk=="九巴時段")return;
-	if(!eta.eta || CTB_lastBus>eta.eta){
-		if(eta.eta){
+	
+	if(eta && eta.rmk=="九巴時段")return;
+	if(!eta || !eta.eta || CTB_lastBus>eta.eta){
+		if(eta && eta.eta){
 			CTB_lastBus=eta.eta;
-			document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm[2]-eta.seq)+"站)";	
+			document.getElementById("Next_bus stop").innerHTML=parm.route+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm.seq-eta.seq)+"站)";	
 		}
-		if(eta.seq==2)return;
-	httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[eta.route].var[eta.dir].stops[_rtlist.CTB[eta.route].var[eta.dir].stops.indexOf(eta.stop)-1]+"/"+eta.route,CTB_nextBus,parm);
+		//if(eta && eta.seq==2)return;
+	parm.nowstopid-=1;
+	httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[parm.route].var[parm.dir].stops[parm.nowstopid]+"/"+parm.route,CTB_nextBus,parm);
 	
 	}else{
+	if(parm.nowstopid==0)
+	document.getElementById("Next_bus stop").innerHTML=parm.route+" 位於 <br>1. "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm.seq-1)+"站<small> 總站 未開出</small>)";	
 	return;
 	}
 }
@@ -268,7 +323,7 @@ function CTB_nextBus(g,parm){
 function RouteSelect(rt){
 	if(!input.nort)input.nort=[];
 	if(input.nort.includes(rt)){
-		input.nort.splice(input.nort.indexOf(rt));
+		input.nort.splice(input.nort.indexOf(rt),1);
 	}else{
 		input.nort.push(rt);
 	}
@@ -276,7 +331,7 @@ function RouteSelect(rt){
 
 function StopSelect(st){
 	if(input.stops.includes(st)){
-		input.stops.splice(input.stops.indexOf(st));
+		input.stops.splice(input.stops.indexOf(st),1);
 	}else{
 		input.stops.push(st);
 	}

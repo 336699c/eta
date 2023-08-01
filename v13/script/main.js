@@ -46,3 +46,14 @@ document.cookie = `{#0}={#1}; path=/eta/v13/ ; expires ='Wed, 27 Mar 2047 16:00:
 	JSON.stringify(value)
 ])
 }
+
+function rtsorter(a,b){
+	var anum = a.match(/\d+/g);
+	var bnum = b.match(/\d+/g);
+	if(!anum && !bnum)return 0;
+	if(!anum || !bnum)return anum?-1:1;
+	var aid = a.split(anum)[0]+anum.toString().padStart(5,"0")+ (a.split(bnum)[1] ? a.split(bnum)[1] : "");
+	var bid = b.split(bnum)[0]+bnum.toString().padStart(5,"0")+ (b.split(bnum)[1] ? b.split(bnum)[1] : "");
+	console.log(aid,bid);
+	return aid>bid?1:-1
+}
