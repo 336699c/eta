@@ -291,7 +291,8 @@ dir:f.dir,
 route:f.route,
 seq:f.seq,
 nowstop:f.stop,
-nowstopid:stopindex
+nowstopid:stopindex,
+parseId:0
 })
 }
 }
@@ -299,20 +300,20 @@ nowstopid:stopindex
 var CTB_lastBus = "9999";
 function CTB_nextBus(g,parm){
 	var eta = JSON.parse(g).data[0];
-	
+	parm.parseId++;
 	
 	if(eta && eta.rmk=="九巴時段")return;
-	if(!eta || !eta.eta || CTB_lastBus>eta.eta){
+	if(parm.nowstopid>0 && (!eta || !eta.eta || CTB_lastBus>eta.eta)){
 		if(eta && eta.eta){
 			CTB_lastBus=eta.eta;
-			document.getElementById("Next_bus stop").innerHTML=parm.route+" 位於 <br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm.seq-eta.seq)+"站)";	
+			document.getElementById("Next_bus stop").innerHTML=parm.route+" 位於 <small style='color:#ccc'>(t="+parm.parseId+")</small><br>"+eta.seq+". "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm.seq-eta.seq)+"站)";	
 		}
 		//if(eta && eta.seq==2)return;
 	parm.nowstopid-=1;
 	httpGet("https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/"+_rtlist.CTB[parm.route].var[parm.dir].stops[parm.nowstopid]+"/"+parm.route,CTB_nextBus,parm);
 	
 	}else{
-	if(parm.nowstopid==0)
+	if(parm.nowstopid<=0)
 	document.getElementById("Next_bus stop").innerHTML=parm.route+" 位於 <br>1. "+_stoplist[eta.stop].data.name_tc+" ("+eta_All.timeparse(eta.eta,input.time)+", "+(parm.seq-1)+"站<small> 總站 未開出</small>)";	
 	return;
 	}
