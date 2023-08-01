@@ -66,14 +66,9 @@ font-family: 'system-ui'
 }
 
 //ETA STOP LIST
-.x3{
-font-size:3vw;
-color:#000000;
-}
-
 .eta_display_title{
 color:#0056b8;
-font-size:3.5vw;
+font-size:4vw;
 padding-left:12px;
 font-weight: bold;
 }
@@ -152,14 +147,14 @@ document.getElementById("B").insertRow(0).insertCell(0).innerHTML = `<div>
 document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇巴士站</label>";
 input.stops.forEach(w=>{
 	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
-	`<input type="checkbox" onclick="StopSelect('{#0}')" checked ><label class="x3">{#2}</label><br>`.replacement([
+	`<input type="checkbox" onclick="StopSelect('{#0}')" checked ><label style='font-size:3.5vw'>{#2}</label><br>`.replacement([
 		w,_stoplist[w].data.name_tc+" <small>"+w+"</small>"
 	])
 });
 document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇路綫</label>";
 routes.sort(rtsorter).forEach((data,i)=>{
 	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
-	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label class="x3">{#2}</label><br>`.replacement([
+	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label style='font-size:3.5vw'>{#2}</label><br>`.replacement([
 		data,
 		(input.nort&&input.nort.includes(data))?"":"checked",
 		data
