@@ -80,7 +80,7 @@ max-height:240px;
 <body>
 
 
-<div style="background-color:#b4c4ffff;height:calc( 100vh - 330px); overflow-y:auto" id="routetable">
+<div style="background-color:#b4c4ffff;height:calc( 100vh - 350px); overflow-y:auto" id="routetable">
 <table id="P"></table>
 </div>
 
@@ -185,7 +185,7 @@ Object.values(_rtlist.CTB).concat(Object.values(_rtlist.KMB)).forEach(w=>{
 		if(!ROUTES_num.includes(w.route))ROUTES_num.push(w.route)
 	})
 })
-return s
+return s.sort((a,b)=>{return (XXX(a.r) < XXX(b.r) ? 1 :-1)});
 }
   
 
@@ -204,7 +204,6 @@ while(document.getElementById("P").childNodes.length>0){document.getElementById(
 
 INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
-INPUT_pend=INPUT_pend.sort((a,b)=>{return (XXX(a.r) < XXX(b.r) ? 1 :-1)});
 
 INPUT_pend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
