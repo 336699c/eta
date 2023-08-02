@@ -80,7 +80,7 @@ max-height:240px;
 <body>
 
 
-<div style="background-color:#b4c4ffff;height:calc( 100vh - 350px); overflow-y:auto" id="routetable">
+<div style="background-color:#dff;height:calc( 100vh - 350px); overflow-y:auto" id="routetable">
 <table id="P"></table>
 </div>
 
@@ -173,9 +173,7 @@ String.prototype.replacement = function(r){return this.replace(/\{\#\d\}/g, m =>
 var _rtlist={}
 var ROUTES=[];
 var ROUTES_num=[];
-httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{_rtlist=JSON.parse(q);ROUTES=getRtList2();rt_button_regen();})
-
-var INPUT_pend = [];
+httpGet("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{_rtlist=JSON.parse(q);ROUTES=getRtList2();rt_button_regen();submit("")})
 
 function getRtList2(){
 var s=[];
@@ -200,21 +198,22 @@ function XXX(v) {
 }
 
 function submit(rt){
-while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
+document.getElementById("P").innerHTML = "";
 
-INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
+var INPUT_pend = ROUTES;
+if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
 
 INPUT_pend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
-`<button style="text-align: left; width:100%; background-color:{#0}; border: none;" id="routename_{#1}" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
+`<button style="text-align: left; width:100%; background-color:#dff; border: none;" id="routename_{#1}" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
 <div style="display: inline;">
 <img src="/eta/icon/{#4}.png" style="width:6%;min-width:30px">
 </div>
 <div style="display: inline;">
-<pre style="display: inline;font-size:5vw;">{#5}</pre><pre style="display: inline;font-size:3vw">{#6}</pre>
+<pre style="display: inline;font-size:5vw">{#5}</pre><pre style="display: inline;font-size:3vw">{#6}</pre>
 </div></button>`.replacement([
-	i%2==0?"#ccca":"#fffa",
+	//i%2==0?"#ccca":"#fffa",
 	i,
 	data.sf,
 	data.co.toLowerCase(),
