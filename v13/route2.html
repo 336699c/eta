@@ -68,6 +68,7 @@ table.rt_table td:nth-child(4){width:19%}
 position: fixed;
 max-height:300px;
 bottom: 0;
+left:0;
 background-color:#eee;
 width: 100%;
 }
@@ -80,7 +81,7 @@ max-height:240px;
 <body>
 
 
-<div style="background-color:#dff;height:calc( 100vh - 350px); overflow-y:auto" id="routetable">
+<div style="background-color:#dff;height:calc( 100vh - 350px); overflow-y:auto;left:0;top:0;position: fixed;" id="routetable">
 <table id="P"></table>
 </div>
 
@@ -91,7 +92,7 @@ max-height:240px;
 <td><button class="rt_but" onclick="rt_sub(1)" id="rtnum_1">1</button></td>
 <td><button class="rt_but" onclick="rt_sub(2)" id="rtnum_2">2</button></td>
 <td><button class="rt_but" onclick="rt_sub(3)" id="rtnum_3">3</button></td>
-<td rowspan=4 height=100%><div class="rt_table_alph" id="rt_table_alph" height=100%>123ABC</div></td>
+<td rowspan=4 height=100%><div class="rt_table_alph" id="rt_table_alph" height=100%></div></td>
 </tr>
 <tr>
 <td><button class="rt_but" onclick="rt_sub(4)" id="rtnum_4">4</button></td>
@@ -129,7 +130,7 @@ function rt_sub(x){
 	}
 	$("#rtnum").text(rt_now);
 	rt_button_regen();
-	submit(rt_now);
+	submit2(rt_now);
 }
 
 function rt_button_regen(){
@@ -205,22 +206,27 @@ if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
 
 INPUT_pend.forEach((data,i)=>{
-    document.getElementById("P").insertRow(0).innerHTML = 
-`<button style="text-align: left; width:100%; background-color:#dff; border: none;" id="routename_{#1}" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
+    var id=document.getElementById("P").insertRow(0);
+	id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
+	id.innerHTML = 
+`<button style="text-align: left; width:100%; background-color:#dff; border: none;" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
 <img src="/eta/icon/{#4}.png" style="width:6%;min-width:30px">
 <pre style="display: inline;font-size:5vw">{#5}</pre>
 </button>`.replacement([
 	//i%2==0?"#ccca":"#fffa",
-	i,
+	//data.co+"_"+data.r+"_"+data.b,
 	data.sf,
 	data.co.toLowerCase(),
 	data.r.padEnd(6," ")+"<small>"+data.d+"</small>"
-]
-
-)
-
-
-;
+])
 });
+}
+
+
+function submit2(rt){
+ROUTES.forEach((data,i)=>{
+	var id2 = document.getElementById("routename_"+data.co+"_"+data.r+"_"+data.b);
+id2.style.display = data.r.startsWith(rt) ? "block" : "none";
+})
 }
 </script>
