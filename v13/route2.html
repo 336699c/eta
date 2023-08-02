@@ -207,18 +207,14 @@ if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 INPUT_pend.forEach((data,i)=>{
     document.getElementById("P").insertRow(0).innerHTML = 
 `<button style="text-align: left; width:100%; background-color:#dff; border: none;" id="routename_{#1}" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
-<div style="display: inline;">
 <img src="/eta/icon/{#4}.png" style="width:6%;min-width:30px">
-</div>
-<div style="display: inline;">
-<pre style="display: inline;font-size:5vw">{#5}</pre><pre style="display: inline;font-size:3vw">{#6}</pre>
-</div></button>`.replacement([
+<pre style="display: inline;font-size:5vw">{#5}</pre>
+</button>`.replacement([
 	//i%2==0?"#ccca":"#fffa",
 	i,
 	data.sf,
 	data.co.toLowerCase(),
-	data.r.padEnd(6," "),
-	data.d
+	data.r.padEnd(6," ")+"<small>"+data.d+"</small>"
 ]
 
 )
