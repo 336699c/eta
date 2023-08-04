@@ -8,12 +8,19 @@
 div.route{
   position: -webkit-sticky; /* Safari */
   position: sticky;
-  background-color:#b4c4ffff;
-  top: 0;
-  left: 0;
-  right: 0;
+  background-color:#b4c4ff;
+  top: 0px;
+  left: 0px;
+  right: 0px;
   width:100%;
   overflow:auto;
+}
+
+.body2{
+left:0;
+top:0;
+right:0;
+position:absolute;
 }
 
 td.s1{
@@ -25,7 +32,7 @@ td.s2{
 }
 
 .rss{
-background-color: #ffffffff;
+background-color: #ffffff;
 border: 1px;
 width:100%;
 }
@@ -49,12 +56,10 @@ width:100%
 
 .stoptable{
 width:100%;
+left:0;
 text-align: left;
 }
 
-.stopid2{
-width:20px
-}
 .stopname3{
 width:65%
 }
@@ -92,6 +97,30 @@ height:400px;
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
   overflow-y:scroll;
 }
+
+.rev{
+position:fixed;
+right:0;top:0;
+width:50px;
+background-color:#fff2;
+border:none;
+}
+
+.chg_pend{
+background-color:#ddf;
+}
+.chg_rss{
+background-color: #ddf;
+border: 1px;
+width:100%;
+}
+.chg_pend2{
+width:100%;
+}
+.chg_eta{
+width:30%;
+font-weight:bold;
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -100,6 +129,7 @@ height:400px;
 </head>
 <body>
 
+<div class="body2">
 <div id="ROUTESTOP_header" class="route">
 		<table id="rttable" class="rttable"></table>
 </div>
@@ -119,7 +149,7 @@ height:400px;
 		<td><button onclick="search('dest')">搜尋巴士站</button></td>
 		</tr>
 		<td><select id="dest_select"></select></td>
-		<td><button onclick="RtSearch()">搜尋路綫!</button></td>
+		<td><button onclick="RtSearch(1)">搜尋路綫!</button></td>
 		</tr>
 		<tr style="padding-top:10px">
 		<td><button onclick="Filter()">Filter</button></td>
@@ -142,6 +172,10 @@ height:400px;
 	<table id="B" width=100%></table>
 	</div>
 </div>
+
+</div>
+
+
 <script>
 //overlay
 function overlay_off() {
@@ -201,7 +235,7 @@ var CHANGEBUS_buslist=[];
 function Filter(){
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
 
-CHANGEBUS_buslist.sort().forEach((data,i)=>{
+CHANGEBUS_buslist.sort(rtsorter).forEach((data,i)=>{
     var Row = document.getElementById("B").insertRow(i);
     Row.insertCell(0).innerHTML = 
 	`<input type="checkbox" onclick="CHANGEBUS_filterRoute('{#0}')" {#1} ><label style="color:#fff">{#2}</label><br>`.replacement([
@@ -249,9 +283,16 @@ function regen(){
 	_rtlist2 = getRtList2();
 	INPUT = document.location.href.split("?")[1].split("+");
 	var resultT = document.getElementById("rttable").insertRow();
+	var s3 = resultT.insertCell(0);
 	var s2 = resultT.insertCell(0);
 	var s1 = resultT.insertCell(0);
-	RT_data = _rtlist[INPUT[0]][INPUT[1]]["var"][INPUT[2]]
+	
+	s3.innerHTML = `<a href="{#0}"><button class="rev"><img width=100% src="/eta/icon/route_rev.png"></button></a>`.replacement([
+	document.location.href.replace(/\+[IO]/, document.location.href.includes("+I") ?"+O":"+I")
+]);
+	
+	RT_data = _rtlist[INPUT[0]][INPUT[1]]["var"][INPUT[2]];
+	document.title = INPUT[0]+" "+INPUT[1]+" "+RT_data.dest_tc+" "+INPUT[2];
 	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <small>往 </small>{#1}</label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
 	s2.className ="s2"
 	s1.className ="s1"
@@ -391,19 +432,15 @@ return tmp;
 
 setInterval(function (){
 if(document.visibilityState=="visible" && NOWMODE==1){
-try{
-apply_eta(ETA_RESULT)
-}catch(error){console.log(error)}
+	try{
+	apply_eta(ETA_RESULT)
+	}catch(error){console.log(error)}
+}else if(document.visibilityState=="visible" && NOWMODE==2){
+	try{
+	ChangeBus_updateETA();
+	}catch(error){console.log(error)}
 }
 },1000);
-
-setInterval(function (){
-if(document.visibilityState=="visible" && NOWMODE==2){
-try{
-ChangeBusOutput();
-}catch(error){console.log(error)}
-}
-},5000);
 
 setInterval(function (){
 if(document.visibilityState=="visible"){
@@ -441,7 +478,26 @@ CHANGE_SCREEN(1)
 var CHANGEBUSDATA = {"stop":""};
 function updateNowStop(xid){
 	CHANGEBUSDATA.stop=xid;
-	CHANGE_SCREEN(2)
+	CHANGE_SCREEN(2);
+	CHANGEBUSDATA.kdiff = {};
+	
+	Object.keys(ETA_RESULT).forEach(w=>{
+		if(ETA_RESULT[w-1])CHANGEBUSDATA.kdiff[w] = getTimeDiff(ETA_RESULT[w-1],ETA_RESULT[w]);
+	})
+}
+
+function getTimeDiff(x1,x2){
+	var sum=0;var k=0;
+	var xid1 = 0, xid2=0;
+	for (var i=0;i<3;i++){
+		if(x1[xid1] && x2[xid2]){
+		var diff = new Date(x2[xid1].eta).getTime() - new Date(x1[xid2].eta).getTime();
+		if(diff>0){sum+=diff;k++}
+		else{xid2--;}
+		}
+		xid1++;xid2++;
+	};
+	return sum/k
 }
 
 function search(){
@@ -462,7 +518,8 @@ for (var i = 0; i < array.length; i++) {
 }
 
 var CHANGEBUS_stopMapper={}
-function RtSearch(){
+function RtSearch(s){
+if(s)CHG_BUS_LAST_ETA = 1e40;
 var dest2 = $("#dest_select").find(":selected").val();
 var start3 = RT_data.stops.slice(RT_data.stops.indexOf(CHANGEBUSDATA.stop));
 CHANGEBUS_stopMapper={}
@@ -492,9 +549,11 @@ CHANGEBUSDATA.result = resultlist.map(w=>[w[0][1][0]+"+"+w[0][1][1],w[1]]);
 
 
 console.log(resultlist);
-updateChangeBus()
+updateChangeBus();
+ChangeBusOutput();
 }
 
+var CHG_BUS_LAST_ETA = 1e40;
 function updateChangeBus(){
 	CHANGEBUSDATA.eta=[];
 	CHANGEBUSDATA.heta={};
@@ -506,6 +565,18 @@ function updateChangeBus(){
 			})
 		})
 	}
+	getByStopETA(CHANGEBUSDATA.stop,(g,j)=>{
+		const eta3 = JSON.parse(g).data.filter(w=>(!w.service_type || w.service_type==1) && w.route==j[1] && w.eta_seq == 1)[0].eta;
+		console.log("FTG",CHG_BUS_LAST_ETA+120000,new Date(eta3).getTime(), CHG_BUS_LAST_ETA+120000 > new Date(eta3).getTime());
+		if(CHG_BUS_LAST_ETA+120000 > new Date(eta3).getTime()){
+			CHANGEBUSDATA.heta[j[0]] = eta3;
+			CHG_BUS_LAST_ETA = new Date(eta3).getTime();
+		}else{
+			CHG_BUS_LAST_ETA = 1e40;
+			CHANGEBUSDATA.stop = RT_data.stops[RT_data.stops.indexOf(CHANGEBUSDATA.stop)+1];
+			setTimeout(f=>{RtSearch()},4000)
+		}
+	},[CHANGEBUSDATA.stop,INPUT[1]]);
 	CHANGEBUSDATA.stops.forEach(w=>{getByStopETA(w,(g,j)=>{
 		JSON.parse(g).data.filter(w=>!w.service_type || w.service_type==1).forEach(h=>{
 			if(h.route==INPUT[1] && h.eta_seq==1 && h.eta){
@@ -516,7 +587,7 @@ function updateChangeBus(){
 				CHANGEBUSDATA.eta.push({"route":h.route,"stop":h.stop?h.stop:j,"dest":h.dest?h.dest:h.dest_tc,"seq":h.eta_seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
 			}
 		});
-		ChangeBusOutput()
+		ChangeBus_updateETA();
 	},w)
 	})
 }
@@ -524,37 +595,76 @@ function updateChangeBus(){
 
 <script>
 function CHANGEBUS_mapeta(stop){
-if(CHANGEBUSDATA.heta[stop])return CHANGEBUSDATA.heta[stop];
-if(CHANGEBUSDATA.heta[CHANGEBUS_stopMapper[stop]])return CHANGEBUSDATA.heta[CHANGEBUS_stopMapper[stop]];
+if(CHANGEBUSDATA.peta[stop])return CHANGEBUSDATA.peta[stop];
+if(CHANGEBUSDATA.peta[CHANGEBUS_stopMapper[stop]])return CHANGEBUSDATA.peta[CHANGEBUS_stopMapper[stop]];
+if(CHANGEBUSDATA.heta[stop])return CHANGEBUSDATA.heta[stop]
 //console.log("PROBLEM "+stop)
 }
 
 function ChangeBusOutput(){
+	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
+	var stoplist = document.getElementById("chg_pend2");
+	var ORIG=[];
+	stoplist.innerHTML = "";
+	var index2 = RT_data.stops.indexOf(CHANGEBUSDATA.stop);
+	RT_data.stops.slice(index2).forEach((w,i)=>{
+		var s = stoplist.insertRow().insertCell(0);
+		s.className = "chg_rss";
+		s.innerHTML = `<button class="chg_rss"><table class="stoptable"><td class="stopid2"><label class="stopid">{#0}</label></td><td class="stopname3"><label class="stopname2"><big>{#1}</big><br><small>{#3}</small></label></td></div><td class="bus" id="bus_{#5}"> </td><td class="chg_eta" id="heta_{#5}"></td></table></button><div id="hstop_{#5}">`.replacement([
+			i+1+index2,
+			_stoplist[w].data.name_tc,
+			w,
+			ORIG.includes(w)?"NaN":w,
+			ORIG.includes(w)?"NaN":w,
+			w
+		]);
+		ORIG.push(w)
+	});
+	ChangeBus_updateETA();
+}
+
+function ChangeBus_updateETA(){
+	var lastTime = NaN;
+	CHANGEBUSDATA.peta = {};
+	RT_data.stops.forEach((w,i)=>{
+		if(document.getElementById("heta_"+w)){
+		var parseR = false;
+		const htime = new Date(CHANGEBUSDATA.heta[w]).getTime();
+		const ptime = lastTime+CHANGEBUSDATA.kdiff[i+1];
+		if(htime && ((ptime-240000)<htime || !lastTime))lastTime = htime
+		else {lastTime=ptime;parseR=true}
+		
+		CHANGEBUSDATA.peta[w] = parseR? new Date(lastTime).toString() : CHANGEBUSDATA.heta[w];
+		document.getElementById("heta_"+w).innerHTML = eta_All.timeparse(parseR? new Date(lastTime) : CHANGEBUSDATA.heta[w],0);
+		document.getElementById("heta_"+w).style.color = parseR ? "#aaa":"#000"
+		}
+	});
 	var result = CHANGEBUSDATA.eta.map(w=>[w,new Date(w.eta).getTime()-new Date(CHANGEBUS_mapeta(w.stop)).getTime(),CHANGEBUS_mapeta(w.stop),w.eta])
-	console.log(result)
-	result = result.filter(w=>w[1]>0&&!CHANGEBUS_filter.includes(w.route)).sort((a,b)=>{return a[3]>b[3]?1:-1});
-	console.log(result);
+	result = result.filter(w=>w[1]>0&&!CHANGEBUS_filter.includes(w[0].route)).sort((a,b)=>{return a[3]>b[3]?1:-1});
 	ChangeBusList = document.getElementById("chg_pend2");
-	ChangeBusList.innerHTML = "";
-	result.forEach(w=>{
-		var s = ChangeBusList.insertRow().insertCell(0);
-		//s.className = "rss";
-		s.innerHTML = `<table><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
-		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><b>{#2}</b><br><small>{#4}</small></label></td>
+	
+	var result2 = {};
+	result.filter(w=>w[0].route!=INPUT[1]).forEach(w=>{
+		if(!result2[w[0].stop])result2[w[0].stop]=[];
+		result2[w[0].stop].push(`<table style="padding-left:15px"><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
+		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><small>{#2}</small></label></td>
 		</table>`.replacement([
 			busimg(w[0].co,w[0].route),
 			w[0].route,
 			eta_All.timeparse(w[2])+" --> "+ (w[1]>60000?Math.floor(w[1]/60000)+"分 "+Math.floor((w[1]%60000)/1000)+"秒":Math.floor(w[1]/1000)+"秒"),
 			"$"+_rtlist[w[0].co][w[0].route].fare[w[0].dir][_rtlist[w[0].co][w[0].route].var[w[0].dir].stops.indexOf(w[0].stop)][0][0] + " 往: "+w[0].dest,
-			_stoplist[w[0].stop].data.name_tc,
-			" --> "+CHANGEBUSDATA.result.find(r=>r[0]==w[0].co+"+"+w[0].route)[1]
-		]);
+			_stoplist[w[0].stop].data.name_tc+" --> "+CHANGEBUSDATA.result.find(r=>r[0]==w[0].co+"+"+w[0].route)[1]
+		])
+		)
 	});
+	
+	Object.keys(result2).forEach(w=>{
+		try{
+		document.getElementById("hstop_"+w).innerHTML = result2[w].join("<br>");
+		}catch{}
+	})
 }
 
-function ROUTECOLOR(r,co){
-if (co=="CTB")return 
-}
 
 function getByStopETA(f,func2,parm2){
 if (f.length==6){
