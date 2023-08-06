@@ -20,16 +20,6 @@ background-color: #d3d3d3a0;
 border-color: lightgray;
 }
 
-
-div.route_choose{
-  position: -webkit-sticky; /* Safari */
-  position: sticky;
-  background-color:#b4c4ffff;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
 </style>
 <style>
 /* BUS ROUTE INPUT */
@@ -76,12 +66,21 @@ width: 100%;
 overflow-y: auto;
 max-height:240px;
 }
+
+#routetable{
+background-color:#dff;
+height:calc( 100vh - 350px); 
+overflow-y:auto;
+left:0;top:0;
+position: fixed;
+width:100%;
+}
 </style>
 
 <body>
 
 
-<div style="background-color:#dff;height:calc( 100vh - 350px); overflow-y:auto;left:0;top:0;position: fixed;" id="routetable">
+<div id="routetable">
 <table id="P"></table>
 </div>
 
@@ -116,7 +115,7 @@ max-height:240px;
 
 <script>
 var rt_now = "";
-function rt_sub(x){
+async function rt_sub(x){
 	switch (x){
 		case "clr": 
 			rt_now = "";
@@ -130,7 +129,7 @@ function rt_sub(x){
 	}
 	$("#rtnum").text(rt_now);
 	rt_button_regen();
-	submit2(rt_now);
+	await submit2(rt_now);
 }
 
 function rt_button_regen(){
