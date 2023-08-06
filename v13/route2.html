@@ -197,14 +197,14 @@ function XXX(v) {
   return YYY + (nnn ? nnn[0] : '');
 }
 
-function submit(rt){
+async function submit(rt){
 document.getElementById("P").innerHTML = "";
 
 var INPUT_pend = ROUTES;
 if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
 
-INPUT_pend.forEach((data,i)=>{
+await INPUT_pend.forEach((data,i)=>{
     var id=document.getElementById("P").insertRow(0);
 	id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
 	id.innerHTML = 
