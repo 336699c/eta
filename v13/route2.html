@@ -197,15 +197,20 @@ function XXX(v) {
   return YYY + (nnn ? nnn[0] : '');
 }
 
-async function submit(rt){
+function submit(rt){
 document.getElementById("P").innerHTML = "";
 
 var INPUT_pend = ROUTES;
 if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
 
-await INPUT_pend.forEach((data,i)=>{
-    var id=document.getElementById("P").insertRow(0);
+INPUT_pend.forEach((data,i)=>{
+    add_2(data,i)
+});
+}
+
+function add_2(data,i){
+var id=document.getElementById("P").insertRow(0);
 	id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
 	id.innerHTML = 
 `<button style="text-align: left; width:100%; background-color:#dff; border: none;height:3.5em" onclick="window.location.href = '/eta/v13/route3.html?{#3}'">
@@ -218,9 +223,7 @@ await INPUT_pend.forEach((data,i)=>{
 	data.co.toLowerCase(),
 	data.r.padEnd(6," ")+"<small>"+data.d+"</small>"
 ])
-});
 }
-
 
 function submit2(rt){
 ROUTES.forEach((data,i)=>{
