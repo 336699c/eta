@@ -537,10 +537,25 @@ _stoplist[r].alt.forEach(t=>CHANGEBUS_stopMapper[t]=w)
 
 var dest3 = Object.values(_stoplist).filter(w=>getDistanceFromLatLonInKm(_stoplist[dest2].data.lat,_stoplist[dest2].data.long,w.data.lat,w.data.long)<0.4)
 
-var resultlist = _rtlist2.filter(w=>start3.some(r=>w[0].includes(r)) && dest3.some(r=> w[0].includes(r.data.stop)))
+var resultlist2 = _rtlist2.filter(w=>start3.some(r=>w[0].includes(r)) && dest3.some(r=> w[0].includes(r.data.stop)))
 
-resultlist = resultlist.map(w=>[w[0].indexOf(start3.find(r=> w[0].includes(r))) ,
+
+var resultlist = [];
+resultlist2.forEach(w=>{
+	w[0].forEach((g,i)=>{
+		if(start3.includes(g))resultlist.push([i, w[0].indexOf(dest3.find(r=> w[0].includes(r.data.stop)).data.stop), w])
+	})
+});
+
+resultlist = resultlist.filter(w=>w[0]<w[1])
+
+/*
+resultlist = resultlist2.map(w=>[w[0].indexOf(start3.find(r=> w[0].includes(r))) ,
 	w[0].indexOf(dest3.find(r=> w[0].includes(r.data.stop)).data.stop),w]).filter(w=>w[0]<w[1])
+*/
+console.log("a",resultlist)
+
+
 	
 resultlist = resultlist.map(w=>[w[2],`{#2}. {#3}`.replacement([w[1],_stoplist[w[2][0][w[1]]].data.name_tc]),w[2][0][w[0]]]);
 CHANGEBUSDATA.routes = resultlist.map(w=>w[0][1]);
@@ -647,13 +662,19 @@ function ChangeBus_updateETA(){
 	result.filter(w=>w[0].route!=INPUT[1]).forEach(w=>{
 		if(!result2[w[0].stop])result2[w[0].stop]=[];
 		result2[w[0].stop].push(`<table style="padding-left:15px"><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
-		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><small>{#2}</small></label></td>
+		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><small>{#2}</small></label></td>{#3}
 		</table>`.replacement([
 			busimg(w[0].co,w[0].route),
 			w[0].route,
 			eta_All.timeparse(w[2])+" --> "+ (w[1]>60000?Math.floor(w[1]/60000)+"分 "+Math.floor((w[1]%60000)/1000)+"秒":Math.floor(w[1]/1000)+"秒"),
 			"$"+_rtlist[w[0].co][w[0].route].fare[w[0].dir][_rtlist[w[0].co][w[0].route].var[w[0].dir].stops.indexOf(w[0].stop)][0][0] + " 往: "+w[0].dest,
-			_stoplist[w[0].stop].data.name_tc+" --> "+CHANGEBUSDATA.result.find(r=>r[0]==w[0].co+"+"+w[0].route)[1]
+			_stoplist[w[0].stop].data.name_tc+" --> "+CHANGEBUSDATA.result.find(r=>r[0]==w[0].co+"+"+w[0].route)[1],
+			
+			w[0].co=="CTB"?`<td><button class="bt2" onclick="window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds={#0}--{#1}','_blank')">官網</button></td>`.replacement([
+				w[0].route,
+				_rtlist.CTB[w[0].route].var[w[0].dir].dest_en.replaceAll(' ','_')
+			]) : ""
+
 		])
 		)
 	});
@@ -708,4 +729,3 @@ function deg2rad(deg) {
 </script>
 </body>
 </html> 
-
