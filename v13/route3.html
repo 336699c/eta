@@ -522,8 +522,21 @@ function RtSearch(s){
 if(s)CHG_BUS_LAST_ETA = 1e40;
 var dest2 = $("#dest_select").find(":selected").val();
 var start3 = RT_data.stops.slice(RT_data.stops.indexOf(CHANGEBUSDATA.stop));
+
+CHANGEBUSDATA.realstop = start3.map(w=>w);
+
 CHANGEBUS_stopMapper={}
 start3.forEach(w=>{
+
+Object.values(_stoplist).filter(q=>getDistanceFromLatLonInKm(_stoplist[w].data.lat,_stoplist[w].data.long,q.data.lat,q.data.long)<0.3).forEach(q=>{
+	if(!start3.includes(q.data.stop)){
+		start3.push(q.data.stop);
+		CHANGEBUS_stopMapper[q.data.stop] = w
+	}
+})
+
+/*
+
 start3=start3.concat(_stoplist[w].alt);
 _stoplist[w].alt.forEach(r=>{
 CHANGEBUS_stopMapper[r]=w;
@@ -531,9 +544,14 @@ if(_stoplist[r].alt){
 start3=start3.concat(_stoplist[r].alt);
 _stoplist[r].alt.forEach(t=>CHANGEBUS_stopMapper[t]=w)
 }
+
 })
 
+*/
+
 });
+
+//console.log("start3",start3);
 
 var dest3 = Object.values(_stoplist).filter(w=>getDistanceFromLatLonInKm(_stoplist[dest2].data.lat,_stoplist[dest2].data.long,w.data.lat,w.data.long)<0.4)
 
@@ -553,7 +571,7 @@ resultlist = resultlist.filter(w=>w[0]<w[1])
 resultlist = resultlist2.map(w=>[w[0].indexOf(start3.find(r=> w[0].includes(r))) ,
 	w[0].indexOf(dest3.find(r=> w[0].includes(r.data.stop)).data.stop),w]).filter(w=>w[0]<w[1])
 */
-console.log("a",resultlist)
+//console.log("resultlist",resultlist)
 
 
 	
@@ -563,7 +581,7 @@ CHANGEBUSDATA.stops = RemoveSame(resultlist.map(w=>w[2]));
 CHANGEBUSDATA.result = resultlist.map(w=>[w[0][1][0]+"+"+w[0][1][1],w[1]]);
 
 
-console.log(resultlist);
+console.log("resultlist2",resultlist);
 updateChangeBus();
 ChangeBusOutput();
 }
@@ -660,8 +678,12 @@ function ChangeBus_updateETA(){
 	
 	var result2 = {};
 	result.filter(w=>w[0].route!=INPUT[1]).forEach(w=>{
-		if(!result2[w[0].stop])result2[w[0].stop]=[];
-		result2[w[0].stop].push(`<table style="padding-left:15px"><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
+
+		var realstop = (CHANGEBUSDATA.realstop.includes(w[0].stop) ? w[0].stop : CHANGEBUS_stopMapper[w[0].stop]);
+		
+		if(!result2[realstop])result2[realstop]=[];
+				
+		result2[realstop].push(`<table style="padding-left:15px"><td width="30px"><img src="/eta/icon/{#0}.png" style="width:30px"></td><td width="50px"><label style="font-family: 'Helvetica';font-size:16px"><b>{#0}</b></label></td>
 		<td><label style="font-family: 'Helvetica';font-size:15px"><b>{#1}</b><br><small>{#2}</small><br><small>{#2}</small></label></td>{#3}
 		</table>`.replacement([
 			busimg(w[0].co,w[0].route),
@@ -673,11 +695,13 @@ function ChangeBus_updateETA(){
 			w[0].co=="CTB"?`<td><button class="bt2" onclick="window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds={#0}--{#1}','_blank')">官網</button></td>`.replacement([
 				w[0].route,
 				_rtlist.CTB[w[0].route].var[w[0].dir].dest_en.replaceAll(' ','_')
-			]) : ""
+			]) : " "
 
 		])
 		)
 	});
+	
+	console.log("RESLT2",result2)
 	
 	Object.keys(result2).forEach(w=>{
 		try{
