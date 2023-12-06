@@ -419,7 +419,14 @@ function format_eta(f){
 
 //MODE 1 
 function click2(s){
-document.getElementById("stop_"+s).innerHTML = `<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td><button onclick="updateNowStop('{#1}')">轉車易</button></td></table><br><iframe src="{#0}"></iframe>`.replacement([s,s,"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)])
+document.getElementById("stop_"+s).innerHTML = `
+<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td>
+<button onclick="updateNowStop('{#1}')">轉車易</button></td></table>
+<label style="font-size:24px"><tt>{#2}</tt></label>
+<iframe src="{#0}"></iframe>`.replacement([
+s,s,
+_stoplist[s].rt.map(w=>w.split("_")[1]).sort(rtsorter).join("  "),
+"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)])
 }
 
 function RemoveSame(f,s){

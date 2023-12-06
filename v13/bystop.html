@@ -67,12 +67,12 @@ font-family: 'system-ui'
 
 /* ETA DISTRICT */
 .x3{
-font-size:4vw;
+font-size:4.5vw;
 }
 
 .eta_display_title{
 color:#0056b8;
-font-size:4.5vw;
+font-size:5vw;
 padding-left:12px;
 font-weight: bold;
 }
@@ -81,17 +81,32 @@ font-weight: bold;
 border:none;
 background-color:#ffffff;
 color:#000000;
-font-size:4vw;
+font-size:4.5vw;
 width:100%;
 text-align:left;
+padding: 12px 5px 12px 0;
 }
 .eta_display_button_s{
 border:none;
 background-color:#0056b8;
 color:#ffffff;
-font-size:4vw;
+font-size:4.5vw;
 width:100%;
 text-align:left;
+padding: 12px 5px 12px 0;
+}
+
+input[type='checkbox'] {
+    -webkit-appearance:none;
+	background:white;
+    width:40px;
+    height:40px;
+    border-radius:5px;
+    border:2px solid #555;
+	margin-right: 20px;
+}
+input[type='checkbox']:checked {
+    background: #0056b8;
 }
 </style>
 <script src="/eta/v13/script/main.js"></script>
@@ -106,7 +121,7 @@ text-align:left;
 <button style="width:200px;height:50px;font-size:4vw;" onclick="overlay_on()">設置</button>
 
 <div id="overlay" style="overflow-y:scroll">
-	<button onclick="overlay_off()" style="float: right; width:40px; height:40px; background-color:#faa; font-size:20px; border-radius: 50px"> X </button>
+	<button onclick="overlay_off()" style="float: right; width:75px; height:75px; background-color:#faa; font-size:40px; border-radius: 50px"> X </button>
 	<br>
 	<div>
 	<table id="B" width=100% style="background-color:#aaad">
@@ -161,7 +176,7 @@ routes.sort(rtsorter).forEach((data,i)=>{
 	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label class='x3'>{#2}</label><br>`.replacement([
 		data,
 		(input.nort&&input.nort.includes(data))?"":"checked",
-		data
+		(valid_routes.includes(data)?"":"ⓘ ")+data
 	])
 });
 	
@@ -193,13 +208,18 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+f,func2,parm2);
 
 var RetrievedETA = [];
 var routes=[];
+var valid_routes = [];
 function main(){
 document.title = (input.bkmark?"["+input.bkmark+"] ":"")+_stoplist[input.stops[0]].data.name_tc+" ("+input.stops.length+")";
 RetrievedETA=[];
 input.stops.forEach(w=>{
+	_stoplist[w].rt?.map(e=>e.split("_")[1]).forEach(g=>{
+		if(!routes.includes(g))routes.push(g);
+	})
 	getByStopETA(w,(g,j)=>{
 		JSON.parse(g).data.forEach(h=>{
 			if(!routes.includes(h.route))routes.push(h.route);
+			if(!valid_routes.includes(h.route))valid_routes.push(h.route);
 			if(!input.nort || !input.nort.includes(h.route))
 			if(!h.service_type || h.service_type==1)
 				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"rmk":h.rmk?h.rmk:h.rmk_tc,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
