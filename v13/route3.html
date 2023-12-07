@@ -426,7 +426,7 @@ document.getElementById("stop_"+s).innerHTML = `
 <iframe src="{#0}"></iframe>`.replacement([
 s,s,
 _stoplist[s].rt.map(w=>w.split("_")[1]).sort(rtsorter).join("  "),
-"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)])
+"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]])
 }
 
 function RemoveSame(f,s){
