@@ -267,19 +267,17 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 		var zc = CHG[input.CHG[0]][1].filter(w=>w.route==e.route);
 		
 		
-		
 		if (zc.length==0)return "";
 		if (zc.length>1){
 			zc.sort((a,b)=>{
-				console.log(a[1].dest,b[1].dest);
-				return (countSameLetters(a[1].dest,bound)>countSameLetters(b[1].dest,bound) ? 1 : -1)
+				return (countSameLetters(a.direction,bound)>countSameLetters(b.direction,bound) ? 1 : -1)
 			})
-			}
+		}
 		zc=zc[0]
 		
 		Object.values(_rtlist[e.co][e.route].var).map(w=>[w,]).sort((a,b)=>{return (a[1]>b[1]?1:-1)})[0][0].bound;
 
-		return `\n<label style="font-size:3vw">`+zc.route+" "+zc.direction+" | "+zc.dInfo+"\n@"+zc.stopName+" | 時限: "+zc.timeLimit+"\n"+zc.remark+"</label>"
+		return `\n<label style="font-size:3vw">`+zc.route+" "+zc.direction+" | "+zc.dInfo+"\n@"+zc.stopName+" | 時限: "+zc.timeLimit+"分\n"+zc.remark+"</label>"
 	})(),
 	i+"",	
 	eta_All.timeparse(e.eta,input.time)
