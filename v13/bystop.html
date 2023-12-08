@@ -264,8 +264,7 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 		let bound = _rtlist[e.co][e.route].var[e.dir].dest_tc;
 		
 		
-		var zc = CHG[input.CHG[0]][1].filter(w=>w.route==e.route);
-		
+		var zc = CHG[input.CHG[0]].filter(w=>w.route==e.route);
 		
 		if (zc.length==0)return "";
 		if (zc.length>1){
