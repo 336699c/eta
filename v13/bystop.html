@@ -261,10 +261,10 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 	e.dest,
 	(e.rmk?e.rmk+"\n":"")+getPrice(e).padEnd(9," ")+" "+e.seq+". "+_stoplist[e.stop].data.name_tc + (()=>{
 		if (input.CHG==null || CHG == null)return "";
-		let bound = _rtlist[e.co][e.route].var[e.dir].dest_tc;
+		let bound = _rtlist[e.co?e.co:"KMB"][e.route].var[e.dir].dest_tc;
 		
 		
-		var zc = CHG[input.CHG[0]].filter(w=>w.route==e.route);
+		var zc = CHG[input.CHG[0]][1].filter(w=>w.route==e.route);
 		
 		if (zc.length==0)return "";
 		if (zc.length>1){
@@ -272,6 +272,7 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 				return (countSameLetters(a.direction,bound)>countSameLetters(b.direction,bound) ? 1 : -1)
 			})
 		}
+		
 		zc=zc[0]
 		
 		Object.values(_rtlist[e.co][e.route].var).map(w=>[w,]).sort((a,b)=>{return (a[1]>b[1]?1:-1)})[0][0].bound;
