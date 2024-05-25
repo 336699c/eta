@@ -179,6 +179,7 @@ function getRtList2(){
 var s=[];
 Object.values(_rtlist.CTB).concat(Object.values(_rtlist.KMB)).forEach(w=>{
 	Object.keys(w.var).forEach(e=>{
+		if(w.var[e].dest_tc != null)
 		try{s.push({"co":w.co,"r":w.route,"d":w.var[e].dest_tc,"d_en":w.var[e].dest_en,"b":e,"sf":w.co+"+"+w.route+"+"+e})}catch{}
 		if(!ROUTES_num.includes(w.route))ROUTES_num.push(w.route)
 	})
