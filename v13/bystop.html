@@ -108,6 +108,10 @@ input[type='checkbox'] {
 input[type='checkbox']:checked {
     background: #0056b8;
 }
+
+input.r8[type='checkbox']:checked {
+    background: #00b856;
+}
 </style>
 <script src="/eta/v13/script/main.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -171,12 +175,14 @@ input.stops.forEach(w=>{
 	])
 });
 document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇路綫</label>";
-routes.sort(rtsorter).forEach((data,i)=>{
+document.getElementById("B").insertRow().insertCell(0).innerHTML = `<input type="checkbox" onclick="RouteSelect('ALL')" class='r8' ><label class='x3'>清除全部</label><br>`
+routesbound.sort(rtsorter).forEach((data,i)=>{
+	var _rt = data.split("_")[0];
 	document.getElementById("B").insertRow().insertCell(0).innerHTML = 
-	`<input type="checkbox" onclick="RouteSelect('{#0}')" {#1} ><label class='x3'>{#2}</label><br>`.replacement([
+	`<input type="checkbox" onclick="RouteSelect('{#0}')" class='r9' {#1} ><label class='x3'>{#2}</label><br>`.replacement([
 		data,
 		(input.nort&&input.nort.includes(data))?"":"checked",
-		(valid_routes.includes(data)?"":"ⓘ ")+data
+		(valid_routes.includes(_rt)?"":"ⓘ ")+_rt+"  "+RoutesBoundDest[data]
 	])
 });
 	
@@ -215,6 +221,8 @@ httpGet("https://data.etabus.gov.hk/v1/transport/kmb/stop-eta/"+f,func2,parm2);
 
 var RetrievedETA = [];
 var routes=[];
+var routesbound = [];
+var RoutesBoundDest = {};
 var valid_routes = [];
 function main(){
 document.title = (input.bkmark?"["+input.bkmark+"] ":"")+_stoplist[input.stops[0]].data.name_tc+" ("+input.stops.length+")";
@@ -226,8 +234,12 @@ input.stops.forEach(w=>{
 	getByStopETA(w,(g,j)=>{
 		JSON.parse(g).data.forEach(h=>{
 			if(!routes.includes(h.route))routes.push(h.route);
+			if(!routesbound.includes(h.route+"_"+h.dir)){
+				routesbound.push(h.route+"_"+h.dir);
+				RoutesBoundDest[h.route+"_"+h.dir] = h.dest?h.dest:h.dest_tc;
+			}
 			if(!valid_routes.includes(h.route))valid_routes.push(h.route);
-			if(!input.nort || !input.nort.includes(h.route))
+			if(!input.nort || !input.nort.includes(h.route+"_"+h.dir))
 			if(!h.service_type || h.service_type==1)
 				RetrievedETA.push({"route":h.route,"stop":h.stop?h.stop:j,"rmk":h.rmk?h.rmk:h.rmk_tc,"dest":h.dest?h.dest:h.dest_tc,"seq":h.seq,"eta":h.eta,"co":h.co,"dir":h.co=="KMB"?h.dir+"1":h.dir})
 		});
@@ -260,7 +272,7 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 	e.route.padEnd(5," "),
 	e.dest,
 	(e.rmk?e.rmk+"\n":"")+getPrice(e).padEnd(9," ")+" "+e.seq+". "+_stoplist[e.stop].data.name_tc + (()=>{
-		if (input.CHG==null || CHG == null)return "";
+		if (input.CHG==null || CHG == null || CHG[input.CHG[0]]==null || CHG[input.CHG[0]][1] == null)return "";
 		let bound = _rtlist[e.co?e.co:"KMB"][e.route].var[e.dir].dest_tc;
 		
 		
@@ -378,11 +390,21 @@ function CTB_nextBus(g,parm){
 <script>
 function RouteSelect(rt){
 	if(!input.nort)input.nort=[];
-	if(input.nort.includes(rt)){
-		input.nort.splice(input.nort.indexOf(rt),1);
+	
+	if(rt=="ALL"){
+		input.nort = input.nort.length==routesbound.length ? []: routesbound.map(w=>w);
+		for (var i=0;i<$(".r9").length;i++){
+			$(".r9")[i].checked = input.nort.length==0
+		}
 	}else{
-		input.nort.push(rt);
+	
+		if(input.nort.includes(rt)){
+			input.nort.splice(input.nort.indexOf(rt),1);
+		}else{
+			input.nort.push(rt);
+		}
 	}
+	$(".r8")[0].checked = input.nort.length==routesbound.length;
 }
 
 function StopSelect(st){
