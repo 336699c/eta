@@ -312,7 +312,7 @@ function regen(){
 	
 	RT_data = _rtlist[INPUT[0]][INPUT[1]]["var"][INPUT[2]];
 	document.title = INPUT[0]+" "+INPUT[1]+" "+RT_data.dest_tc+" "+INPUT[2];
-	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <small>往 </small>{#1}</label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
+	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <label style="font-size:0.75em"><small><small>往 </small></small>{#1}</label></label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
 	s2.className ="s2";
 	s1.className ="s1";
 	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([busimg(INPUT[0],INPUT[1])]);
