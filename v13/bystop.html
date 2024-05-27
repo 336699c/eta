@@ -262,7 +262,7 @@ if(e.co=="CTB")row.insertCell(0).innerHTML=`<button class="bt2" onclick="
 window.open('https://mobile.bravobus.com.hk/nwp3/index.php?f=1&l=0&ds={#0}--{#1}','_blank')
 ">官網</button>`.replacement([
 	e.route,
-	_rtlist.CTB[e.route].var[e.dir].dest_en.replaceAll(' ','_')
+	_rtlist.CTB[e.route].var[e.dir].dest.replaceAll(' ','_')
 ]);
 
 row.insertCell(0).innerHTML=`<button class="bt2" onclick=getbus_eta('{#0}')>距離</button>`.replacement([JSON.stringify(e)]);
