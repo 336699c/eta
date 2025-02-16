@@ -140,14 +140,14 @@ td.stopNameCell{
 }
 
 label.ByStopRouteName{
-	font-size:3.5vw;
+	font-size:5.5vw;
 	text-align: center; /* Center text */
 	display: block; /* Make label a block element */
 	font-weight: bold; /* Make the label text bold */
 }
 
 label.ByStopDestName{
-	font-size:2.7vw;
+	font-size:3.5vw;
 	text-align: left;
     margin: 20px 0; /* Optional margin */
 	display: block; /* Make label a block element */
@@ -163,11 +163,11 @@ label.ByStopDestName{
 
 .ByStopETAFirst{
 	font-weight: bold;
-	font-size:2.7vw;
+	font-size:3.5vw;
 }
 
 .ByStopETAOther{
-	font-size:2vw;
+	font-size:3vw;
 }
 </style>
 <script src="/eta/v13/script/main.js"></script>
@@ -423,7 +423,7 @@ for (i in ETA_bystop){
 						
 						Object.values(_rtlist[e.co][e.route].var).map(w=>[w,]).sort((a,b)=>{return (a[1]>b[1]?1:-1)})[0][0].bound;
 
-						return `<br><label style="font-size:1.7vw; background-color:#cccc">`+zc.route+" "+zc.direction+" | "+zc.dInfo+"<br>@"+zc.stopName+" | 時限: "+zc.timeLimit+"分<br>"+zc.remark+"</label>"
+						return `<br><label style="font-size:2.5vw; background-color:#cccc">`+zc.route+" "+zc.direction+" | "+zc.dInfo+"<br>@"+zc.stopName+" | 時限: "+zc.timeLimit+"分<br>"+zc.remark+"</label>"
 					})()
 			+ `</small></label>`;
 			
@@ -437,7 +437,7 @@ for (i in ETA_bystop){
 	
 						result_s += `<label class="ByStopETA{#1}"><label id="Timer_{#0}">`.replacement([(k.eta_seq==1?'First':'Other'), k.etaid]) + eta_All.timeparse(k.eta,input.time) + "</label>"
 						+ (e.dest!=k.dest? "<small> "+k.dest+"</small> " : "")+ (k.rmk ? "<small> "+k.rmk+"</small> " : "")+
-						`<label style="display: inline;font-size:2vw;color:#{#6}">   {#5}</label>`.replacement([
+						`<label style="display: inline;font-size:2.7vw;color:#{#6}">   {#5}</label>`.replacement([
 								((_s)=>{return _s==0 ? "aaa" : (_s>0? "f77" : "5a5")})(ETADelay[_TOKEN][k.eta_seq-1][0]/1000),
 								( ((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(ETADelay[_TOKEN][k.eta_seq-1][0])+"s" ).padEnd(8," ")
 							])

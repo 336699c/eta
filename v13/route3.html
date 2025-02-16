@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+<link href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" rel="stylesheet"/>
 <link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
 
 <style>
@@ -520,16 +522,19 @@ function click2(s){
 document.getElementById("stop_"+s).innerHTML = `
 <div class="StopSelectionDIV">
 <table class="StopSelectionTable">
+<tr>
 	<td class="StopSelectionTableCell">
 		<button onclick="overlay_on('{#0}')" class="StopSelectionButton2">
 			書簽
 		</button>
 	</td>
 	<td class="StopSelectionTableCell">
-		<button onclick="" class="StopSelectionButton2">
+		<button onclick="iframe_map_handler('{#1}')" class="StopSelectionButton2">
 			地圖
 		</button>
 	</td>
+	</tr>
+	<tr>
 	<td class="StopSelectionTableCell">
 		<button onclick="iframe_handler('{#1}',1)" class="StopSelectionButton2">
 			同站路綫
@@ -540,21 +545,71 @@ document.getElementById("stop_"+s).innerHTML = `
 			到站順序
 		</button>
 	</td>
+	</tr>
 </table>
 <label style="font-size:24px"></label>
 <iframe src="{#3}" id="iframe_stop_{#4}"></iframe>
+<div id="div_stop_{#5}"></div>
 </div>
 `.replacement([
-s,
-
+s,s,
 s,s,
 
 "/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0],
-s
+s,s
 ])
 }
 
+function iframe_map_handler(s){
+	$('#iframe_stop_'+s).hide();
+	$('#div_stop_'+s).show();
+	
+	// Where you want to render the map.
+	var element = document.getElementById('div_stop_'+s);
+
+	// Height has to be set. You can do this in CSS too.
+	element.style = 'height:400px;';
+
+	// Create Leaflet map on map element.
+	var map = L.map(element);
+
+	// Add OSM tile layer to the Leaflet map.
+	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+	// Target's GPS coordinates.
+	var stopdetails = _stoplist[s].data;
+	var target = L.latLng(stopdetails.lat, stopdetails.long);
+
+	// Set map's center to target with zoom 14.
+	map.setView(target, 16);
+
+	// Place a marker on the same location.
+	//L.marker(target).addTo(map);
+	
+	var points = [];
+	RT_data.stops.forEach((w,id)=>{
+		var marker2 = L.marker(L.latLng(_stoplist[w].data.lat, _stoplist[w].data.long))
+		marker2.addTo(map);
+		points.push([_stoplist[w].data.lat, _stoplist[w].data.long]);
+	
+		var popup = marker2.bindPopup((id+1)+". "+_stoplist[w].data.name_tc);
+		if (s == w)popup.openPopup();
+	});
+	
+	console.log(points);
+	const line = L.polyline(points, {
+            color: 'red',    // Line color
+            weight: 2,        // Line width
+            opacity: 0.5      // Line opacity
+        }).addTo(map);
+		
+}
+
 function iframe_handler(s,t){
+	$('#iframe_stop_'+s).show();
+	$('#div_stop_'+s).hide();
 	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]);
 }
 
