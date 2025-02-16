@@ -560,10 +560,13 @@ s,s
 ])
 }
 
+var initalized = [];
 function iframe_map_handler(s){
 	$('#iframe_stop_'+s).hide();
 	$('#div_stop_'+s).show();
 	
+	if(initalized.includes(s))return;
+	initalized.push(s);
 	// Where you want to render the map.
 	var element = document.getElementById('div_stop_'+s);
 
