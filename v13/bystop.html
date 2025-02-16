@@ -7,6 +7,10 @@
 <link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
 
 <style>
+body{
+	margin: 0; /* Optional: Removes margin for a cleaner look */
+}
+
 table{
 border-collapse : collapse;
 }
@@ -116,6 +120,55 @@ input[type='checkbox']:checked {
 input.r8[type='checkbox']:checked {
     background: #00b856;
 }
+
+
+label.ByStopStopName {
+	font-size:5.5vw;
+	height:60px;
+	padding-left: 40px;
+	color:#0056b8;
+}
+
+tr.stopNameRow{
+	background-color: #f0f0f0 !important;
+}
+
+
+td.stopNameCell{
+	padding: 10px 5px 10px 0;
+	
+}
+
+label.ByStopRouteName{
+	font-size:3.5vw;
+	text-align: center; /* Center text */
+	display: block; /* Make label a block element */
+	font-weight: bold; /* Make the label text bold */
+}
+
+label.ByStopDestName{
+	font-size:2.7vw;
+	text-align: left;
+    margin: 20px 0; /* Optional margin */
+	display: block; /* Make label a block element */
+}
+
+.ByStopCell{
+	width:auto !important;
+}
+
+.ByStopWidthPad{
+	
+}
+
+.ByStopETAFirst{
+	font-weight: bold;
+	font-size:2.7vw;
+}
+
+.ByStopETAOther{
+	font-size:2vw;
+}
 </style>
 <script src="/eta/v13/script/main.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -123,7 +176,7 @@ input.r8[type='checkbox']:checked {
 <body>
 
 
-<pre id="Next_bus stop" style="font-size:4vw;"></pre>
+<label id="Next_bus stop" style="font-size:4vw;"></label>
 <table id="P" class="eta_list"><tbody></tbody></table>
 
 <button style="width:200px;height:50px;font-size:4vw;" onclick="overlay_on()">設置</button>
@@ -149,7 +202,7 @@ function overlay_off() {
   var ck = parseCookie("bookmark");
   if(ck && ck.length>1){
 	  ck[input.bkmark].stops = input.stops;
-	  ck[input.bkmark].preference = {"time":input.time,"nort":input.nort,"color":input.color}
+	  ck[input.bkmark].preference = {"time":input.time,"nort":input.nort,"color":input.color,"byrt":input.byrt}
 	  SaveCookie(ck,"bookmark");
   }
   window.location.href = "/eta/v13/bystop.html?"+Object.keys(input).map(w=>w=w+"="+ (input[w] instanceof Array ? input[w].join(",") : input[w])).join("&");
@@ -166,9 +219,23 @@ document.getElementById("B").insertRow(0).insertCell(0).innerHTML = `<div>
 	<br>
 	<button class="eta_display_button{#1}" id="eta_d1" onclick="input.time=1;$('#eta_d1').removeClass('eta_display_button').addClass('eta_display_button_s');$('#eta_d0').removeClass('eta_display_button_s').addClass('eta_display_button');"><label>抵站時分 (16:30)</label></button>
 
-	</div>`.replacement(
+	<br>
+	<br>
+	
+	<label class="eta_display_title">顯示巴士路綫方式</label>
+	<br>
+	<button class="eta_display_button{#2}" id="eta_e0" onclick="input.byrt=0;$('#eta_e0').removeClass('eta_display_button').addClass('eta_display_button_s');$('#eta_e1').removeClass('eta_display_button_s').addClass('eta_display_button');"><label>巴士抵站順序</label></button>
+	<br>
+	<button class="eta_display_button{#3}" id="eta_e1" onclick="input.byrt=1;$('#eta_e1').removeClass('eta_display_button').addClass('eta_display_button_s');$('#eta_e0').removeClass('eta_display_button_s').addClass('eta_display_button');"><label>巴士路綫編號</label></button>
+
+	<br>
+	</div>
+	
+	`.replacement(
 		[ input.time==0?"_s":" ",
-		  input.time==1?"_s":" "  ]
+		  input.time==1?"_s":" ",
+		  input.byrt==0?"_s":" ",
+		  input.byrt==1?"_s":" "]
 	)
 
 document.getElementById("B").insertRow().insertCell(0).innerHTML = "<label class='eta_display_title'>選擇巴士站</label>";
@@ -267,12 +334,131 @@ input.stops.forEach(w=>{
 				
 				
 		});
-		output()
+		if(input.byrt==1)output();
+		else output2();
 	},w)
 })
 }
 
+//.CHATGPT
+
+function groupAndSort(arr,key2) {
+    const grouped = {};
+
+    arr.forEach(item => {
+        const key = item[key2]; // Use the key
+
+        // Initialize an array for this key if it doesn't exist
+        if (!grouped[key]) {
+            grouped[key] = [];
+        }
+
+        // Push the current item into the appropriate group
+        grouped[key].push(item);
+    });
+
+    return grouped;
+}
+
+//.CHATGPT
+
 function output(){
+while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
+
+RetrievedETA = RetrievedETA.sort((a,b)=>{return -rtsorter(a.route,b.route)});
+for (i in RetrievedETA)RetrievedETA[i].etaid = i;
+var ETA_bystop = groupAndSort(RetrievedETA,"stop");
+for (i in ETA_bystop)ETA_bystop[i] = groupAndSort(ETA_bystop[i],"route");
+
+console.log(ETA_bystop);
+console.log(RetrievedETA);
+
+var row,rownum=0,colnum=0,id2=0;
+for (i in ETA_bystop){
+	id2++;
+	colnum=0;
+	row = document.getElementById("P").insertRow(rownum++);
+	var cell0 = row.insertCell(colnum++);
+	cell0.innerHTML = `<label class="ByStopStopName"> `+ _stoplist[i].data.name_tc +`</label>`;
+	cell0.className = "stopNameCell";
+	cell0.colSpan = 9;
+	row.className = "stopNameRow";
+	Object.keys(ETA_bystop[i]).sort(rtsorter).forEach(j=>{
+		colnum=0;
+		if(ETA_bystop[i][j].find(w=>w.seq == 1) && ETA_bystop[i][j].find(w=>w.seq != 1)){
+			ETA_bystop[i][j] = ETA_bystop[i][j].filter(w=>w.seq==1);
+		}
+		var e = ETA_bystop[i][j][0];
+		row = document.getElementById("P").insertRow(rownum++);
+		row.className = "p"+id2;
+		row.insertCell(colnum++).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:100%; min-width:40px">`.replacement([
+				((e.co=="CTB"&& /^(A|NA)/.test(e.route) ) ? "ctb_airport" : 
+					((e.co=="KMB"&& /^(A|NA)/.test(e.route) ) ? "lwb" : e.co
+				))
+			]);
+		
+		cell0 = row.insertCell(colnum++);
+		cell0.innerHTML = `<label class="ByStopRouteName"> ` + j + `</label>`;
+		cell0.className = "ByStopCell ByStopWidthPad";
+		row.insertCell(colnum++).innerHTML = `<label class="ByStopDestName"> <small><small>往</small></small> ` + e.dest +
+			"<br><small>" + getPrice(e) + 
+			
+							(()=>{
+						if (input.CHG==null || CHG == null || CHG[input.CHG[0]]==null || CHG[input.CHG[0]][1] == null)return "";
+						let bound = _rtlist[e.co?e.co:"KMB"][e.route].var[e.dir];
+						if (bound==null){
+							bound = _rtlist[e.co?e.co:"KMB"][e.route].var[(e.dir[0]=="I" ? "O" : "I") + (e.dir[1]? e.dir[1] : "")].dest_tc;
+						}else bound = bound.dest_tc;
+						
+						var zc = CHG[input.CHG[0]][1].filter(w=>w.route==e.route);
+						
+						if (zc.length==0)return "";
+						if (zc.length>1){
+							zc.sort((a,b)=>{
+								return (countSameLetters(a.direction,bound)>countSameLetters(b.direction,bound) ? 1 : -1)
+							})
+						}
+						
+						zc=zc[0]
+						
+						Object.values(_rtlist[e.co][e.route].var).map(w=>[w,]).sort((a,b)=>{return (a[1]>b[1]?1:-1)})[0][0].bound;
+
+						return `<br><label style="font-size:1.7vw; background-color:#cccc">`+zc.route+" "+zc.direction+" | "+zc.dInfo+"<br>@"+zc.stopName+" | 時限: "+zc.timeLimit+"分<br>"+zc.remark+"</label>"
+					})()
+			+ `</small></label>`;
+			
+			
+		row.insertCell(colnum++).innerHTML = `<label class="ByStopETA"> ` + 
+				(()=>{
+					var result_s = "";
+					ETA_bystop[i][j].forEach(k=>{
+						_TOKEN = k.route+"_"+k.dir+"_"+k.stop;
+						if(k.eta)
+	
+						result_s += `<label class="ByStopETA{#1}"><label id="Timer_{#0}">`.replacement([(k.eta_seq==1?'First':'Other'), k.etaid]) + eta_All.timeparse(k.eta,input.time) + "</label>"
+						+ (e.dest!=k.dest? "<small> "+k.dest+"</small> " : "")+ (k.rmk ? "<small> "+k.rmk+"</small> " : "")+
+						`<label style="display: inline;font-size:2vw;color:#{#6}">   {#5}</label>`.replacement([
+								((_s)=>{return _s==0 ? "aaa" : (_s>0? "f77" : "5a5")})(ETADelay[_TOKEN][k.eta_seq-1][0]/1000),
+								( ((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(ETADelay[_TOKEN][k.eta_seq-1][0])+"s" ).padEnd(8," ")
+							])
+						+"</label><br>";
+					});
+					return result_s;
+				})()
+		+ `</label>`;
+		
+		
+	})
+}	
+
+
+}
+
+
+//OLD
+
+
+function output2(){
 while(document.getElementById("P").childNodes.length>0){document.getElementById("P").childNodes[0].remove()};
 
 RetrievedETA = RetrievedETA.filter(w=>w.eta).sort((a,b)=>{return a.eta<b.eta?1:-1});
@@ -327,8 +513,8 @@ row.insertCell(0).innerHTML = `<pre style="font-size:6vw;display: inline;">{#0}<
 
 
 row.insertCell(0).innerHTML = `<img src="/eta/icon/{#0}.png" style="width:100%; min-width:40px">`.replacement([
-	((e.co=="CTB"&& /^[A,NA]/.test(e.route) ) ? "ctb_airport" : 
-		((e.co=="KMB"&& /^[A,NA]/.test(e.route) ) ? "lwb" : e.co
+	((e.co=="CTB"&& /^(A|NA)/.test(e.route) ) ? "ctb_airport" : 
+		((e.co=="KMB"&& /^(A|NA)/.test(e.route) ) ? "lwb" : e.co
 	))
 ]);
 })
@@ -350,6 +536,7 @@ setInterval(function (){
 if(document.visibilityState=="visible"){
 try{
 	RetrievedETA.forEach((e,i)=>{
+	if(document.getElementById("Timer_"+i))
 	document.getElementById("Timer_"+i).innerHTML = eta_All.timeparse(e.eta,input.time)
 	})
 }catch(error){console.log(error)}

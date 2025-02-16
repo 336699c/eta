@@ -9,19 +9,16 @@ div.route{
   position: -webkit-sticky; /* Safari */
   position: sticky;
   background-color:#b4c4ff;
-  top: 0px;
+  width:100%;
+}
+.abcd{  top: 0px;
   left: 0px;
   right: 0px;
   width:100%;
-  overflow:auto;
+  //overflow:auto;
 }
 
-.body2{
-left:0;
-top:0;
-right:0;
-position:absolute;
-}
+
 
 td.s1{
 	width:30px;
@@ -100,18 +97,34 @@ height:400px;
 }
 
 .rev{
-position:fixed;
-right:0;top:0;
 width:50px;
+height:100%;
 background-color:#fff2;
 border:none;
 }
-.rev2{
-position:fixed;
-right:50px;top:0;
+
+
+td.s2,td.s3,td.s4{
+padding: 0 0 0 0; /* Padding inside cells */
+text-align: left; /* Align text to the left */
+border: 0px;
+}
+
+td.s3, td.s4{
 width:50px;
-background-color:#fff2;
-border:none;
+height:100%;
+text-align: right;
+}
+
+td.s2{
+width:100%;
+height:100%;
+}
+
+.img2{
+width: 75%; /* Make images responsive */
+max-height: 150px; /* Limit the maximum height */
+height: auto; /* Maintain aspect ratio */
 }
 
 .chg_pend{
@@ -129,6 +142,55 @@ width:100%;
 width:30%;
 font-weight:bold;
 }
+
+div.holder-div {
+	width:100%;
+	max-width: 769px; /* Maximum width */
+	box-shadow: 0 4px 12px rgba(119,119,217, 1); /* Subtle shadow */
+	background-color: #fff;
+}
+
+body{
+	padding: 0; /* Eliminates padding */
+    border: none; /* Eliminates border */
+    margin: 0; /* Optional: Removes margin for a cleaner look */
+	justify-content: center;
+	display: flex;
+	background-color: #151721; /* Light gray background */
+	}
+	
+	
+div.StopSelectionDIV{
+	width:calc(100%-10px);
+	background-color: #f0f0f0;
+	border: none; /* Remove default border */
+	border-radius: 6px; /* Rounded corners */
+	padding-top: 5px;
+	padding-left: 5px;
+}
+	
+td.StopSelectionTableCell{
+	padding-right: 10px;
+	padding-bottom:10px;
+}
+
+button.StopSelectionButton2{
+	width:100px;
+	height:30px;
+	background-color: #ccf9; /* Button background color */
+	color: black; /* Text color */
+	border: none; /* Remove default border */
+	border-radius: 6px; /* Rounded corners */
+	padding: 0px 0px; /* Padding inside the button */
+	font-size: 18px; /* Font size */
+	cursor: pointer; /* Pointer cursor on hover */
+	transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+}
+	
+iframe{
+border: none; /* Remove default border */
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -137,7 +199,7 @@ font-weight:bold;
 </head>
 <body>
 
-<div class="body2">
+<div class="holder-div">
 <div id="ROUTESTOP_header" class="route">
 		<table id="rttable" class="rttable"></table>
 </div>
@@ -182,7 +244,6 @@ font-weight:bold;
 </div>
 
 </div>
-
 
 <script>
 //overlay
@@ -304,17 +365,19 @@ function regen(){
 	var s2 = resultT.insertCell(0);
 	var s1 = resultT.insertCell(0);
 	
-	s3.innerHTML = `<a href="{#0}"><button class="rev"><img width=100% src="/eta/icon/route_rev.png"></button></a>`.replacement([
+	s3.innerHTML = `<a href="{#0}"><button class="rev"><img src="/eta/icon/route_rev.png" class="img2"></button></a>`.replacement([
 	document.location.href.replace(/\+[IO]/, document.location.href.includes("+I") ?"+O":"+I")
 	]);
 	
-	s4.innerHTML = `<button class="rev2" onclick="TimerSettings()"><img width=80% src="/eta/icon/time_cd.png" class="TimerDisplay"></button>`
+	s4.innerHTML = `<button class="rev" onclick="TimerSettings()"><img src="/eta/icon/time_cd.png" class="TimerDisplay img2"></button>`
 	
 	RT_data = _rtlist[INPUT[0]][INPUT[1]]["var"][INPUT[2]];
 	document.title = INPUT[0]+" "+INPUT[1]+" "+RT_data.dest_tc+" "+INPUT[2];
 	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>{#0}</b> <label style="font-size:0.75em"><small><small>往 </small></small>{#1}</label></label>`.replacement([INPUT[1].padEnd(4," "),RT_data.dest_tc])
-	s2.className ="s2";
 	s1.className ="s1";
+	s2.className ="s2";
+	s3.className ="s3";
+	s4.className ="s4";
 	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([busimg(INPUT[0],INPUT[1])]);
 	
 	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
@@ -323,7 +386,7 @@ function regen(){
 	RT_data.stops.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
-		s.innerHTML = `<button onclick="click2('{#0}')" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">{#0}</label></td><td class="stopname3"><label class="stopname2"><big>{#1}</big><br>車費: \${#2}<br><small>{#3}</small></label></td></div><td class="bus" id="bus_{#5}"> </td><td class="eta" id="eta_{#5}"></td></table></button><div id="stop_{#5}">`.replacement([
+		s.innerHTML = `<button onclick="click2('{#0}')" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">{#0}</label></td><td class="stopname3"><label class="stopname2"><big>{#1}</big><br>車費: \${#2}<br><small><small>{#3}</small></small></label></td></div><td class="bus" id="bus_{#5}"> </td><td class="eta" id="eta_{#5}"></td></table></button><div id="stop_{#5}">`.replacement([
 			w,
 			i+1,
 			_stoplist[w].data.name_tc,
@@ -455,13 +518,44 @@ function format_eta(f){
 //MODE 1 
 function click2(s){
 document.getElementById("stop_"+s).innerHTML = `
-<table><td><button onclick="overlay_on('{#1}')">書簽</button></td><td>
-<button onclick="updateNowStop('{#1}')">轉車易</button></td></table>
-<label style="font-size:24px"><tt>{#2}</tt></label>
-<iframe src="{#0}"></iframe>`.replacement([
+<div class="StopSelectionDIV">
+<table class="StopSelectionTable">
+	<td class="StopSelectionTableCell">
+		<button onclick="overlay_on('{#0}')" class="StopSelectionButton2">
+			書簽
+		</button>
+	</td>
+	<td class="StopSelectionTableCell">
+		<button onclick="" class="StopSelectionButton2">
+			地圖
+		</button>
+	</td>
+	<td class="StopSelectionTableCell">
+		<button onclick="iframe_handler('{#1}',1)" class="StopSelectionButton2">
+			同站路綫
+		</button>
+	</td>
+	<td class="StopSelectionTableCell">
+		<button onclick="iframe_handler('{#2}',0)" class="StopSelectionButton2">
+			到站順序
+		</button>
+	</td>
+</table>
+<label style="font-size:24px"></label>
+<iframe src="{#3}" id="iframe_stop_{#4}"></iframe>
+</div>
+`.replacement([
+s,
+
 s,s,
-_stoplist[s].rt.map(w=>w.split("_")[1]).sort(rtsorter).join("  "),
-"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]])
+
+"/eta/v13/bystop.html?color=1&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0],
+s
+])
+}
+
+function iframe_handler(s,t){
+	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+RemoveSame(_stoplist[s].alt,s)+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]);
 }
 
 function RemoveSame(f,s){
