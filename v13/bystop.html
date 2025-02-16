@@ -383,7 +383,38 @@ for (i in ETA_bystop){
 	cell0.className = "stopNameCell";
 	cell0.colSpan = 9;
 	row.className = "stopNameRow";
-	Object.keys(ETA_bystop[i]).sort(rtsorter).forEach(j=>{
+	
+	var routes_parsed = Object.keys(ETA_bystop[i]);
+	
+	_stoplist[i].rt.forEach(w=>{
+		if(!routes_parsed.includes(w.split("_")[1])){
+			routes_parsed.push(w.split("_")[1]);
+			var routevar = _rtlist[w.split("_")[0]][w.split("_")[1]];
+			var dest_dir = ["",""];
+			console.log(routevar);
+			if(routevar.var["I"]?.stops.includes(i))dest_dir = [routevar.var["I"].dest_tc, routevar.var["I"].stops.indexOf(i),"I"];
+			if(routevar.var["O"]?.stops.includes(i))dest_dir = [routevar.var["O"].dest_tc, routevar.var["O"].stops.indexOf(i),"O"];
+			if(routevar.var["I1"]?.stops.includes(i))dest_dir = [routevar.var["I1"].dest_tc, routevar.var["I1"].stops.indexOf(i),"I1"];
+			if(routevar.var["O1"]?.stops.includes(i))dest_dir = [routevar.var["O1"].dest_tc, routevar.var["O1"].stops.indexOf(i),"O1"];
+			
+			ETA_bystop[i][w.split("_")[1]]=[
+				{
+				"seq":1, 
+				"co": w.split("_")[0], 
+				"route": w.split("_")[1],
+				"dest": dest_dir[0],
+				"dir":dest_dir[2],
+				"seq":dest_dir[1],
+				"eta":"",
+				"etaid":-1,
+				"stop":i
+				}
+			]
+		}
+	})
+	
+	console.log(ETA_bystop[i]);
+	routes_parsed.sort(rtsorter).forEach(j=>{
 		colnum=0;
 		if(ETA_bystop[i][j].find(w=>w.seq == 1) && ETA_bystop[i][j].find(w=>w.seq != 1)){
 			ETA_bystop[i][j] = ETA_bystop[i][j].filter(w=>w.seq==1);
