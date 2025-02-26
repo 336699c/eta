@@ -20,6 +20,16 @@ background-color: #d3d3d3a0;
 border-color: lightgray;
 }
 
+
+body{
+	padding: 0; /* Eliminates padding */
+    border: none; /* Eliminates border */
+    margin: 0; /* Optional: Removes margin for a cleaner look */
+	justify-content: center;
+	display: flex;
+	background-color: #151721; /* Light gray background */
+	}
+	
 </style>
 <style>
 /* BUS ROUTE INPUT */
@@ -55,8 +65,7 @@ table.rt_table td:nth-child(3){width:27%}
 table.rt_table td:nth-child(4){width:19%}
 
 .rt_table{
-position: fixed;
-max-height:300px;
+height:250px;
 bottom: 0;
 left:0;
 background-color:#eee;
@@ -69,17 +78,18 @@ max-height:240px;
 
 #routetable{
 background-color:#dff;
-height:calc( 100vh - 350px); 
+height:calc(100vh - 250px);
 overflow-y:auto;
 left:0;top:0;
-position: fixed;
+//position: fixed;
 width:100%;
 }
+
 </style>
 
 <body>
 
-
+<div class="outer0">
 <div id="routetable">
 <table id="P"></table>
 </div>
@@ -109,6 +119,7 @@ width:100%;
 <td><button class="rt_but" onclick="rt_sub('back')">⌫</button></td>
 </tr>
 </table>
+</div>
 
 </body>
 </html> 
