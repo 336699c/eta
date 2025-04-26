@@ -12,14 +12,15 @@ body {
 	font-family: Arial, sans-serif;
 	background: #151721;
 	overflow: hidden; /* Prevent body scrolling */
-	height: 100vh;
+	height: 100%;
 	justify-content: center;
 	display: flex;
 }
 
 .routetable{
 background-color:#fff;
-overflow-y:auto;
+	min-height: 0; /* Enable scroll */
+	overflow-y:auto;
 overflow-x:hidden;
 left:0;top:0;
 width:100%;
@@ -29,10 +30,12 @@ flex-direction:row;
 
 .num_div{
 	display:flex;
+	position: relative;
+
+	z-index: 2;
 	flex:1;
 	height: flex;
-	bottom: 0;
-	left:0;
+
 	width: 100%;
 }
 
@@ -102,6 +105,7 @@ table.P tr{width:100%;}
 #P{width:100%;}
 .rt_table_alph{
 overflow-y: auto;
+max-height: 30vh;
 height:200px;
 }
 
