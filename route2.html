@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/x-icon" href="icon/icon.png">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+
+<link rel="stylesheet" href="script/main.css">
+<style>
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Arial, sans-serif;
+	background: #151721;
+	overflow: hidden; /* Prevent body scrolling */
+	height: 100vh;
+	justify-content: center;
+	display: flex;
+}
+
+.routetable{
+background-color:#fff;
+overflow-y:auto;
+overflow-x:hidden;
+left:0;top:0;
+width:100%;
+display:flex;
+flex-direction:row;
+flex:1;
+}
+
+.num_div{
+	display:flex;
+	height: flex;
+	bottom: 0;
+	left:0;
+	width: 100%;
+}
+
+.num_table{
+	width:100%;
+	background-color:#f6f6f6;
+	td {
+		vertical-align: middle;
+		text-align: center;
+
+	}
+}
+
+
+
+/* BUS ROUTE INPUT */
+button.rt_but{
+height:50px;
+font-family:'Helvetica';
+
+border: none; /*1px solid #ddd;*/
+background-color:#f6f6f6;
+font-size: 30px;
+border-radius: 4px;
+width:100%;
+}
+button.rt_but_alpha{
+width:90%;
+height:45px;
+font-family:'Helvetica';
+font-size: 30px;
+
+
+padding: 8px 12px;
+border: 1px solid #ddd;
+border-radius: 4px;
+background: #f8f9fa;
+cursor: pointer;
+}
+
+.rt-but-cont{
+	padding-bottom:8px;
+}
+
+label.rtnum{
+font-family:'Helvetica';
+display: block;
+text-align: center;
+font-weight:bold;
+font-size: 45px;
+min-height:50px;
+background:#fff;
+}
+
+table.num_table td:nth-child(1){width:27%}
+table.num_table td:nth-child(2){width:27%}
+table.num_table td:nth-child(3){width:27%}
+table.num_table td:nth-child(4){width:19%;background:#fff;}
+table.num_table tr:nth-child(1){background:#fff;}
+
+table.P tr{width:100%;}
+#P{width:100%;}
+.rt_table_alph{
+overflow-y: auto;
+height:200px;
+}
+
+.route-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 3px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+			width:100%;
+        }
+
+.destination-en {
+	font-size: 0.9em;
+	color: #666;
+}
+
+.route-number {
+	font-size: 1.4em;
+	font-weight: bold;
+	color: black;
+	padding: 0 15px 0 7px;
+}
+
+.destination {
+	font-size: 1.1em;
+	color: #333;
+}
+
+</style>
+<script src="script/utils.js"></script>
+
+<body>
+
+<div class="PRE-container">
+<div class="routetable" id="routetable">
+<table id="P"></table>
+</div>
+
+<div class="num_div">
+<table class="num_table">
+<tr>
+<td colspan=4><label class="rtnum" id="rtnum"></label></td>
+<tr>
+<td><button class="rt_but" onclick="rt_sub(1)" id="rtnum_1">1</button></td>
+<td><button class="rt_but" onclick="rt_sub(2)" id="rtnum_2">2</button></td>
+<td><button class="rt_but" onclick="rt_sub(3)" id="rtnum_3">3</button></td>
+<td rowspan=4 height=100%><div class="rt_table_alph" id="rt_table_alph"></div></td>
+</tr>
+<tr>
+<td><button class="rt_but" onclick="rt_sub(4)" id="rtnum_4">4</button></td>
+<td><button class="rt_but" onclick="rt_sub(5)" id="rtnum_5">5</button></td>
+<td><button class="rt_but" onclick="rt_sub(6)" id="rtnum_6">6</button></td>
+</tr>
+<tr>
+<td><button class="rt_but" onclick="rt_sub(7)" id="rtnum_7">7</button></td>
+<td><button class="rt_but" onclick="rt_sub(8)" id="rtnum_8">8</button></td>
+<td><button class="rt_but" onclick="rt_sub(9)" id="rtnum_9">9</button></td>
+</tr>
+<tr>
+<td><button class="rt_but" onclick="rt_sub('clr')">⨂</button></td>
+<td><button class="rt_but" onclick="rt_sub(0)" id="rtnum_0">0</button></td>
+<td><button class="rt_but" onclick="rt_sub('back')">⌫</button></td>
+</tr>
+</table>
+</div>
+</div>
+
+</body>
+</html> 
+
+<script>
+var rt_now = "";
+async function rt_sub(x){
+	switch (x){
+		case "clr": 
+			rt_now = "";
+		break;
+		case "back": 
+			rt_now = rt_now.substring(0,rt_now.length-1);
+		break;
+		default:
+			rt_now+=x.toString();
+		
+	}
+	$("#rtnum").text(rt_now);
+	rt_button_regen();
+	await submit2(rt_now);
+}
+
+function rt_button_regen(){
+	var validrt = ROUTES_num.filter(w=>w.startsWith(rt_now));
+	var validmove = [];
+	validrt.forEach(w=>{
+	var nextchr = w.substring(w.indexOf(rt_now)+rt_now.length)[0];
+	if(!validmove.includes(nextchr))validmove.push(nextchr)
+	});
+	["0","1","2","3","4","5","6","7","8","9"].forEach(q=>{$('#rtnum_'+q).prop('disabled', !validmove.includes(q));});
+	
+	var result = "";
+	console.log(validmove);	
+	validmove.filter(w=>w).filter(w=>!w.match(/\d/)).sort().forEach(w=>{
+		result+=`<div class="rt-but-cont"><button class="rt_but_alpha" onclick="rt_sub('${w}')">${w}</button></div>`;
+	});
+	$("#rt_table_alph").html(result);
+	
+}
+
+</script>
+
+<script>
+//v6
+
+var _rtlist={}
+var ROUTES=[];
+var ROUTES_num=[];
+_T.fetch("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{_rtlist=q;ROUTES=getRtList2();rt_button_regen();submit("")})
+
+function getRtList2(){
+var s=[];
+Object.values(_rtlist.CTB).concat(Object.values(_rtlist.KMB)).forEach(w=>{
+	Object.keys(w.var).forEach(e=>{
+		try{s.push({"co":w.co,"r":w.route,"d":w.var[e].dest_tc,"d_en":w.var[e].dest_en,"b":e,"sf":w.co+"+"+w.route+"+"+e})}catch{}
+		if(!ROUTES_num.includes(w.route))ROUTES_num.push(w.route)
+	})
+})
+return s.sort((a,b)=>{return (XXX(a.r) < XXX(b.r) ? 1 :-1)});
+}
+  
+
+function XXX(v) {
+  var Q1 = /[A-Z][0-9]+/;
+  if (Q1.exec(v))return v;
+    
+  var YYY = parseInt(v).toString().padStart(4, '0');
+  var mmm = /[A-Z]/g;
+  var nnn = mmm.exec(v);
+  return YYY + (nnn ? nnn[0] : '');
+}
+
+function submit(rt){
+document.getElementById("P").innerHTML = "";
+
+var INPUT_pend = ROUTES;
+if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
+
+
+INPUT_pend.forEach((data,i)=>{
+    add_2(data,i)
+});
+}
+
+function add_2(data,i){
+var id=document.getElementById("P").insertRow(0);
+	id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
+	id.innerHTML = 
+`<div class="route-item" onclick="window.location.href='v13/route3.html?${data.sf}'">
+
+	<div>
+		<img src="icon/${_T.busIMG(data)}.png" style="width:35px">
+	</div>
+	<div class="route-number">${data.r}</div>
+	<div class="route-info">
+		<div class="destination">${data.d}</div>
+		<div class="destination-en">${data.d_en}</div>
+	</div>
+
+</div>
+</div>`;
+}
+
+function submit2(rt){
+ROUTES.forEach((data,i)=>{
+	var id2 = document.getElementById("routename_"+data.co+"_"+data.r+"_"+data.b);
+id2.style.display = data.r.startsWith(rt) ? "block" : "none";
+})
+}
+</script>
