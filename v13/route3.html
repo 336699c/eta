@@ -382,7 +382,8 @@ function regen(){
 	s4.className ="s4";
 	s1.innerHTML = `<img src="/eta/icon/{#0}.png" style="width:30px">`.replacement([busimg(INPUT[0],INPUT[1])]);
 	
-	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]]
+	var Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2]];
+	if(!Fare)Fare = _rtlist[INPUT[0]][INPUT[1]]["fare"][INPUT[2][0]+"1"];
 	var stoplist = document.getElementById("stoptable");
 	var ORIG=[];
 	RT_data.stops.forEach((w,i)=>{
