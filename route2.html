@@ -6,14 +6,6 @@
 
 <link rel="stylesheet" href="script/main.css">
 <style>
-body {
-	margin: 0;
-	padding: 0;
-	font-family: Arial, sans-serif;
-	background: #151721;
-	overflow: hidden; /* Prevent body scrolling */
-}
-
 .routetable{
 background-color:#fff;
 	min-height: 0; /* Enable scroll */
@@ -195,6 +187,13 @@ async function rt_sub(x){
 	await submit2(rt_now);
 }
 
+function submit2(rt){
+ROUTES.forEach((data,i)=>{
+	var id2 = document.getElementById("routename_"+data.co+"_"+data.r+"_"+data.b);
+id2.style.display = data.r.startsWith(rt) ? "block" : "none";
+})
+}
+
 function rt_button_regen(){
 	var validrt = ROUTES_num.filter(w=>w.startsWith(rt_now));
 	var validmove = [];
@@ -213,10 +212,6 @@ function rt_button_regen(){
 	
 }
 
-</script>
-
-<script>
-//v6
 
 var _rtlist={}
 var ROUTES=[];
@@ -225,17 +220,27 @@ _T.fetch("https://raw.githubusercontent.com/996633c/eta2/data/_rtlist.json",q=>{
 
 function getRtList2(){
 var s=[];
-Object.values(_rtlist.CTB).concat(Object.values(_rtlist.KMB)).forEach(w=>{
+
+Object.keys(_rtlist).sort().reduce((w,q)=>
+w.concat(Object.values(_rtlist[q])),[])
+	.forEach(w=>{
 	Object.keys(w.var).forEach(e=>{
-		try{s.push({"co":w.co,"r":w.route,"d":w.var[e].dest_tc,"d_en":w.var[e].dest_en,"b":e,"sf":w.co+"+"+w.route+"+"+e})}catch{}
+		try{s.push({
+			"co":w.co,
+			"r":w.route,
+			"d":w.var[e].dest_tc,
+			"d_en":w.var[e].dest_en,
+			"b":e,
+			"sf":w.co+"+"+w.route+"+"+e,
+			"re":fromRegexp(w.route)})}catch{}
 		if(!ROUTES_num.includes(w.route))ROUTES_num.push(w.route)
 	})
 })
-return s.sort((a,b)=>{return (XXX(a.r) < XXX(b.r) ? 1 :-1)});
+return s.sort((a,b)=>{return (a.re < b.re ? 1 :-1)});
 }
   
 
-function XXX(v) {
+function fromRegexp(v) {
   var Q1 = /[A-Z][0-9]+/;
   if (Q1.exec(v))return v;
     
@@ -246,40 +251,33 @@ function XXX(v) {
 }
 
 function submit(rt){
-document.getElementById("P").innerHTML = "";
+	document.getElementById("P").innerHTML = "";
 
-var INPUT_pend = ROUTES;
-if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
+	var INPUT_pend = ROUTES;
+	if(rt)INPUT_pend = ROUTES.filter(q=>q.r.startsWith(rt));
 
 
-INPUT_pend.forEach((data,i)=>{
-    add_2(data,i)
-});
+	INPUT_pend.forEach((data,i)=>{
+			var id=document.getElementById("P").insertRow(0);
+			id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
+			id.innerHTML = 
+		`<div class="route-item" onclick="window.location.href='v13/route3.html?${data.sf}'">
+
+			<div>
+				<img src="icon/${_T.busIMG(data)}.png" style="width:35px">
+			</div>
+			<div class="route-number">${data.r}</div>
+			<div class="route-info">
+				<div class="destination">${data.d}</div>
+				<div class="destination-en">${data.d_en}</div>
+			</div>
+
+		</div>
+		</div>`;
+	});
 }
 
-function add_2(data,i){
-var id=document.getElementById("P").insertRow(0);
-	id.setAttribute("id", "routename_"+data.co+"_"+data.r+"_"+data.b);
-	id.innerHTML = 
-`<div class="route-item" onclick="window.location.href='v13/route3.html?${data.sf}'">
 
-	<div>
-		<img src="icon/${_T.busIMG(data)}.png" style="width:35px">
-	</div>
-	<div class="route-number">${data.r}</div>
-	<div class="route-info">
-		<div class="destination">${data.d}</div>
-		<div class="destination-en">${data.d_en}</div>
-	</div>
 
-</div>
-</div>`;
-}
 
-function submit2(rt){
-ROUTES.forEach((data,i)=>{
-	var id2 = document.getElementById("routename_"+data.co+"_"+data.r+"_"+data.b);
-id2.style.display = data.r.startsWith(rt) ? "block" : "none";
-})
-}
 </script>
