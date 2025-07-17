@@ -1,92 +1,187 @@
 //Version: 20250424
 
-/*
-header
-    {array} ETA     - Array of ETA data objects
-    {int} ETAID     - Auto-incrementing ID for each ETA data object
 
-    {fun}getETA     - Get an ETA data object by its ID
-    {fun}pushETA    - The new ETA data object
-    {fun}fetch   - Fetch the ETA data from API asynchronously
-    {fun}filterETA  - Remove the ETA data that is older than 1 minute
-
-    {fun}MTR_ETA    - Fetch the ETA data from API asynchronously
-
-    {fun}timeparse  - Parse the ETA time string into a human-readable format
-    {fun}timeparse2 - Format time duration in seconds to a human-readable string
-
-    {fun}Set_Cookie  - Set the cookie by the given name and value
-    {fun}Get_Cookie  - Get the cookie by the given name
-    {fun}Save_Cookie - Save the cookie by the given name, value and path
-    {fun}parseCookie - Parse the cookie by the given name
-
-    {fun}busIMG      - Get the bus image by the given company and route
-*/
 
 /**
  * @namespace _T
  * @description Utility functions for parsing and processing ETA data
  */
+function RawETA(rawdata={},parm={}){
+    //private
+    var co = "" || parm.co;
+    var route = "" || parm.route;
+    var stop = "" || parm.stop;
+    var bound = "" || parm.bound;
+    var seq = "" || parm.seq;
+
+    var data = null;
+    var StopMapper = {
+        CTB_stop: function(){
+            data = rawdata.map(g=>({
+                co:g.co,
+                dest_en:g.dest_en,
+                dest_sc:g.dest_sc,
+                dest_tc:g.dest_tc,
+                dir:g.dir,
+                eta:new Date(g.eta.replace("Z","+08:00")),
+                raweta:g.eta,
+                offset:0,
+
+                eta_timestamp:new Date(g.eta.replace("Z","+08:00")).getTime(),
+                eta_seq:g.eta_seq,
+                rmk_en:g.rmk_en,
+                rmk_sc:g.rmk_sc,
+                rmk_tc:g.rmk_tc,
+                route:g.route,
+                seq:g.seq,
+                stop:g.stop,
+                tdstop:null,
+            })).filter(g=>g.raweta)
+        },
+
+        KMB_route: function(){
+            data = rawdata.map(g=>({
+                co:g.co,
+                dest_en:g.dest_en,
+                dest_sc:g.dest_sc,
+                dest_tc:g.dest_tc,
+                dir:g.dir,
+                eta:g.eta ? new Date(g.eta.replace("Z","+08:00")) : null,
+                raweta:g.eta,
+                offset:0,
+
+                eta_timestamp:g.eta ? new Date(g.eta.replace("Z","+08:00")).getTime() : null,
+                eta_seq:g.eta_seq,
+                rmk_en:g.rmk_en,
+                rmk_sc:g.rmk_sc,
+                rmk_tc:g.rmk_tc,
+                route:g.route,
+                seq:g.seq,
+                stop:null,
+                tdstop:null,
+            }))
+        }
+
+    }
+
+    //public
+    this.route_bus = 0; //How many bus in this stop?
+
+
+    this.formatETA = function(mode){
+        if(!StopMapper[mode])return null;
+        StopMapper[mode]();
+        return this;
+    };
+    this.toString = function(){return JSON.stringify(data)};
+    this.parm = function(){return parm};
+    this.data = function(){return data};
+    this.tag = function(){return co+"_"+route+"_"+stop+"_"+bound+"_"+seq};
+    this.route = route; this.co = co; this.stop = stop; this.bound = bound; this.seq = seq;
+   
+
+    this.calcBusPos = function(/*int*/ timestamp){
+        if(!data || data.length == 0 || !data[0].eta_timestamp)return timestamp;
+        this.route_bus = data.filter(g=>g.eta_timestamp && g.eta_timestamp<timestamp).length;
+        return data[0].eta_timestamp;
+    }
+
+    this.calcOffset = function(/*RawETA*/ old){
+        if(!old)return;
+        let oldData = old.data();
+        function calcDiff(a,b,offset=0){
+            var sum=0,i=0;
+            while(a[i] && b[i+offset]){
+                sum += Math.abs(a[i]-b[i+offset]);
+                i++;
+            }
+            return sum/i;
+        }
+
+        let norm = Array.from({ length: data.length }, (_, h) => [
+            calcDiff(data.map(g => g.eta_timestamp), oldData.map(g => g.eta_timestamp),h),
+            h
+        ]);
+        norm.sort((a,b)=>a[0]-b[0]);
+        let bus_offset = norm[0][1];
+
+        for(var i=0;i<data.length;i++){
+            let index = bus_offset + i;
+            if(!oldData[index])break;
+            data[i].offset = oldData[index].offset + data[i].eta_timestamp - oldData[index].eta_timestamp;
+        }
+    }
+}
+
+function ETAList(){
+    //private
+    List = [];
+    SplitBound = function(obj){
+        var result = [];
+        var parsedBound = [];
+        obj.map(g=>g.dir).forEach(i=>{
+            if (obj.length==0 || parsedBound.includes(i))return;
+            result.push(obj.filter(w=>w.dir==i));
+            parsedBound.push(i);
+            obj = obj.filter(w=>w.dir!=i);
+        })
+        return result;
+    }
+
+    PushETA = function(/*RawETA*/ eta){
+        let OrigIndex = List.length>0 ? List.findIndex(g=>g.tag() == eta.tag()) : -1;
+        if(OrigIndex>-1){
+            eta.calcOffset(List[OrigIndex]);
+            List[OrigIndex] = eta;
+        }else{
+            List.push(eta);
+        }
+    }
+    //public
+    this.PushETA = PushETA;
+    this.data = function(){return List.map(g=>g.data())}
+    this.data2 = function(){return List}
+
+    //Input
+    this.CTB_stop = function(route, stop, seq, callback){
+        _T.fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${stop}/${route}`,((w)=>{
+        SplitBound(w.data).forEach(g=>{
+            PushETA(new RawETA(g,{co:"CTB",route:route,stop:stop,bound:g[0].dir,seq:seq}).formatETA("CTB_stop"))
+            });
+        if(callback)callback(w.data);
+    }));  
+    }
+
+    this.KMB_route = function(route, service, rtstop, bound){
+        _T.fetch(`https://data.etabus.gov.hk/v1/transport/kmb/route-eta/${route}/${service}`,((w)=>{
+        let tmp = [], tmpseq = 0, tmpdir = "";
+        for (var i in w.data){
+            if(tmpseq != w.data[i].seq || tmpdir != w.data[i].dir){
+                if(tmp.length>0){
+                    PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
+                    tmp = [];
+                    tmpseq = w.data[i].seq;
+                    tmpdir = w.data[i].dir;
+                }
+            }
+            tmp.push(w.data[i]);
+        }
+    }));  
+    }
+
+
+    //Output
+    this.byroute = function(co, route, bound){
+        let result = List.filter(g=>g.co==co && g.route==route && g.bound==bound).sort((a,b)=>a.seq-b.seq);
+        var timestamp = -1;
+        result.forEach(g=> timestamp=g.calcBusPos(timestamp));
+        return result;
+    }
+}
+
 var _T = {
     /**
-     * @property {array} ETA - Array of ETA data objects
-     */
-    ETA: [],
-    /**
-     * @property {number} ETAID - Auto-incrementing ID for each ETA data object
-     */
-    ETAID: 0,
-
-    /**
-     * @function getETA
-     * @description Get an ETA data object by its ID
-     * @param {number} id - The ID of the ETA data object
-     * @return {object} The ETA data object
-     */
-    getETA: function(id){
-        return this.ETA.find(w=>w.ID==id);
-    },
-    /**
-     * @function pushETA
-     * @description Push a new ETA data object to the array
-     * @param {object} data - The new ETA data object
-     */
-    pushETA: function(data){
-        var original = this.ETA.find(w=>w.parm==data.parm);
-        if(original){
-            this.ETA.splice(this.ETA.indexOf(original),1);
-
-            data.dict.forEach((key, index) => {
-                let originalETA = original[key];
-                let newETA = data[key];
-                let originalIndex = 0;
-                let newIndex = 0;
-
-                while (originalIndex < originalETA.length && newIndex < newETA.length) {
-                    const originalItem = originalETA[originalIndex];
-                    const newItem = newETA[newIndex];
-                    const originalTime = new Date(originalItem.time.replace("Z","+08:00"));
-                    const originalTime2 = (originalETA[originalIndex+1] ? new Date(originalETA[originalIndex+1].time.replace("Z","+08:00")) : NaN);
-                    const newTime = new Date(newItem.time.replace("Z","+08:00"));
-                    const timeDifference = Math.abs(newTime - originalTime) / (1000 * 60); // time difference in minutes
-
-                    if (timeDifference > 5 || (originalTime2 && Math.abs(originalTime2 - newTime) < Math.abs(originalTime - newTime))) {
-                        originalIndex++;
-                        continue;
-                    }
-
-                    newItem.delta = originalItem.delta + (newTime - originalTime) / 1000;
-                    originalIndex++;
-                    newIndex++;
-                }
-            });
-            
-        }
-        this.ETA.push(data);
-    },
-
-    /**
-     * @function fetchETA
+     * @function fetch
      * @description Fetch the ETA data from API asynchronously 
      * @param {string} theUrl - The URL of the API endpoint
      * @param {function} callback - The callback function to process the response
@@ -150,15 +245,6 @@ var _T = {
     },
 
     /**
-     * @function filter_ETA
-     * @description Remove the ETA data that is older than 1 minute
-     */
-    filter_ETA:function(){
-        // Keep only the data that is newer than 1 minute
-        this.ETA = this.ETA.filter(w=>w.timestamp>=(Date.now()-60000));
-    },
-
-    /**
      * @function MTR_ETA
      * @description Fetch the ETA data from API asynchronously 
      * @param {string} line - The line code of the MTR line
@@ -166,7 +252,7 @@ var _T = {
      * @param {function} callback - The callback function to process the response
      */
     MTR_ETA: function(line, sta, callback){
-        this.fetch(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${line}&sta=${sta}`, function(data){
+        this.fetchETA(`https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php?line=${line}&sta=${sta}`, function(data){
             var s = {
                 "parm":line+"+"+sta,
                 "ID":++(_T.ETAID),
@@ -185,77 +271,6 @@ var _T = {
             if(callback)callback(s,_T.ETAID)
         });
     },
-
-    /**
-     * @function Get_Cookie
-     * @description Get the cookie by the given name
-     * @param {string} value - The name of the cookie
-     * @param {object} noresult - The value returned if the cookie is not found
-     * @returns {object} The value of the cookie
-     */
-    Get_Cookie : function(value,noresult){
-        // Split the cookie string into an array
-        var ck = document.cookie.split("; ");
-        
-        // Filter the array to get the cookie with the given name
-        ck = ck.filter(e=>e.split("=")[0]==value);
-        
-        // If the cookie is found, parse it
-        if(ck.length>0){
-            ck = JSON.parse(ck[0].substring(ck[0].indexOf("=")+1));
-        }else{
-            // If the cookie is not found, return the default value
-            ck = noresult;
-        }
-        
-        // Return the cookie value
-        return ck;
-    },
-
-    /**
-     * @function Set_Cookie
-     * @description Set the cookie by the given name and value
-     * @param {string} name - The name of the cookie
-     * @param {object} value - The value of the cookie 
-     */
-    Set_Cookie : function(value,key){
-        value.map(w=>w.stops = window.btoa(JSON.stringify(w.stops)));
-        document.cookie = `{#0}={#1}; path=/eta/v13/ ; expires ='Wed, 27 Mar 2047 16:00:00 GMT'`.replacement([
-            key,
-            JSON.stringify(value)
-        ])
-    },
-
-    /**
-     * @function Save_Cookie
-     * @description Save the cookie by the given name, value and path
-     * @param {string} key - The name of the cookie
-     * @param {object} value - The value of the cookie
-     * @param {string} path - The path of the cookie
-     */
-    Save_Cookie: function(key,value,path){
-        document.cookie = key+`=`+JSON.stringify(value)+`; path=`+path+` ; expires=`+new Date(2047,2,28).toUTCString();
-        },
-        
-    /**
-     * @function parseCookie
-     * @description Parse the cookie by the given name
-     * @param {string} value - The name of the cookie
-     * @returns {object} The value of the cookie
-     */
-    parseCookie: function(value){
-            // Get the cookie by the given name
-            var cookie = this.Get_Cookie(value,null);
-            
-            // If the cookie is not found, return an empty array
-            if (!cookie)return [];
-            
-            // Parse the cookie
-            cookie.map(w=>w.stops = JSON.parse(window.atob(w.stops)));
-            
-            // Return the value of the cookie
-            return cookie
-        },
 
     /**
      * @function busIMG
@@ -280,3 +295,4 @@ var _T = {
         return data.co;
     },
 }
+

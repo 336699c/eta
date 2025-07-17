@@ -25,3 +25,25 @@ body {
 	justify-content: center;
 	display: flex;
 }
+
+
+
+
+label.offset{
+	padding-left:7px;
+	font-size: 10px;
+	text-align: center;
+	font-weight: 600;
+}
+
+label.off_-1{
+	color:#27ae60;
+}
+
+label.off_1{
+	color:#c0392b;
+}
+
+label.off_NaN{
+	color:#2980b9;
+}
