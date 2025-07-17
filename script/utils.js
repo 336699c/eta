@@ -219,6 +219,7 @@ var _T = {
         let diffSeconds = Math.floor((e - new Date()) / 1000);
         
         if (parm.mode === 1) {
+            if(e instanceof Date)return e.toTimeString().substring(0,8);
             return e.toTimeString().slice(0, 5);
         }
         if (diffSeconds <= 0) 

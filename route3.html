@@ -414,7 +414,6 @@ function apply_eta(s){
 	RT_data.stops.forEach((w,i)=>{
 		if(s[i+1]){s[i+1] = s[i+1].filter(w=>w&&w.eta).sort((a,b)=>{return a.eta<b.eta?-1:1})}
 		if (s[i+1] && s[i+1][0] && new Date(s[i+1][0].eta).getTime() < lastTime){
-			console.log(w,i);
 			document.getElementById("bus_"+w+"_"+(i+1)).innerHTML = `<img src="/eta/icon/${_T.busIMG(s[i+1][0].co,INPUT[1])}.png" style="width:30px"></div>`;
 		}else{
 			//document.getElementById("bus_"+w+"_"+(i+1)).innerHTML = ""
@@ -430,7 +429,7 @@ function format_eta2(f){
 	var n=""
 	f.forEach((w,i)=>{
 		if(isNaN(w.eta))return 1;
-		n+=`<label class="eta_time_${i+1}">` + (i==0?"<b>":"")+eta_All.timeparse(w.eta,TimeDisplay)+(i==0?"<b> ":" ")+(COJOIN_ETA?"<small>"+w.co+" </small>":"")+w.rmk_tc+" </label>"+
+		n+=`<label class="eta_time_${i+1}">` + (i==0?"<b>":"")+_T.timeparse(w.eta,{"mode":TimeDisplay?1:0})+(i==0?"<b> ":" ")+(COJOIN_ETA?"<small>"+w.co+" </small>":"")+w.rmk_tc+" </label>"+
 			`<label class="offset off_${w.offset/Math.abs(w.offset)}">${((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(w.offset/1000)}s
 		</label><br>`;
 	})
@@ -441,7 +440,7 @@ function format_eta(f){
 	if(!f)return ""
 	var n=""
 	f.forEach((w,i)=>{
-		n+=`<label class="eta_time_{#0}">`.replacement([i+1])+(i==0?"<b>":"")+eta_All.timeparse(w.eta,TimeDisplay)+(i==0?"<b> ":" ")+(COJOIN_ETA?"<small>"+w.co+" </small>":"")+w.rmk+`</label><br>`;
+		n+=`<label class="eta_time_{#0}">`.replacement([i+1])+(i==0?"<b>":"")+_T.timeparse(w.eta,{"mode":TimeDisplay?1:0})+(i==0?"<b> ":" ")+(COJOIN_ETA?"<small>"+w.co+" </small>":"")+w.rmk+`</label><br>`;
 	})
 	return n
 }
