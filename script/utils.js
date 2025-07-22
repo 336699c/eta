@@ -157,15 +157,16 @@ function ETAList(){
         let tmp = [], tmpseq = 0, tmpdir = "";
         for (var i in w.data){
             if(tmpseq != w.data[i].seq || tmpdir != w.data[i].dir){
-                if(tmp.length>0){
+                if(tmp.length>0)
                     PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
-                    tmp = [];
-                    tmpseq = w.data[i].seq;
-                    tmpdir = w.data[i].dir;
-                }
+                tmp = [];
+                tmpseq = w.data[i].seq;
+                tmpdir = w.data[i].dir;
             }
             tmp.push(w.data[i]);
         }
+        PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
+
     }));  
     }
 
