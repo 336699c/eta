@@ -214,7 +214,9 @@ var _T = {
         if(parm.small)_S={"m":"<small>分</small>","s":"<small>秒</small>"};
 
         if (!(e instanceof Date)) {
+            try{
             e = new Date(e.replace("Z","+08:00"))
+            }catch(error){return "";}
         }
 
         let diffSeconds = Math.floor((e - new Date()) / 1000);
