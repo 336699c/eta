@@ -159,7 +159,7 @@ function ETAList(){
             if(tmpseq != w.data[i].seq || tmpdir != w.data[i].dir){
                 if(tmp.length>0){
                     PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
-                    tmp = [w.data[i]];
+                    tmp = [];
                     tmpseq = w.data[i].seq;
                     tmpdir = w.data[i].dir;
                 }
