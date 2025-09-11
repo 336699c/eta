@@ -36,7 +36,7 @@ function RawETA(rawdata={},parm={}){
                 seq:g.seq,
                 stop:g.stop,
                 tdstop:null,
-            })).filter(g=>g.raweta)
+            })).sort((g1,g2)=>g1.eta_timestamp-g2.eta_timestamp).filter(g=>g.raweta)
         },
 
         KMB_route: function(){
@@ -57,7 +57,7 @@ function RawETA(rawdata={},parm={}){
                 rmk_tc:g.rmk_tc,
                 route:g.route,
                 seq:g.seq,
-                stop:null,
+                stop:parm.stop,
                 tdstop:null,
             }))
         }
@@ -66,7 +66,15 @@ function RawETA(rawdata={},parm={}){
 
     //public
     this.route_bus = 0; //How many bus in this stop?
-
+    this.handleMerge = function(){
+        //data = data.filter(g=>g.raweta);
+        let stop = data.filter(g=>g.stop);
+        if(stop.length==0)return this;
+        this.seq = stop[0].seq;
+        this.stop = stop[0].stop;
+        data = data.sort((g1,g2)=>g1.eta_timestamp-g2.eta_timestamp);
+        return this;
+    }
 
     this.formatETA = function(mode){
         if(!StopMapper[mode])return null;
@@ -76,9 +84,28 @@ function RawETA(rawdata={},parm={}){
     this.toString = function(){return JSON.stringify(data)};
     this.parm = function(){return parm};
     this.data = function(){return data};
+    this.setdata = function(d){data=d;return this};
     this.tag = function(){return co+"_"+route+"_"+stop+"_"+bound+"_"+seq};
     this.route = route; this.co = co; this.stop = stop; this.bound = bound; this.seq = seq;
    
+    this.formatETAString = function(parm={mode:1, cos:false}){
+        if(!data)return "";
+        var n="";
+        data.forEach((w,i)=>{
+            if(isNaN(w.eta))return 1; //nulleta
+            n+=`<label class="eta_time_${i+1}">` 
+                + (i==0?"<b>":"")
+                + _T.timeparse(w.eta,parm)
+                + (i==0?"<b> ":" ")
+                + (parm.cos?"<small>"+w.co+" </small>":"")
+                + w.rmk_tc
+                +" </label>";
+            
+            if(w.offset!=0) n+=(`<label class="offset off_${w.offset/Math.abs(w.offset)}">${((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(w.offset/1000)}s</label>`)
+            n+= "<br>";
+        });
+        return n
+    }
 
     this.calcBusPos = function(/*int*/ timestamp){
         if(!data || data.length == 0 || !data[0].eta_timestamp)return timestamp;
@@ -89,6 +116,14 @@ function RawETA(rawdata={},parm={}){
     this.calcOffset = function(/*RawETA*/ old){
         if(!old)return;
         let oldData = old.data();
+        if(data.length < oldData.length){
+            //reversely set data offset, ie eg data length = 1; data[1] = oldData[2]; data[0] = oldData[1]; dont use oldData[0]
+            for(var i=data.length-1,j=oldData.length-1;i>=0;i--,j--){
+                data[i].offset = oldData[j].offset + data[i].eta_timestamp - oldData[j].eta_timestamp;
+            }
+            return;
+        }
+
         function calcDiff(a,b,offset=0){
             var sum=0,i=0;
             while(a[i] && b[i+offset]){
@@ -103,6 +138,8 @@ function RawETA(rawdata={},parm={}){
             h
         ]);
         norm.sort((a,b)=>a[0]-b[0]);
+        try{norm[0][1]
+        }catch(error){console.log(data,old,norm);return;}
         let bus_offset = norm[0][1];
 
         for(var i=0;i<data.length;i++){
@@ -116,6 +153,7 @@ function RawETA(rawdata={},parm={}){
 function ETAList(){
     //private
     List = [];
+    mergeco_timestamp = -1;
     SplitBound = function(obj){
         var result = [];
         var parsedBound = [];
@@ -143,12 +181,15 @@ function ETAList(){
     this.data2 = function(){return List}
 
     //Input
-    this.CTB_stop = function(route, stop, seq, callback){
+    this.CTB_stop = function(route, stop, seq, callback, bound){
+        if(bound)console.log(bound);
         _T.fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${stop}/${route}`,((w)=>{
         SplitBound(w.data).forEach(g=>{
+            if(bound && g[0].dir != bound)return;
             PushETA(new RawETA(g,{co:"CTB",route:route,stop:stop,bound:g[0].dir,seq:seq}).formatETA("CTB_stop"))
             });
         if(callback)callback(w.data);
+        mergeco_timestamp = -1;
     }));  
     }
 
@@ -158,22 +199,60 @@ function ETAList(){
         for (var i in w.data){
             if(tmpseq != w.data[i].seq || tmpdir != w.data[i].dir){
                 if(tmp.length>0)
-                    PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
+                    PushETA(new RawETA(tmp,{co:"KMB",route:route,bound:tmpdir,seq:tmpseq,stop:((bound==tmpdir||bound=="null")? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
                 tmp = [];
                 tmpseq = w.data[i].seq;
                 tmpdir = w.data[i].dir;
             }
             tmp.push(w.data[i]);
         }
-        PushETA(new RawETA(tmp,{co:"KMB",route:route,stop:"",bound:tmpdir,seq:tmpseq,stop:(bound==tmpdir? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
-
+        PushETA(new RawETA(tmp,{co:"KMB",route:route,bound:tmpdir,seq:tmpseq,stop:((bound==tmpdir||bound=="null")? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
+        mergeco_timestamp = -1;
     }));  
+    }
+
+    this.lrtfeeder = function(route, language="zh",bound){
+        fetch("https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule", {
+        "headers": {
+            "accept": "*/*",
+            "content-type": "application/json",
+            "sec-fetch-site": "cross-site"
+        },
+        "body": JSON.stringify({"language":"zh","routeName":"K58"}),
+        "method": "POST",
+        "mode": "cors",
+        "credentials": "omit"
+        });
     }
 
 
     //Output
+    mergcotmp = {};
     this.byroute = function(co, route, bound){
-        let result = List.filter(g=>g.co==co && g.route==route && g.bound==bound).sort((a,b)=>a.seq-b.seq);
+        let result = List.filter(g=>(co.includes(g.co.toLowerCase())) && g.route==route && g.stop).sort((a,b)=>a.seq-b.seq);
+        if(co.length>1){
+            if(mergeco_timestamp==-1){
+
+            let tmp = {};
+            result.forEach(g=>{
+                //console.log(g.data())
+                if(g.data().length>0)
+                if(!tmp[g.seq])tmp[g.seq]=g.data();
+                else {
+                    tmp[g.seq] = tmp[g.seq].concat(g.data());
+                }
+            });
+            console.log(tmp);
+
+            result = Object.values(tmp).map(g=>new RawETA().setdata(
+                g.filter(g=>g.raweta && (g.dir==bound[g.co.toLowerCase()] || bound[g.co.toLowerCase()]=="OI" || bound[g.co.toLowerCase()] == "IO"))
+            ).handleMerge());
+            mergcotmp = result; mergeco_timestamp = 1;
+            console.log("Merge");
+            }else{
+                result = mergcotmp;
+            }
+        }
         var timestamp = -1;
         result.forEach(g=> timestamp=g.calcBusPos(timestamp));
         return result;
@@ -222,8 +301,8 @@ var _T = {
         let diffSeconds = Math.floor((e - new Date()) / 1000);
         
         if (parm.mode === 1) {
-            if(e instanceof Date)return e.toTimeString().substring(0,8);
-            return e.toTimeString().slice(0, 5);
+            let result = (e instanceof Date ? e.toTimeString().substring(0,8) : e.toTimeString().slice(0, 5));
+            return `${result.substring(0,5)}<small style="padding-left:2px;"><small>${result.substring(6)}</small></small>`;
         }
         if (diffSeconds <= 0) 
             return `${parm.jj?"即將抵達":""} -${Math.abs(diffSeconds)}${_S.s}`;
@@ -287,6 +366,7 @@ var _T = {
      */
     busIMG: function(data,_){
         if(_)data = {"co":data, "r":_}; //override
+        try{data.co = data.co.toUpperCase();}catch(error){}
         // Check if the company is "CTB" and the route starts with "A" or "NA"
         if (data.co === "CTB" && /^(A|NA)/.test(data.r)) {
             return "ctb_airport";
@@ -298,5 +378,15 @@ var _T = {
         // Default case: return the company code
         return data.co;
     },
+
+    routeREGEXP: function(v) {
+    var Q1 = /[A-Z][0-9]+/;
+    if (Q1.exec(v))return v;
+        
+    var YYY = parseInt(v).toString().padStart(4, '0');
+    var mmm = /[A-Z]/g;
+    var nnn = mmm.exec(v);
+    return YYY + (nnn ? nnn[0] : '');
+    }
 }
 
