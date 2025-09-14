@@ -182,7 +182,6 @@ function ETAList(){
 
     //Input
     this.CTB_stop = function(route, stop, seq, callback, bound){
-        if(bound)console.log(bound);
         _T.fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${stop}/${route}`,((w)=>{
         SplitBound(w.data).forEach(g=>{
             if(bound && g[0].dir != bound)return;

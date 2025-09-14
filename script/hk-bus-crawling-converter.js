@@ -9,6 +9,13 @@ let result = await fetch("https://raw.githubusercontent.com/hkbus/hk-bus-crawlin
 data = await result.json();
 }
 
+function toSentenceCase(str){
+    //check if the string is already sentence case
+    if(str == str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); }))
+        return str;
+    //turn the string to sentence case
+    return str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+}
 this.generateRouteList = async function(div){
     var ROUTES_num = [];
     await reload();
@@ -19,7 +26,7 @@ this.generateRouteList = async function(div){
         if(!ROUTES_num.includes(g.route))ROUTES_num.push(g.route);
         let co = g.co[0];
         if(g.co.length==2 && g.co.includes("kmb") && g.co.includes("ctb"))co = "kmb+ctb";
-        k.add(co, g.route, g.bound[co]?g.bound[co]:g.bound, g.dest.zh, g.dest.en, key, g.serviceType)
+        k.add(co, g.route, g.bound[co]?g.bound[co]:g.bound, g.dest.zh, toSentenceCase(g.dest.en), key, g.serviceType)
     });
     k.gen();
     return [k,ROUTES_num];
@@ -28,6 +35,17 @@ this.generateRouteList = async function(div){
 this.data = async function(div){
     await reload();
     return data;
+}
+
+this.getStopData = function(id){
+    let n = data.stopList[id];
+    return {
+        lat: n.location.lat,
+        long: n.location.lng,
+        name_en: n.name.en,
+        name_tc: n.name.zh,
+        stop: id
+    }
 }
 
 this.getSameStop = function(id){
@@ -85,12 +103,20 @@ this.add = function(co, route, bound, dest_tc, dest_en, href, ss){
 }
 
 this.gen = function(){
+    console.log(list);
     list = list.sort((a,b)=>{
-        const key = ["re","co","bound","serviceType"];
+        const key = ["re","co","bound","serviceType",];
         
         for (var j of key){
-            if(j=="bound" && a[j]!=b[j])return (a[j]<b[j]?-1:1);
+            if(j=="bound"){
+                let ab = Object.values(a[j])[0];
+                let bb = Object.values(b[j])[0];
+                if(ab!=bb)return (ab>bb?1:-1);
+            }
             if(j=="co" && a[j]!=b[j])return (colist.indexOf(b[j]) < colist.indexOf(a[j]))? -1 : 1;
+            if(j=="serviceType" && a[j]!=b[j]){
+                return (a[j]<b[j]?1:-1);
+            }
 
             if(a[j]!=b[j])return (a[j]<b[j]?1:-1);
         }

@@ -233,7 +233,7 @@ ck.forEach((data,i)=>{
     Row.insertCell(0).innerHTML = 
 	`<button style="text-align: left; width:100%; border:1px" onclick="addBookMark(${i},'${xid}')">
 	<pre style="display: inline;font-size:20px;">書簽${i} </pre>
-	<label style="display: inline;font-size:10px;"> ${data.stops.map(w=>_stoplist[w].data.name_tc).join("、<br>")} </label>
+	<label style="display: inline;font-size:10px;"> ${data.stops.map(w=>BusCrawling.getStopData(w).name_tc).join("、<br>")} </label>
 	</button>`
     });
 	
@@ -248,11 +248,11 @@ document.getElementById("overlay").style.display = "block";
 function addBookMark(id,value){
 	var cookie2 = parseCookie("bookmark");
 	if(cookie2[id] && cookie2[id].stops.includes(value)){
-		alert(`書簽#${id} 已包含 ${_stoplist[value].data.name_tc}，未能設置書簽`);
+		alert(`書簽#${id} 已包含 ${BusCrawling.getStopData(value).name_tc}，未能設置書簽`);
 		return;
 	}
 	
-	var value2 = _stoplist[value].alt.concat([value]);
+	var value2 = BusCrawling.getSameStop(value);
 	if(cookie2[id])value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
 	var repeat2=[];
 	value2.forEach(w=>{if(!repeat2.includes(w))repeat2.push(w)});
@@ -262,7 +262,7 @@ function addBookMark(id,value){
 	else cookie2[id] = {"stops":repeat2,"preference":{"time":0,"nort":[]}};
 	SaveCookie(cookie2,"bookmark");
 	overlay_off();
-	alert(`已新增 ${_stoplist[value].data.name_tc} 至書簽#${id}`);
+	alert(`已新增 ${BusCrawling.getStopData(value).name_tc} 至書簽#${id}`);
 }
 </script>
 
@@ -274,12 +274,8 @@ BusCrawling.data().then(res=>{BusCrawlingData=res;regen()});
 var ETAList = new ETAList();
 var RT_dt = {};
 
-
-var RT_data2;
 var RT_data = [];
-var RT_data3 = null;
-var INPUT = document.location.href.split("?")[1].split("+");
-var _rtlist2=[];
+
 
 //MODE_1 byroute INIT
 var TimeDisplay = false;
@@ -310,11 +306,7 @@ function regen(){
 	RT_dt.repeat = RT_dt.stops.filter((w,i)=>RT_dt.stops.indexOf(w) != i);
 	console.log(RT_dt.repeat);
 
-	RT_data2 = BusCrawlingData.routeList[decodeURI(document.location.href.split("?")[1])];
-	RT_data = Object.values(RT_data2.stops)[0];
-
-
-	INPUT = [RT_data2.co.join("+").toUpperCase(),RT_data2.route,Object.values(RT_data2.bound)[0], RT_data2.serviceType];
+	RT_data = Object.values(RT_dt.data.stops)[0];
 
 	var resultT = document.getElementById("rttable").insertRow();
 	var s3 = resultT.insertCell(0);
@@ -329,19 +321,19 @@ function regen(){
 	
 	s4.innerHTML = `<button class="TimerSettings" id="TimerSettings" onclick="TimerSettings()"><img src="/eta/icon/time_cd.png" class="TimerDisplay img2"></button>`
 	document.title = `${RT_dt.route}  ${RT_dt.data.dest.zh}`;
-	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>${INPUT[1].padEnd(4," ")}</b> <label style="font-size:0.75em"><small><small>往 </small></small>${RT_data2.dest.zh}</label></label>`
+	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>${RT_dt.route.padEnd(4," ")}</b> <label style="font-size:0.75em"><small><small>往 </small></small>${RT_dt.data.dest.zh}</label></label>`
 	s1.className ="s1";
 	s2.className ="s2";
 	s3.className ="s3";
 	s4.className ="s4";
-	s1.innerHTML = `<img src="/eta/icon/${_T.busIMG(INPUT[0],INPUT[1])}.png" style="width:30px">`
+	s1.innerHTML = `<img src="/eta/icon/${_T.busIMG(RT_dt.co,RT_dt.route)}.png" style="width:30px">`
 	
 	var stoplist = document.getElementById("stoptable");
 	RT_data.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
 		s.innerHTML = `<button onclick="click2('${w}')" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
-			<label class="stopname2"><big>${BusCrawlingData.stopList[w].name.zh}</big>${RT_data2.fares&&RT_data2.fares[i]?"<br>車費: $"+RT_data2.fares[i]:""}<br><small><small>${w}${RT_dt.costops?" "+Object.values(RT_data2.stops)[1][i]:""}</small></small></label></td></div>
+			<label class="stopname2"><big>${BusCrawlingData.stopList[w].name.zh}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>車費: $"+RT_dt.data.fares[i]:""}<br><small><small>${w}${RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:""}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
 	});
 	getETA();
@@ -359,7 +351,7 @@ function CTB_eta(rt,bound){
 		ETAList.CTB_stop(rt,w,i+1,g=>{
 			counter--;
 			if (counter==0)apply_eta();
-		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : null);
+		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : RT_dt.bounds.ctb);
 		if(RT_dt.repeat && RT_dt.repeat.includes(w))rp.push(w);
 	})
 }
@@ -373,10 +365,10 @@ function apply_eta(s){
 				return "";
 			break;
 			case 1:
-				return `<img src="/eta/icon/${_T.busIMG(w.data()[0].co,INPUT[1])}.png" style="width:30px">`;
+				return `<img src="/eta/icon/${_T.busIMG(w.data()[0].co,RT_dt.route)}.png" style="width:30px">`;
 			break;
 			default:
-				return `<div style="position:relative"><img src="/eta/icon/${_T.busIMG(w.data()[0].co,INPUT[1])}.png" style="width:30px; filter:brightness(60%)">
+				return `<div style="position:relative"><img src="/eta/icon/${_T.busIMG(w.data()[0].co,RT_dt.route)}.png" style="width:30px; filter:brightness(60%)">
 					<div style="position:absolute;left: 7px;top: 1px"><span style="font-size:18px;font-weight:bold;color:#fff;">
 						<small><small>x</small></small>${w.route_bus}
 						</span></div>
@@ -420,7 +412,7 @@ document.getElementById("stop_"+s).innerHTML = `
 	</tr>
 </table>
 <label style="font-size:24px"></label>
-<iframe src="${"/eta/v13/bystop.html?color=1&stops="+RemoveSame(BusCrawling.getSameStop(s))+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]}" id="iframe_stop_${s}"></iframe>
+<iframe src="${"/eta/v13/bystop.html?color=1&stops="+BusCrawling.getSameStop(s)+"&CHG="+RT_dt.co+"_"+RT_dt.route+"_"+RT_dt.bound}" id="iframe_stop_${s}"></iframe>
 <div id="div_stop_${s}"></div>
 </div>
 `
@@ -448,7 +440,7 @@ function iframe_map_handler(s){
 	}).addTo(map);
 
 	// Target's GPS coordinates.
-	var stopdetails = _stoplist[s].data;
+	var stopdetails = BusCrawling.getStopData(s);
 	var target = L.latLng(stopdetails.lat, stopdetails.long);
 
 	// Set map's center to target with zoom 14.
@@ -459,11 +451,12 @@ function iframe_map_handler(s){
 	
 	var points = [];
 	RT_data.forEach((w,id)=>{
-		var marker2 = L.marker(L.latLng(_stoplist[w].data.lat, _stoplist[w].data.long))
+		let currstopdata = BusCrawling.getStopData(w);
+		var marker2 = L.marker(L.latLng(currstopdata.lat, currstopdata.long))
 		marker2.addTo(map);
-		points.push([_stoplist[w].data.lat, _stoplist[w].data.long]);
+		points.push([currstopdata.lat, currstopdata.long]);
 	
-		var popup = marker2.bindPopup((id+1)+". "+_stoplist[w].data.name_tc);
+		var popup = marker2.bindPopup((id+1)+". "+currstopdata.name_tc);
 		if (s == w)popup.openPopup();
 	});
 	
@@ -479,16 +472,8 @@ function iframe_map_handler(s){
 function iframe_handler(s,t){
 	$('#iframe_stop_'+s).show();
 	$('#div_stop_'+s).hide();
-	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+RemoveSame(BusCrawling.getSameStop(s))+"&CHG="+INPUT[0]+"_"+INPUT[1]+"_"+INPUT[2][0]);
+	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+BusCrawling.getSameStop(s)+"&CHG="+RT_dt.co+"_"+RT_dt.route+"_"+RT_dt.bound);
 }
-
-function RemoveSame(f,s){
-if(s)f.push(s);
-var tmp = [];
-f.forEach(w=>{if(!tmp.includes(w))tmp.push(w)});
-return tmp;
-}
-
 
 setInterval(function (){
 	try{
@@ -507,10 +492,10 @@ getETA()
 
 function getETA(){
 	if (RT_data && RT_dt.costops){
-		ETAList.KMB_route(INPUT[1],INPUT[3],RT_data,RT_dt.bounds.kmb);
-		CTB_eta(INPUT[1],INPUT[2]);
-	}else if (INPUT[0]=="KMB"){
-		ETAList.KMB_route(INPUT[1],INPUT[3],RT_data,INPUT[2])
+		ETAList.KMB_route(RT_dt.route,RT_dt.serviceType,RT_data,RT_dt.bounds.kmb);
+		CTB_eta(RT_dt.route,RT_dt.bounds.ctb);
+	}else if (RT_dt.co=="KMB"){
+		ETAList.KMB_route(RT_dt.route,RT_dt.serviceType,RT_data,RT_dt.bounds.kmb)
 	}else if (RT_dt.co=="CTB"){
 		CTB_eta(RT_dt.route,RT_dt.bound)
 	}else if (RT_dt.co=="CTB"){
