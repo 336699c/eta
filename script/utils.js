@@ -59,7 +59,32 @@ function RawETA(rawdata={},parm={}){
                 stop:parm.stop,
                 tdstop:null,
             }))
-        }
+        },
+
+        LRT_feeder: function(){
+            data = rawdata.map((g,i)=>({
+                co:g.co,
+                dest_en:null,
+                dest_sc:null,
+                dest_tc:null,
+                dir:g.lineRef,
+                eta:(g.arrivalTimeInSecond&&g.arrivalTimeInSecond!="108000") ? new Date(Date.now()+parseInt(g.arrivalTimeInSecond)*1000) : (g.departureTimeInSecond? new Date(Date.now()+parseInt(g.departureTimeInSecond)*1000) : null),
+                raweta:g.arrivalTimeInSecond,
+                rawDepart: g.departureTimeInSecond,
+                offset:0,
+                eta_seq:i,
+                rmk_en:g.isScheduled,
+                rmk_sc:g.isScheduled,
+                rmk_tc:(g.isScheduled==1?"未開出 ":"")+` <small>#</small>${g.busId}`,
+                busLocation:g.busLocation,
+                route:parm.route,
+                seq:parm.seq,
+                stop:parm.busStopId,
+            }));
+            data.eta_timestamp = +data.eta;
+        },
+
+        
 
     }
 
@@ -209,17 +234,23 @@ function ETAList(){
     }));  
     }
 
-    this.lrtfeeder = function(route, language="zh",bound){
+    this.lrtfeeder = function(route, stops, language="zh"){
         fetch("https://rt.data.gov.hk/v1/transport/mtr/bus/getSchedule", {
         "headers": {
             "accept": "*/*",
             "content-type": "application/json",
             "sec-fetch-site": "cross-site"
         },
-        "body": JSON.stringify({"language":"zh","routeName":"K58"}),
+        "body": JSON.stringify({"language":language,"routeName":route}),
         "method": "POST",
         "mode": "cors",
         "credentials": "omit"
+        }).then(w=>w.json()).then(w=>{
+            console.log(w);
+            w.busStop.forEach(g=>{
+                if(!stops.includes(g.busStopId))return;
+                PushETA(new RawETA(g.bus,{co:"LRTFEEDER",route:w.routeName,bound:null,seq:stops.indexOf(g.busStopId)+1,stop:g.busStopId}).formatETA("LRT_feeder"))
+            })
         });
     }
 

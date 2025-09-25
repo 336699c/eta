@@ -258,6 +258,10 @@ bookmarks.forEach((data,i)=>{
 	
 document.getElementById("overlay").style.display = "block";
 }
+
+function overlay_off(){
+	document.getElementById("overlay").style.display = "none";
+}
 </script>
 
 <script>
@@ -490,8 +494,8 @@ function getETA(){
 		CTB_eta(RT_dt.route,RT_dt.bounds.ctb);
 	}else if (RT_dt.co=="KMB"){
 		ETAList.KMB_route(RT_dt.route,RT_dt.serviceType,RT_data,RT_dt.bounds.kmb)
-	}else if (RT_dt.co=="CTB"){
-		CTB_eta(RT_dt.route,RT_dt.bound)
+	}else if (RT_dt.co=="LRTFEEDER"){
+		ETAList.lrtfeeder(RT_dt.route,RT_dt.stops)
 	}else if (RT_dt.co=="CTB"){
 		CTB_eta(RT_dt.route,RT_dt.bound)
 	}
