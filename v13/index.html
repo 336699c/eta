@@ -31,7 +31,7 @@ background-color:#0000
 window.onload = function(){
     let a = parseCookie("bookmark");
     if(a && localStorage.getItem('bookmarks')===null){
-        localStorage.setItem('bookmarks', JSON.stringify(a.map((g,i)=>({name:`書簽 ${i}`,stops:g.stops}))));
+        localStorage.setItem('bookmarks', JSON.stringify(a.map((g,i)=>({name:`書簽 ${i}`,stops:[g.stops]}))));
         alert("請使用新主頁");
         window.location.href="/eta";
     };
