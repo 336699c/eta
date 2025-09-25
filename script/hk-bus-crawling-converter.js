@@ -67,24 +67,25 @@ var tmpdict = {};
 const colist = ["kmb+ctb","ctb","kmb","nlb","lrtfeeder"];
 
 function chkdiff(orig, newr, routing){
-let data = BusCrawlingData;
-let orig_rtlist,new_rtlist;
-let tmpstr = "";
-try{
-orig_rtlist = Object.values(data.routeList[orig].stops)[0];
-new_rtlist = Object.values(data.routeList[newr].stops)[0];
-}catch(error){return ""}
+    let data = BusCrawlingData;
+    let orig_rtlist,new_rtlist;
+    let tmpstr = "";
+    try{
+    orig_rtlist = Object.values(data.routeList[orig].stops)[0];
+    new_rtlist = Object.values(data.routeList[newr].stops)[0];
+    }catch(error){return ""}
 
-//orig not same
+    //orig not same
 
-if(orig_rtlist[0]!=new_rtlist[0])tmpstr = `<small>[${routing}] ${data.stopList[new_rtlist[0]].name.zh}開出</small>`;
+    if(orig_rtlist[0]!=new_rtlist[0])tmpstr = `<small>[${routing}] ${data.stopList[new_rtlist[0]].name.zh}開出</small>`;
 
-let stop=0,stopname="";
-try{
-stop = new_rtlist.filter(g=>!orig_rtlist.includes(g))[tmpstr?1:0];
-stopname = data.stopList[stop].name.zh;
-}catch(error){}
-return "<br>"+tmpstr+ "<small>"+(tmpstr?",":`[${routing}]`)+` 經: ${stopname}</small>`;
+    let stop=0,stopname="";
+    try{
+    stop = new_rtlist.filter(g=>!orig_rtlist.includes(g))[tmpstr?1:0];
+    stopname = data.stopList[stop].name.zh;
+    }catch(error){}
+    if(!tmpstr && !stopname)return "";
+    return tmpstr+ "<small>"+(tmpstr?",":`[${routing}]`)+` 經: ${stopname}</small>`;
 }
 
 this.add = function(co, route, bound, dest_tc, dest_en, href, ss){
@@ -96,7 +97,7 @@ this.add = function(co, route, bound, dest_tc, dest_en, href, ss){
     if(ss==1){
         tmpdict[co+"_"+route+"_"+bound] = href;
     }else{
-        data.dest_tc += " "+chkdiff(tmpdict[co+"_"+route+"_"+bound], href, ss)
+        data.rmk = chkdiff(tmpdict[co+"_"+route+"_"+bound], href, ss)
     }
 
     if(colist.includes(co))list.push(data);
@@ -125,6 +126,10 @@ this.gen = function(){
     var done = [];
     list.forEach(data=>{
         var id=div.insertRow(0);
+
+        const language = localStorage.getItem('language') || 'tc';
+        const bilingual = localStorage.getItem('bilingual') === 'true';
+
         id.setAttribute("id", "route_"+data.id);
                 id.innerHTML = 
             `<div class="route-item" onclick="window.location.href='route3.html?${data.href}'">
@@ -134,8 +139,9 @@ this.gen = function(){
                 </div>
                 <div class="route-number">${data.route}</div>
                 <div class="route-info">
-                    <div class="destination">${data.dest_tc}</div>
-                    <div class="destination-en">${data.dest_en}</div>
+                    <div class="destination">${data["dest_"+language]}</div>
+
+                    <div class="destination-en">${(bilingual)?data.dest_en+"<br>":""}${data.rmk?data.rmk:""}</div>
                 </div>
 
             </div>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>巴士到站預報</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        a{
+            text-decoration: none;
+        }
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 10px 0 10px 0;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #34495e;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .main-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #8e44ad;
+            transform: translateY(-2px);
+        }
+        
+        .btn-tertiary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-tertiary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+            color: #2c3e50;
+        }
+        
+        .bookmarks {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .bookmark {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .bookmark:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
+        
+        .bookmark-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .station-info {
+            flex: 1;
+            padding-right: 15px;
+        }
+        
+        .station-name {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .station-additional {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .bus-info {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .bus-list {
+            list-style: none;
+        }
+        
+        .bus-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f2f6;
+        }
+        
+        .bus-item:last-child {
+            border-bottom: none;
+        }
+        
+        .bus-route {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .bus-time {
+            color: #e74c3c;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .soon {
+            color: #27ae60;
+        }
+        
+        .bookmark-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        
+        .btn-go {
+            padding: 8px 16px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-go:hover {
+            background: #219653;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+            transition: all 0.3s ease;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .advanced-settings {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+        
+        .advanced-settings.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* 語言選擇框的動畫樣式 */
+        #language-group {
+            transition: all 0.4s ease;
+            overflow: hidden;
+            max-height: 100px;
+            opacity: 1;
+        }
+        
+        #language-group.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+            padding: 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 24px;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            
+            .bookmark-content {
+                flex-direction: column;
+            }
+            
+            .station-info, .bus-info {
+                width: 100%;
+                padding-right: 0;
+            }
+            
+            .station-info {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>歡迎使用 巴士到站預報</h1>
+            <p class="subtitle">實時獲取巴士到站信息，節省您的寶貴時間</p>
+        </header>
+        
+        <div class="main-actions">
+            <a class="btn btn-primary" href="route2.html">
+                <i class="fas fa-search"></i> 查詢巴士路線
+            </a>
+            <button class="btn btn-secondary" onclick="showSettings()">
+                <i class="fas fa-cog"></i> 設置
+            </button>
+        </div>
+        
+        <h2 class="section-title">巴士站書籤</h2>
+        
+        <div class="bookmarks" id="bookmarks-container">
+        </div>
+        
+        <div class="modal" id="settings-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>應用設置</h3>
+                    <span class="close" onclick="closeModal('settings-modal')">&times;</span>
+                </div>
+                <div class="form-group" id="language-group">
+                    <label>語言選擇</label>
+                    <select id="language" class="btn" style="width: 100%;">
+                        <option value="tc" selected>中文</option>
+                        <option value="en">英文</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>倒數時間格式</label>
+                    <select id="time-format" class="btn" style="width: 100%;">
+                        <option value="minutes" selected>分鐘數顯示</option>
+                        <option value="hms">時:分:秒</option>
+                        <option value="hm">時:分</option>
+                    </select>
+                </div>
+                <!--
+                <div class="form-group">
+                    <label>書籤設置</label>
+                    <div>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="openBookmarkSettings()">
+                            <i class="fas fa-external-link-alt"></i> 打開書籤設置
+                        </button>
+                    </div>
+                </div>
+                -->
+                <!-- 進階設置按鈕 -->
+                <div class="form-group">
+                    <button class="btn btn-tertiary" style="width: 100%;" onclick="toggleAdvancedSettings()">
+                        <i class="fas fa-cogs"></i> 進階設置
+                        <i class="fas fa-chevron-down" id="advanced-toggle-icon" style="margin-left: auto;"></i>
+                    </button>
+                </div>
+                
+                <!-- 進階設置內容 -->
+                <div class="advanced-settings" id="advanced-settings">
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="bilingual-setting">
+                            <label for="bilingual-setting">雙語顯示</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="stop-number-setting">
+                            <label for="stop-number-setting">顯示站位編號</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="saveSettings()">保存設置</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="script/utils.js"></script>
+    <script src="script/hk-bus-crawling-converter.js"></script>
+    
+    <script>
+        var BusCrawling = new BusCrawling();
+        BusCrawling.data().then(res=>{renderBookmarks()});
+        let bookmarks = localStorage.getItem('bookmarks') || "[]";
+        bookmarks = JSON.parse(bookmarks);
+        [
+            {
+                name: "上班路線",
+                stops: "九龍城轉車站-富豪東方酒店",
+                additionalStops: "太子道東, 富豪東方酒店",
+                buses: [
+                    { route: "101", destination: "觀塘", time: "3分鐘" },
+                    { route: "111", destination: "中環", time: "5分鐘" },
+                    { route: "116", destination: "鰂魚涌", time: "8分鐘" }
+                ]
+            },
+        ];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            //renderBookmarks();
+            loadSettings();
+            
+            const bilingualCheckbox = document.getElementById('bilingual-setting');
+            const languageGroup = document.getElementById('language-group');
+            
+            bilingualCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    languageGroup.classList.add('collapsed');
+                } else {
+                    languageGroup.classList.remove('collapsed');
+                }
+            });
+        });
+        
+        function renderBookmarks() {
+            const container = document.getElementById('bookmarks-container');
+            container.innerHTML = '';
+            
+            if (bookmarks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; padding: 20px;">暫無書籤</p>';
+                return;
+            }
+            
+            bookmarks.forEach((bookmark,i) => {
+                const bookmarkEl = document.createElement('div');
+                bookmarkEl.className = 'bookmark';
+                
+                bookmarkEl.innerHTML = `
+                    <div class="bookmark-content">
+                        <div class="station-info">
+                            <div class="station-name">${bookmark.name}</div>
+                            <div class="station-additional">${bookmark.stops.map(g=>BusCrawling.getStopData(g[0]).name_tc).join("<br>")}</div>
+                        </div>
+                        <div class="bus-info">
+                            <ul class="bus-list" id="bus_list_${i}">
+
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                bookmarkEl.addEventListener('click', function() {
+                    window.location.href="bystop.html?color=1&stops="+bookmark.stops.flat().join(",");
+                    //window.location.href="bystop.html?color=1&bkmark="+i;
+                });
+                
+                container.appendChild(bookmarkEl);
+            });
+        }
+        
+        function f(header, sname, href, rtdata) {
+            console.log('導航參數:', { header, sname, href, rtdata });
+            
+            alert(`即將前往 ${header} 的詳細頁面\n站名: ${sname.join(', ')}`);
+            
+            // window.location.href = href;
+        }
+        
+        function showSettings() {
+            loadSettings();
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        function openBookmarkSettings() {
+            alert('書籤設置功能將在後續版本中提供');
+        }
+        
+        function toggleAdvancedSettings() {
+            const advancedSettings = document.getElementById('advanced-settings');
+            const toggleIcon = document.getElementById('advanced-toggle-icon');
+            
+            if (advancedSettings.classList.contains('show')) {
+                advancedSettings.classList.remove('show');
+                toggleIcon.className = 'fas fa-chevron-down';
+            } else {
+                advancedSettings.classList.add('show');
+                toggleIcon.className = 'fas fa-chevron-up';
+            }
+        }
+        
+        function loadSettings() {
+            const language = localStorage.getItem('language') || 'tc';
+            document.getElementById('language').value = language;
+            
+            const timeFormat = localStorage.getItem('timeFormat') || 'minutes';
+            document.getElementById('time-format').value = timeFormat;
+            
+            const bilingual = localStorage.getItem('bilingual') === 'true';
+            document.getElementById('bilingual-setting').checked = bilingual;
+            
+            const stopNumber = localStorage.getItem('stopNumber') === 'true';
+            document.getElementById('stop-number-setting').checked = stopNumber;
+            
+            // 根據雙語設置折疊語言選擇框
+            const languageGroup = document.getElementById('language-group');
+            if (bilingual) {
+                languageGroup.classList.add('collapsed');
+            } else {
+                languageGroup.classList.remove('collapsed');
+            }
+        }
+        
+        function saveSettings() {
+            const language = document.getElementById('language').value;
+            const timeFormat = document.getElementById('time-format').value;
+            const bilingual = document.getElementById('bilingual-setting').checked;
+            const stopNumber = document.getElementById('stop-number-setting').checked;
+            
+            localStorage.setItem('language', language);
+            localStorage.setItem('timeFormat', timeFormat);
+            localStorage.setItem('bilingual', bilingual);
+            localStorage.setItem('stopNumber', stopNumber);
+            
+            closeModal('settings-modal');
+            
+            alert('設置已保存！');
+            
+            // 應用雙語設置
+            if (bilingual) {
+                applyBilingualSettings();
+            }
+            
+            // 應用站位編號設置
+            if (stopNumber) {
+                applyStopNumberSettings();
+            }
+        }
+        
+        function applyBilingualSettings() {
+            // 這裡可以實現雙語顯示的具體邏輯
+            console.log('雙語顯示已啟用');
+        }
+        
+        function applyStopNumberSettings() {
+            // 這裡可以實現顯示站位編號的具體邏輯
+            console.log('站位編號顯示已啟用');
+        }
+
+                                        /*${bookmark.buses.map(bus => `
+                                <li class="bus-item">
+                                    <span class="bus-route">${bus.route} - ${bus.destination}</span>
+                                    <span class="bus-time ${parseInt(bus.time) <= 3 ? 'soon' : ''}">${bus.time}</span>
+                                </li>
+                                `).join('')}*/
+    </script>
+</body>
+</html>

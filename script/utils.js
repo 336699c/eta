@@ -1,5 +1,4 @@
-//Version: 20250424
-
+//Version: 20250923
 
 
 /**
@@ -184,7 +183,7 @@ function ETAList(){
     this.CTB_stop = function(route, stop, seq, callback, bound){
         _T.fetch(`https://rt.data.gov.hk/v2/transport/citybus/eta/ctb/${stop}/${route}`,((w)=>{
         SplitBound(w.data).forEach(g=>{
-            if(bound && g[0].dir != bound)return;
+            if(bound && (bound!="OI" && g[0].dir != bound))return;
             PushETA(new RawETA(g,{co:"CTB",route:route,stop:stop,bound:g[0].dir,seq:seq}).formatETA("CTB_stop"))
             });
         if(callback)callback(w.data);
