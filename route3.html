@@ -187,11 +187,15 @@ margin:0px;
 button.TimerSettingsLong{
 	width:70px;
 }
+
+button.bookmark{
+	text-align: left; width:100%; border:1px
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="/eta/v13/script/main.js"></script>
-<script src="script/hk-bus-crawling-converter.js"></script>
+
 
 </head>
 <body>
@@ -217,52 +221,42 @@ button.TimerSettingsLong{
 
 </div>
 
+<script src="script/hk-bus-crawling-converter.js"></script>
 <script src="script/utils.js"></script>
 
 <script>
-//overlay
-function overlay_off() {
-  document.getElementById("overlay").style.display = "none";
-}
-
 function overlay_on(xid){
-var ck = parseCookie("bookmark");
+var bookmarks = localStorage.getItem('bookmarks') || "[]";
+bookmarks = JSON.parse(bookmarks);
 while(document.getElementById("B").childNodes.length>0){document.getElementById("B").childNodes[0].remove()};
-ck.forEach((data,i)=>{
-    var Row = document.getElementById("B").insertRow(i);
-    Row.insertCell(0).innerHTML = 
-	`<button style="text-align: left; width:100%; border:1px" onclick="addBookMark(${i},'${xid}')">
-	<pre style="display: inline;font-size:20px;">書簽${i} </pre>
-	<label style="display: inline;font-size:10px;"> ${data.stops.map(w=>BusCrawling.getStopData(w).name_tc).join("、<br>")} </label>
-	</button>`
+bookmarks.push({name:"新書簽",stops:[]});
+
+var rownum = 0;
+bookmarks.forEach((data,i)=>{
+	if(data.stops.flat().includes(xid))return;
+
+    var Row = document.getElementById("B").insertRow(rownum++);
+	var but = Row.insertCell(0).appendChild(document.createElement('button'));
+	but.className = "bookmark";
+	but.innerHTML = `<pre style="display: inline;font-size:20px;">書簽${i} </pre>
+	<label style="display: inline;font-size:10px;"> ${data.stops.map(w=>BusCrawling.getStopData(w[0]).name_tc).join("、<br>")} </label>`
+
+	but.addEventListener('click', function() {
+		var bookmarks = localStorage.getItem('bookmarks') || "[]";
+		bookmarks = JSON.parse(bookmarks);
+
+		if(bookmarks[i]){
+			bookmarks[i].stops.push(BusCrawling.getSameStop(xid));
+		}else{
+			bookmarks.push({name:`書簽 ${i}`,stops:[BusCrawling.getSameStop(xid)]});
+		}
+		localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+		alert(`已新增 ${BusCrawling.getStopData(xid).name_tc} 至書簽#${i}`);
+		document.getElementById("overlay").style.display = "none";
+	})
     });
 	
-document.getElementById("B").insertRow(ck.length).innerHTML = 
-    `<button style="text-align: left; width:100%; border:1px" onclick="addBookMark(${ck.length},'${xid}')">
-	<pre style="display: inline;font-size:20px;">書簽${ck.length} [新] </pre>
-	</button>`;
-	
 document.getElementById("overlay").style.display = "block";
-}
-
-function addBookMark(id,value){
-	var cookie2 = parseCookie("bookmark");
-	if(cookie2[id] && cookie2[id].stops.includes(value)){
-		alert(`書簽#${id} 已包含 ${BusCrawling.getStopData(value).name_tc}，未能設置書簽`);
-		return;
-	}
-	
-	var value2 = BusCrawling.getSameStop(value);
-	if(cookie2[id])value2 = value2.filter(w=>!cookie2[id].stops.includes(w));
-	var repeat2=[];
-	value2.forEach(w=>{if(!repeat2.includes(w))repeat2.push(w)});
-	
-	console.log(repeat2)
-	if(cookie2[id]) cookie2[id].stops = cookie2[id].stops.concat(repeat2);
-	else cookie2[id] = {"stops":repeat2,"preference":{"time":0,"nort":[]}};
-	SaveCookie(cookie2,"bookmark");
-	overlay_off();
-	alert(`已新增 ${BusCrawling.getStopData(value).name_tc} 至書簽#${id}`);
 }
 </script>
 

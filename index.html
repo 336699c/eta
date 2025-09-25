@@ -435,18 +435,6 @@
         BusCrawling.data().then(res=>{renderBookmarks()});
         let bookmarks = localStorage.getItem('bookmarks') || "[]";
         bookmarks = JSON.parse(bookmarks);
-        [
-            {
-                name: "上班路線",
-                stops: "九龍城轉車站-富豪東方酒店",
-                additionalStops: "太子道東, 富豪東方酒店",
-                buses: [
-                    { route: "101", destination: "觀塘", time: "3分鐘" },
-                    { route: "111", destination: "中環", time: "5分鐘" },
-                    { route: "116", destination: "鰂魚涌", time: "8分鐘" }
-                ]
-            },
-        ];
         
         document.addEventListener('DOMContentLoaded', function() {
             //renderBookmarks();
@@ -547,7 +535,6 @@
             const stopNumber = localStorage.getItem('stopNumber') === 'true';
             document.getElementById('stop-number-setting').checked = stopNumber;
             
-            // 根據雙語設置折疊語言選擇框
             const languageGroup = document.getElementById('language-group');
             if (bilingual) {
                 languageGroup.classList.add('collapsed');
@@ -570,27 +557,8 @@
             closeModal('settings-modal');
             
             alert('設置已保存！');
-            
-            // 應用雙語設置
-            if (bilingual) {
-                applyBilingualSettings();
-            }
-            
-            // 應用站位編號設置
-            if (stopNumber) {
-                applyStopNumberSettings();
-            }
         }
         
-        function applyBilingualSettings() {
-            // 這裡可以實現雙語顯示的具體邏輯
-            console.log('雙語顯示已啟用');
-        }
-        
-        function applyStopNumberSettings() {
-            // 這裡可以實現顯示站位編號的具體邏輯
-            console.log('站位編號顯示已啟用');
-        }
 
                                         /*${bookmark.buses.map(bus => `
                                 <li class="bus-item">
