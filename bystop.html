@@ -594,7 +594,7 @@ if(f.co=="KMB"){
 httpGet("https://data.etabus.gov.hk/v1/transport/kmb/route-eta/"+f.route+"/1",(g,parm)=>{
 	var eta = JSON.parse(g).data.filter(w=>w.dir==parm[0][0] && w.eta_seq==1 && w.seq<=parm[2]);
 	eta= eta.filter((h,k)=>(k-1)>0 && h.eta<eta[k-1].eta);
-	eta = eta.map(w=>w.seq+". "+_stoplist[_rtlist.KMB[w.route].var[w.dir+"1"].stops[w.seq]].data.name_tc+" ("+eta_All.timeparse(w.eta,input.time)+", "+(parm[2]-w.seq)+"站)")
+	eta = eta.map(w=>w.seq+". "+_stoplist[_rtlist.KMB[w.route].var[w.dir+"1"].stops[w.seq-1]].data.name_tc+" ("+eta_All.timeparse(w.eta,input.time)+", "+(parm[2]-w.seq)+"站)")
 	document.getElementById("Next_bus stop").innerHTML=parm[1]+" 位於<br>"+eta.join("<br>");
 },[f.dir,f.route,f.seq]);
 }else{

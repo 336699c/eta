@@ -341,18 +341,7 @@ function regen(){
 var ETA_RESULT={};
 var COJOIN_ETA=false;
 var counter = 0;
-function CTB_eta(rt,bound){	
-	var counter = RT_data.length;
-	COJOIN_ETA=false;
-	var rp = [];
-	RT_data.forEach((w,i)=>{
-		ETAList.CTB_stop(rt,w,i+1,g=>{
-			counter--;
-			if (counter==0)apply_eta();
-		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : RT_dt.bounds.ctb);
-		if(RT_dt.repeat && RT_dt.repeat.includes(w))rp.push(w);
-	})
-}
+
 
 function apply_eta(s){
 	/*RawETA[]*/ s = ETAList.byroute(RT_dt.cos, RT_dt.route, RT_dt.bounds);
@@ -488,6 +477,32 @@ getETA()
 }
 },45000);
 
+function CTB_eta(rt,bound){	
+	var counter = RT_data.length;
+	COJOIN_ETA=false;
+	var rp = [];
+	RT_data.forEach((w,i)=>{
+		ETAList.CTB_stop(rt,w,i+1,g=>{
+			counter--;
+			if (counter==0)apply_eta();
+		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : RT_dt.bounds.ctb);
+		if(RT_dt.repeat && RT_dt.repeat.includes(w))rp.push(w);
+	})
+}
+
+function NLB_eta(rt,bound){	
+	var counter = RT_data.length;
+	COJOIN_ETA=false;
+	var rp = [];
+	RT_data.forEach((w,i)=>{
+		ETAList.NLB_stop(rt,w,i+1,g=>{
+			counter--;
+			if (counter==0)apply_eta();
+		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : RT_dt.bounds.ctb);
+		if(RT_dt.repeat && RT_dt.repeat.includes(w))rp.push(w);
+	})
+}
+
 function getETA(){
 	if (RT_data && RT_dt.costops){
 		ETAList.KMB_route(RT_dt.route,RT_dt.serviceType,RT_data,RT_dt.bounds.kmb);
@@ -498,6 +513,8 @@ function getETA(){
 		ETAList.lrtfeeder(RT_dt.route,RT_dt.stops)
 	}else if (RT_dt.co=="CTB"){
 		CTB_eta(RT_dt.route,RT_dt.bound)
+	}else if (RT_dt.co=="NLB"){
+		NLB_eta(RT_dt.route,RT_dt.bound)
 	}
 }
 </script>

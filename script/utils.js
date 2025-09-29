@@ -63,7 +63,7 @@ function RawETA(rawdata={},parm={}){
 
         LRT_feeder: function(){
             data = rawdata.map((g,i)=>({
-                co:g.co,
+                co:"LRTFEEDER",
                 dest_en:null,
                 dest_sc:null,
                 dest_tc:null,
@@ -81,9 +81,30 @@ function RawETA(rawdata={},parm={}){
                 seq:parm.seq,
                 stop:parm.busStopId,
             }));
-            data.eta_timestamp = +data.eta;
+            data.map(g=>g.eta_timestamp = + g.eta);
         },
 
+        NLB_stop: function(){
+            data = rawdata.map(g=>({
+                co:"NLB",
+                dest_en:null,
+                dest_sc:null,
+                dest_tc:null,
+                dir:bound,
+                eta:new Date(g.estimatedArrivalTime.replace("Z","+08:00")),
+                raweta:g.estimatedArrivalTime,
+                offset:0,
+
+                eta_timestamp:new Date(g.estimatedArrivalTime.replace("Z","+08:00")).getTime(),
+                eta_seq:g.eta_seq,
+                rmk_en:g.rmk_en,
+                rmk_sc:g.rmk_sc,
+                rmk_tc:(g.departed==0?"未開出 ":"")+(g.noGPS==1?"預定班次 ":"")+` <small>${g.routeVariantName}</small>`,
+                route:route,
+                seq:seq,
+                stop:stop,
+            })).sort((g1,g2)=>g1.eta_timestamp-g2.eta_timestamp).filter(g=>g.raweta)
+        },
         
 
     }
@@ -125,7 +146,7 @@ function RawETA(rawdata={},parm={}){
                 + w.rmk_tc
                 +" </label>";
             
-            if(w.offset!=0) n+=(`<label class="offset off_${w.offset/Math.abs(w.offset)}">${((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(w.offset/1000)}s</label>`)
+            if(w.offset!=0) n+=(`<label class="offset off_${w.offset/Math.abs(w.offset)}">${((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(Math.floor(w.offset/1000))}s</label>`)
             n+= "<br>";
         });
         return n
@@ -252,6 +273,14 @@ function ETAList(){
                 PushETA(new RawETA(g.bus,{co:"LRTFEEDER",route:w.routeName,bound:null,seq:stops.indexOf(g.busStopId)+1,stop:g.busStopId}).formatETA("LRT_feeder"))
             })
         });
+    }
+
+    this.NLB_stop = function(route, stop, seq, callback, bound){
+        _T.fetch(`https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId=${route}&stopId=${stop}&language=zh`,((w)=>{
+         PushETA(new RawETA(w.estimatedArrivals,{co:"NLB",route:route,stop:stop,bound:bound,seq:seq}).formatETA("NLB_stop"))
+        if(callback)callback(w.data);
+        mergeco_timestamp = -1;
+    }));  
     }
 
 

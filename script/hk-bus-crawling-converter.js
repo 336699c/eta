@@ -14,6 +14,8 @@ function toSentenceCase(str){
     if(str == str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); }))
         return str;
     //turn the string to sentence case
+    let words = str.split(" ");
+    if(words.length == 1) return str;
     return str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); });
 }
 this.generateRouteList = async function(div){
@@ -26,7 +28,7 @@ this.generateRouteList = async function(div){
         if(!ROUTES_num.includes(g.route))ROUTES_num.push(g.route);
         let co = g.co[0];
         if(g.co.length==2 && g.co.includes("kmb") && g.co.includes("ctb"))co = "kmb+ctb";
-        k.add(co, g.route, g.bound[co]?g.bound[co]:g.bound, g.dest.zh, toSentenceCase(g.dest.en), key, g.serviceType)
+        k.add(co, g.route, g.bound[co]?g.bound[co]:g.bound, g.dest.zh, toSentenceCase(g.dest.en), key, g.serviceType, g.freq)
     });
     k.gen();
     return [k,ROUTES_num];
@@ -66,6 +68,30 @@ var id = 0;
 var tmpdict = {};
 const colist = ["kmb+ctb","ctb","kmb","nlb","lrtfeeder"];
 
+function findFreq(freq_raw, time=new Date(), parm){
+    if(!freq_raw)return false;
+
+    key = Object.keys(freq_raw).filter(g=>parseInt(g)&Math.pow(2,time.getDay()));
+    if(key.length==0){
+        //console.log(freq_raw,key,Math.pow(2,time.getDay()),parm);
+        return false;
+    };
+
+    for(var i=0;i<key.length;i++){
+        freq = freq_raw[key[i]];
+        if(!freq)return false;
+
+        let nowTime = time.getHours()*100 + time.getMinutes();
+        let latestTime = Object.keys(freq).filter(key=>parseInt(key)<=nowTime).sort((a,b)=>b-a)[0];
+        //console.log(freq,latestTime,nowTime,freq_raw[latestTime]);
+        
+        if(latestTime && freq[latestTime]){
+            return parseInt(freq[latestTime][0]) > nowTime;
+        }
+    }
+    return false;
+}
+
 function chkdiff(orig, newr, routing){
     let data = BusCrawlingData;
     let orig_rtlist,new_rtlist;
@@ -85,21 +111,29 @@ function chkdiff(orig, newr, routing){
     stopname = data.stopList[stop].name.zh;
     }catch(error){}
     if(!tmpstr && !stopname)return "";
-    return tmpstr+ "<small>"+(tmpstr?",":`[${routing}]`)+` 經: ${stopname}</small>`;
+
+    return [
+        tmpstr+ "<small>"+(tmpstr?",":`[${routing}]`)+` 經: ${stopname}</small>`,
+        new_rtlist.filter(g=>!orig_rtlist.includes(g))
+    ];
 }
 
-this.add = function(co, route, bound, dest_tc, dest_en, href, ss){
+this.add = function(co, route, bound, dest_tc, dest_en, href, ss, freq){
     let data = route?{"co":co,"route":route,"dest_tc":dest_tc,"dest_en":dest_en,"href":href,"bound":bound,"serviceType":ss}:co;
-    data.re = _T.routeREGEXP(data.route);
+    data.re = data.route.replace(/(\d+)/, ((x = "$1")=>{return x.padStart(5, "0")}));
+    //data.re = _T.routeREGEXP(data.route);
     data.id = id++;
     
     
     if(ss==1){
         tmpdict[co+"_"+route+"_"+bound] = href;
     }else{
-        data.rmk = chkdiff(tmpdict[co+"_"+route+"_"+bound], href, ss)
+        let s = chkdiff(tmpdict[co+"_"+route+"_"+bound], href, ss);
+        data.rmk = s[0];
+        data.diffstop = s[1];
     }
 
+    data.rmk = (findFreq(freq,new Date(),co+"_"+route+"_"+bound)?"":"<small>不適用</small> ")+(data.rmk?data.rmk:"");
     if(colist.includes(co))list.push(data);
 }
 
