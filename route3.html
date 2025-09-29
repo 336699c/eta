@@ -490,12 +490,12 @@ function CTB_eta(rt,bound){
 	})
 }
 
-function NLB_eta(rt,bound){	
+function NLB_eta(rt,bound,rtid){	
 	var counter = RT_data.length;
 	COJOIN_ETA=false;
 	var rp = [];
 	RT_data.forEach((w,i)=>{
-		ETAList.NLB_stop(rt,w,i+1,g=>{
+		ETAList.NLB_stop(rtid,rt,w,i+1,g=>{
 			counter--;
 			if (counter==0)apply_eta();
 		}, ((RT_dt.bound=="OI" || RT_dt.bound == "IO") && RT_dt.repeat.includes(w)) ? RT_dt.bound[rp.includes(w)?1:0] : RT_dt.bounds.ctb);
@@ -514,7 +514,7 @@ function getETA(){
 	}else if (RT_dt.co=="CTB"){
 		CTB_eta(RT_dt.route,RT_dt.bound)
 	}else if (RT_dt.co=="NLB"){
-		NLB_eta(RT_dt.route,RT_dt.bound)
+		NLB_eta(RT_dt.route,RT_dt.bound,RT_dt.data.nlbId)
 	}
 }
 </script>

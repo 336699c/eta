@@ -122,6 +122,7 @@ this.add = function(co, route, bound, dest_tc, dest_en, href, ss, freq){
     let data = route?{"co":co,"route":route,"dest_tc":dest_tc,"dest_en":dest_en,"href":href,"bound":bound,"serviceType":ss}:co;
     data.re = data.route.replace(/(\d+)/, ((x = "$1")=>{return x.padStart(5, "0")}));
     //data.re = _T.routeREGEXP(data.route);
+    //data.re = Math.random();
     data.id = id++;
     
     

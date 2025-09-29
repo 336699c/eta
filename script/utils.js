@@ -85,6 +85,7 @@ function RawETA(rawdata={},parm={}){
         },
 
         NLB_stop: function(){
+            if(rawdata)
             data = rawdata.map(g=>({
                 co:"NLB",
                 dest_en:null,
@@ -275,8 +276,8 @@ function ETAList(){
         });
     }
 
-    this.NLB_stop = function(route, stop, seq, callback, bound){
-        _T.fetch(`https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId=${route}&stopId=${stop}&language=zh`,((w)=>{
+    this.NLB_stop = function(rtid, route, stop, seq, callback, bound){
+        _T.fetch(`https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId=${rtid}&stopId=${stop}&language=zh`,((w)=>{
          PushETA(new RawETA(w.estimatedArrivals,{co:"NLB",route:route,stop:stop,bound:bound,seq:seq}).formatETA("NLB_stop"))
         if(callback)callback(w.data);
         mergeco_timestamp = -1;
