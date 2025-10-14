@@ -1,0 +1,21 @@
+label.eta_time{
+
+color:black;
+font-size:17px;
+}
+
+label.eta_time_2{
+padding-top:2px;
+font-size:13px;
+color:#888;
+font-weight:600;
+}
+
+span.eta_time_rmk{
+    font-size:11px;
+}
+
+label.eta_time_gray{
+color: #b88 !important;
+
+}

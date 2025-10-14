@@ -1,4 +1,4 @@
-//Version: 20250923
+//Version: 20251018
 
 
 /**
@@ -49,6 +49,7 @@ function RawETA(rawdata={},parm={}){
                 raweta:g.eta,
                 offset:0,
 
+                departed:(g.rmk_tc=="原定班次"?0:1),
                 eta_timestamp:g.eta ? new Date(g.eta.replace("Z","+08:00")).getTime() : null,
                 eta_seq:g.eta_seq,
                 rmk_en:g.rmk_en,
@@ -73,6 +74,7 @@ function RawETA(rawdata={},parm={}){
                 rawDepart: g.departureTimeInSecond,
                 offset:0,
                 eta_seq:i,
+                departed:(g.isScheduled==1?0:1),
                 rmk_en:g.isScheduled,
                 rmk_sc:g.isScheduled,
                 rmk_tc:(g.isScheduled==1?"未開出 ":"")+` <small>#</small>${g.busId}`,
@@ -96,6 +98,7 @@ function RawETA(rawdata={},parm={}){
                 raweta:g.estimatedArrivalTime,
                 offset:0,
 
+                departed:g.departed,
                 eta_timestamp:new Date(g.estimatedArrivalTime.replace("Z","+08:00")).getTime(),
                 eta_seq:g.eta_seq,
                 rmk_en:g.rmk_en,
@@ -134,17 +137,16 @@ function RawETA(rawdata={},parm={}){
     this.tag = function(){return co+"_"+route+"_"+stop+"_"+bound+"_"+seq};
     this.route = route; this.co = co; this.stop = stop; this.bound = bound; this.seq = seq;
    
-    this.formatETAString = function(parm={mode:1, cos:false}){
+    this.formatETAString = function(parm={mode:1, cos:false, small:true}){
         if(!data)return "";
         var n="";
         data.forEach((w,i)=>{
             if(isNaN(w.eta))return 1; //nulleta
-            n+=`<label class="eta_time_${i+1}">` 
-                + (i==0?"<b>":"")
-                + _T.timeparse(w.eta,parm)
-                + (i==0?"<b> ":" ")
-                + (parm.cos?"<small>"+w.co+" </small>":"")
-                + w.rmk_tc
+            n+=`<label class="eta_time ${(i!=0)?"eta_time_2":""} ${w.departed==0?"eta_time_gray":""}">
+            ${(i==0)?"<b>":""}
+            ${_T.timeparse(w.eta,parm)}
+            ${(i==0)?"</b> ":" "}` 
+                + `<span class="eta_time_rmk">${parm.cos?w.co:""}${w.rmk_tc}</span>`
                 +" </label>";
             
             if(w.offset!=0) n+=(`<label class="offset off_${w.offset/Math.abs(w.offset)}">${((_s)=>{var _P = _s>0 ? "+" : "" ; if(_s>60)_P += Math.floor(_s/60)+"m";_s %=60; return _P+_s})(Math.floor(w.offset/1000))}s</label>`)

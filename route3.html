@@ -7,6 +7,7 @@
 <link rel="icon" type="image/x-icon" href="/eta/icon/icon.png">
 
 <link rel="stylesheet" href="script/main.css">
+<link rel="stylesheet" href="script/formatETAString.css">
 <link href="https://fonts.cdnfonts.com/css/seven-segment" rel="stylesheet">
 <style>
 
@@ -79,14 +80,6 @@ width:30%
 width:50px
 }
 
-label.eta_time_1{
-font-size:15px;
-color:black;
-}
-label.eta_time_2,label.eta_time_3,label.eta_time_4,label.eta_time_5,label.eta_time_6,label.eta_time_7{
-font-size:11px;
-color:gray;
-}
 
 iframe{
 width:100%;
@@ -194,7 +187,6 @@ button.bookmark{
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<script src="/eta/v13/script/main.js"></script>
 
 
 </head>
@@ -364,7 +356,7 @@ function apply_eta(s){
 		}
 		})();
 		
-		document.getElementById("eta_"+w.stop+"_"+w.seq).innerHTML = w.formatETAString({mode:TimeDisplay?1:0, cos:RT_dt.cos.length>1});
+		document.getElementById("eta_"+w.stop+"_"+w.seq).innerHTML = w.formatETAString({mode:TimeDisplay?1:0, cos:RT_dt.cos.length>1, small:true});
 	});
 }
 
