@@ -1,12 +1,12 @@
 label.eta_time{
-color:black;
+color:#115;
 font-size:17px;
 }
 
 label.eta_time_2{
 padding-top:2px;
 font-size:13px;
-color:#888;
+color:#88b;
 font-weight:600;
 }
 
@@ -15,6 +15,6 @@ span.eta_time_rmk{
 }
 
 label.eta_time_gray{
-color: #88b !important;
+color: #999 !important;
 
 }
