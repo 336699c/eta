@@ -156,14 +156,14 @@ function RawETA(rawdata={},parm={}){
 
     this.calcBusPos = function(obj){
         /*int timestamp, int buscount = 0*/
-        console.log(obj);
         if(!data || data.length == 0 || !data[0].eta_timestamp)return obj;
         this.route_bus = data.filter(g=>g.eta_timestamp && g.eta_timestamp<obj.timestamp).length;
         obj.buscount += this.route_bus;
 
-        if(co=="CTB")
+        const busco_toreplace = ["CTB"];
+        if(["CTB","KMB+CTB"].includes(co))
         for(var i=0;i<data.length;i++){
-            data[i].departed = i<obj.buscount;
+            if(busco_toreplace.includes(data[i].co))data[i].departed = i<obj.buscount;
         }
 
         obj.timestamp = data[0].eta_timestamp;
@@ -210,7 +210,6 @@ function RawETA(rawdata={},parm={}){
 function ETAList(){
     //private
     List = [];
-    mergeco_timestamp = -1;
     SplitBound = function(obj){
         var result = [];
         var parsedBound = [];
@@ -246,7 +245,6 @@ function ETAList(){
             PushETA(new RawETA(g,{co:"CTB",route:route,stop:stop,bound:g[0].dir,seq:seq}).formatETA("CTB_stop"))
             });
         if(callback)callback(w.data);
-        mergeco_timestamp = -1;
     }));  
     }
 
@@ -264,7 +262,6 @@ function ETAList(){
             tmp.push(w.data[i]);
         }
         PushETA(new RawETA(tmp,{co:"KMB",route:route,bound:tmpdir,seq:tmpseq,stop:((bound==tmpdir||bound=="null")? rtstop[tmpseq-1] : null)}).formatETA("KMB_route"))
-        mergeco_timestamp = -1;
     }));  
     }
 
@@ -292,13 +289,11 @@ function ETAList(){
         _T.fetch(`https://rt.data.gov.hk/v2/transport/nlb/stop.php?action=estimatedArrivals&routeId=${rtid}&stopId=${stop}&language=zh`,((w)=>{
          PushETA(new RawETA(w.estimatedArrivals,{co:"NLB",route:route,stop:stop,bound:bound,seq:seq}).formatETA("NLB_stop"))
         if(callback)callback(w.data);
-        mergeco_timestamp = -1;
     }));  
     }
 
 
     //Output
-    mergcotmp = {};
     tmpList = null;
     tmpTime = 0;
     this.byroute = function(co, route, bound){
@@ -306,7 +301,6 @@ function ETAList(){
 
         let result = List.filter(g=>(co.includes(g.co.toLowerCase())) && g.route==route && g.stop).sort((a,b)=>a.seq-b.seq);
         if(co.length>1){
-            if(mergeco_timestamp==-1){
 
             let tmp = {};
             result.forEach(g=>{
@@ -319,14 +313,10 @@ function ETAList(){
             });
             console.log(tmp);
 
-            result = Object.values(tmp).map(g=>new RawETA().setdata(
+            result = Object.values(tmp).map(g=>new RawETA({},{"co":"KMB+CTB"}).setdata(
                 g.filter(g=>g.raweta && (g.dir==bound[g.co.toLowerCase()] || bound[g.co.toLowerCase()]=="OI" || bound[g.co.toLowerCase()] == "IO"))
             ).handleMerge());
-            mergcotmp = result; mergeco_timestamp = 1;
             console.log("Merge");
-            }else{
-                result = mergcotmp;
-            }
         }
         result.reduce((acc, g) => g.calcBusPos(acc), {"timestamp":-1,"buscount":0});
         tmpList = result;
