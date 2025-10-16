@@ -26,6 +26,7 @@ function RawETA(rawdata={},parm={}){
                 raweta:g.eta,
                 offset:0,
 
+                departed:null,
                 eta_timestamp:new Date(g.eta.replace("Z","+08:00")).getTime(),
                 eta_seq:g.eta_seq,
                 rmk_en:g.rmk_en,
@@ -143,9 +144,7 @@ function RawETA(rawdata={},parm={}){
         data.forEach((w,i)=>{
             if(isNaN(w.eta))return 1; //nulleta
             n+=`<label class="eta_time ${(i!=0)?"eta_time_2":""} ${w.departed==0?"eta_time_gray":""}">
-            ${(i==0)?"<b>":""}
-            ${_T.timeparse(w.eta,parm)}
-            ${(i==0)?"</b> ":" "}` 
+            ${_T.timeparse(w.eta,parm)}` 
                 + `<span class="eta_time_rmk">${parm.cos?w.co:""}${w.rmk_tc}</span>`
                 +" </label>";
             
@@ -155,10 +154,20 @@ function RawETA(rawdata={},parm={}){
         return n
     }
 
-    this.calcBusPos = function(/*int*/ timestamp){
-        if(!data || data.length == 0 || !data[0].eta_timestamp)return timestamp;
-        this.route_bus = data.filter(g=>g.eta_timestamp && g.eta_timestamp<timestamp).length;
-        return data[0].eta_timestamp;
+    this.calcBusPos = function(obj){
+        /*int timestamp, int buscount = 0*/
+        console.log(obj);
+        if(!data || data.length == 0 || !data[0].eta_timestamp)return obj;
+        this.route_bus = data.filter(g=>g.eta_timestamp && g.eta_timestamp<obj.timestamp).length;
+        obj.buscount += this.route_bus;
+
+        if(co=="CTB")
+        for(var i=0;i<data.length;i++){
+            data[i].departed = i<obj.buscount;
+        }
+
+        obj.timestamp = data[0].eta_timestamp;
+        return obj;
     }
 
     this.calcOffset = function(/*RawETA*/ old){
@@ -222,6 +231,7 @@ function ETAList(){
         }else{
             List.push(eta);
         }
+        tmpTime = 0;
     }
     //public
     this.PushETA = PushETA;
@@ -289,7 +299,11 @@ function ETAList(){
 
     //Output
     mergcotmp = {};
+    tmpList = null;
+    tmpTime = 0;
     this.byroute = function(co, route, bound){
+        if((Date.now() - tmpTime) < 20000)return tmpList;
+
         let result = List.filter(g=>(co.includes(g.co.toLowerCase())) && g.route==route && g.stop).sort((a,b)=>a.seq-b.seq);
         if(co.length>1){
             if(mergeco_timestamp==-1){
@@ -314,8 +328,9 @@ function ETAList(){
                 result = mergcotmp;
             }
         }
-        var timestamp = -1;
-        result.forEach(g=> timestamp=g.calcBusPos(timestamp));
+        result.reduce((acc, g) => g.calcBusPos(acc), {"timestamp":-1,"buscount":0});
+        tmpList = result;
+        tmpTime = Date.now();
         return result;
     }
 }
@@ -451,3 +466,20 @@ var _T = {
     }
 }
 
+
+
+{ 
+`
+fetch("https://search.kmb.hk/KMBWebSite/Function/FunctionRequest.ashx?action=getbbiforroute&route=91&bound=1", {
+  "headers": {
+    "accept": "*/*",
+            "content-type": "application/json",
+            "sec-fetch-site": "cross-site"
+  },
+  "referrer": "https://search.kmb.hk/KMBWebSite/?action=routesearch&route=91",
+  "body": null,
+  "method": "POST",
+"mode": "cors",
+"credentials": "omit"
+});
+`}
