@@ -50,9 +50,16 @@ this.getStopData = function(id){
     }
 }
 
-this.getSameStop = function(id){
+
+getSameStop = function(id){
     if(!data.stopMap[id])return [id];
     return data.stopMap[id].filter(g=>g[0]=="ctb"||g[0]=="kmb").map(g=>g[1]).concat([id]);
+}
+this.getSameStop = function(id, id2){
+    if(!id2)return getSameStop(id);
+    var tmp = getSameStop(id);
+    this.getSameStop(id2).forEach(g=>{if(!tmp.includes(g))tmp.push(g);});
+    return tmp;
 }
 
 this.getOppositeRoute = function(co,route,bound /* bound of #1 co */){

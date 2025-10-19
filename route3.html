@@ -322,7 +322,7 @@ function regen(){
 	RT_data.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
-		s.innerHTML = `<button onclick="click2('${w}')" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
+		s.innerHTML = `<button onclick="click2('${w}' ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
 			<label class="stopname2"><big>${BusCrawlingData.stopList[w].name.zh}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>車費: $"+RT_dt.data.fares[i]:""}<br><small><small>${w}${RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:""}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
 	});
@@ -361,7 +361,7 @@ function apply_eta(s){
 }
 
 //MODE 1 
-function click2(s){
+function click2(s,w){
 document.getElementById("stop_"+s).innerHTML = `
 <div class="StopSelectionDIV">
 <table class="StopSelectionTable">
@@ -379,12 +379,12 @@ document.getElementById("stop_"+s).innerHTML = `
 	</tr>
 	<tr>
 	<td class="StopSelectionTableCell">
-		<button onclick="iframe_handler('${s}',1)" class="StopSelectionButton2">
+		<button onclick="iframe_handler('${s}',1,'${w}')" class="StopSelectionButton2">
 			同站路綫
 		</button>
 	</td>
 	<td class="StopSelectionTableCell">
-		<button onclick="iframe_handler('${s}',0)" class="StopSelectionButton2">
+		<button onclick="iframe_handler('${s}',0,'${w}')" class="StopSelectionButton2">
 			到站順序
 		</button>
 	</td>
@@ -448,10 +448,10 @@ function iframe_map_handler(s){
 		
 }
 
-function iframe_handler(s,t){
+function iframe_handler(s,t,w){
 	$('#iframe_stop_'+s).show();
 	$('#div_stop_'+s).hide();
-	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+BusCrawling.getSameStop(s)+"&CHG="+RT_dt.co+"_"+RT_dt.route+"_"+RT_dt.bound);
+	$('#iframe_stop_'+s).attr('src',  "/eta/v13/bystop.html?color=1&byrt=" + t + "&stops="+BusCrawling.getSameStop(s,w)+"&CHG="+RT_dt.co+"_"+RT_dt.route+"_"+RT_dt.bound);
 }
 
 setInterval(function (){
