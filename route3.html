@@ -215,6 +215,7 @@ button.bookmark{
 
 <script src="script/hk-bus-crawling-converter.js"></script>
 <script src="script/utils.js"></script>
+<script src="script/bundles.js"></script>
 
 <script>
 function overlay_on(xid){
@@ -267,6 +268,10 @@ var RT_dt = {};
 var RT_data = [];
 
 
+const bilingual = localStorage.getItem('bilingual') === 'true';
+const lang = bilingual?"tc": localStorage.getItem('language') || "tc";
+const lang2 = lang=="tc"?"zh":lang;
+
 //MODE_1 byroute INIT
 var TimeDisplay = false;
 
@@ -311,7 +316,7 @@ function regen(){
 	
 	s4.innerHTML = `<button class="TimerSettings" id="TimerSettings" onclick="TimerSettings()"><img src="/eta/icon/time_cd.png" class="TimerDisplay img2"></button>`
 	document.title = `${RT_dt.route}  ${RT_dt.data.dest.zh}`;
-	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>${RT_dt.route.padEnd(4," ")}</b> <label style="font-size:0.75em"><small><small>往 </small></small>${RT_dt.data.dest.zh}</label></label>`
+	s2.innerHTML = `<label style="font-family: 'Helvetica';font-size:0.9em"><b>${RT_dt.route.padEnd(4," ")}</b> <label style="font-size:0.75em"><small><small>${_bundles.to[lang]} </small></small>${RT_dt.data.dest[lang2]}</label></label>`
 	s1.className ="s1";
 	s2.className ="s2";
 	s3.className ="s3";
@@ -322,8 +327,24 @@ function regen(){
 	RT_data.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
+		
+		var stopName = BusCrawlingData.stopList[w].name[lang2];
+		var k,displayName=[stopName,""];
+		
+		if(k=stopName.split(","),k.length>1){
+			displayName = [k[0],k.slice(1).join(",")];
+		}else if(/\([A-Za-z]+\d+\)/.test(stopName)){
+			displayName = [stopName.replace(/\([A-Za-z]+\d+\)/g,""),stopName.match(/\([A-Za-z]+\d+\)/g).join("")];
+		}
+		if(/.+轉車站 ?- ?/.test(displayName[0])){
+			displayName[1] = "> BBI: " + displayName[0].match(/(.+)轉車站 ?- ?/)[1] + "轉車站 " + displayName[1];
+			displayName[0] = displayName[0].replace(/.+轉車站 ?- ?/,"");
+		}
+		if(RT_dt.co=="KMB" && lang=="en")displayName[0] = BusCrawling.toSentenceCase(displayName[0]);
+		const stopNumber = localStorage.getItem('stopNumber') === 'true';
+		
 		s.innerHTML = `<button onclick="click2('${w}' ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
-			<label class="stopname2"><big>${BusCrawlingData.stopList[w].name.zh}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>車費: $"+RT_dt.data.fares[i]:""}<br><small><small>${w}${RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:""}</small></small></label></td></div>
+			<label class="stopname2"><big>${displayName[0]}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>" + _bundles.fare[lang]+": $"+RT_dt.data.fares[i]:""}<br><small><small>${displayName[1]} ${!stopNumber ? "" : w + (RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:"")}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
 	});
 	getETA();

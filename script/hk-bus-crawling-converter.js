@@ -10,14 +10,14 @@ data = await result.json();
 }
 
 function toSentenceCase(str){
-    //check if the string is already sentence case
-    if(str == str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); }))
-        return str;
     //turn the string to sentence case
     let words = str.split(" ");
     if(words.length == 1) return str;
-    return str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+    let tmp = str.toLowerCase().replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+    if(str == tmp)return str;
+    return tmp.replaceAll("Bbi","BBI");
 }
+this.toSentenceCase = ((str)=>toSentenceCase(str));
 this.generateRouteList = async function(div){
     var ROUTES_num = [];
     await reload();
