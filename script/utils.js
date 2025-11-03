@@ -176,6 +176,7 @@ function RawETA(rawdata={},parm={}){
         if(data.length < oldData.length){
             //reversely set data offset, ie eg data length = 1; data[1] = oldData[2]; data[0] = oldData[1]; dont use oldData[0]
             for(var i=data.length-1,j=oldData.length-1;i>=0;i--,j--){
+                if(!oldData[j] || !oldData[j].eta_timestamp)continue;
                 data[i].offset = oldData[j].offset + data[i].eta_timestamp - oldData[j].eta_timestamp;
             }
             return;
@@ -202,6 +203,7 @@ function RawETA(rawdata={},parm={}){
         for(var i=0;i<data.length;i++){
             let index = bus_offset + i;
             if(!oldData[index])break;
+            if(!oldData[index].eta_timestamp)continue;
             data[i].offset = oldData[index].offset + data[i].eta_timestamp - oldData[index].eta_timestamp;
         }
     }
