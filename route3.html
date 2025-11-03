@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="script/formatETAString.css">
 <link href="https://fonts.cdnfonts.com/css/seven-segment" rel="stylesheet">
 <style>
+body{
+	height:100%;
+}
+
 
 .ROUTESTOP{
 	background-color:#fff;
@@ -184,6 +188,64 @@ button.TimerSettingsLong{
 button.bookmark{
 	text-align: left; width:100%; border:1px
 }
+
+
+/*footer panel*/
+div.tab_panel{
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+
+  display:flex;
+  background-color:#fff;
+  width:100%;
+}
+.content{
+  	flex-direction:column;
+	display:flex;
+	overflow-y:scroll;
+	height:100%;
+}
+.tab {
+	flex: 1;
+	text-align: center;
+	padding: 12px 0;
+	font-size: 14px;
+	color: #666;
+	border-bottom: 3px solid transparent;
+	transition: all 0.3s;
+}
+
+.tab.active {
+	color: #66e;
+	border-bottom-color: #66e;
+	font-weight: bold;
+}
+
+button.footerButton{
+	width:75px;
+	height:50px;
+	background-color:#aaaa;
+	border:none;
+}
+.content_container{
+	background-color:#fff;
+	width:100%;
+	height: 100%;
+	display:none;
+	flex:5;
+}
+.content_container.active{
+	display:block;
+}
+#iframe.ROUTENOTE_iframe{
+	width:100%;
+	height:100%;
+	border:none;
+	overflow-y:auto;
+	overflow-x:hidden;
+	display:flex;
+	flex:5;
+}
 </style>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -192,15 +254,29 @@ button.bookmark{
 </head>
 <body>
 
-<div class="PRE-container">
+<div class="PRE-container content">
 <div id="ROUTESTOP_header" class="route">
 		<table id="rttable" class="rttable"></table>
 </div>
-<div class="ROUTESTOP" id="ROUTESTOP">
-	<div class="stops">
-		<table id="stoptable" class="stoptable"></table>
+<div class="tab_panel">
+	<div class="tab active" data-view="ROUTESTOP">路線</div>
+	<div class="tab" data-view="ROUTEMAP">地圖</div>
+	<div class="tab" data-view="ROUTENOTE">備註</div>
+</div>
+<div class="content">
+	<div class="content_container active" id="ROUTESTOP">
+		<div class="stops">
+			<table id="stoptable" class="stoptable"></table>
+		</div>
+	</div>
+	<div class="content_container" id="ROUTEMAP">
+		<div id="ROUTEMAP_container"></div>
+	</div>
+	<div class="content_container" id="ROUTENOTE">
+		<iframe id="ROUTENOTE_iframe">	</iframe>
 	</div>
 </div>
+
 
 
 <div id="overlay">
@@ -218,6 +294,35 @@ button.bookmark{
 <script src="script/bundles.js"></script>
 
 <script>
+var element_init = {"ROUTEMAP":false,"TEST":1}
+document.querySelectorAll('.tab').forEach(tab => {
+	tab.addEventListener('click', function() {
+		const funcs = {
+		"ROUTESTOP": (()=>{}),
+		"ROUTEMAP": (()=>{iframe_map_handler("ROUTEMAP",true)}),
+		"ROUTENOTE": (()=>{
+			if(RT_dt.cos.includes("ctb"))$("#ROUTENOTE_iframe").attr("src",`https://mobile.citybus.com.hk/nwp3/getnotice.php?id=${RT_dt.route}`);
+		}),
+		}
+		// 移除所有活动状态
+		document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+		document.querySelectorAll('.content > div').forEach(view => view.classList.remove('active'));
+		
+		// 添加当前活动状态
+		this.classList.add('active');
+		const viewId = this.getAttribute('data-view');
+		//Object.keys(funcs).forEach(g=>{$("#"+g).css("display",viewId==g?"block":"none")});
+		document.querySelector(`#${viewId}`).classList.add('active');
+
+		if(!element_init[viewId]){
+			element_init[viewId] = true;
+			funcs[viewId]();
+		}
+		
+	});
+});
+
+
 function overlay_on(xid){
 var bookmarks = localStorage.getItem('bookmarks') || "[]";
 bookmarks = JSON.parse(bookmarks);
@@ -324,7 +429,8 @@ function regen(){
 	s1.innerHTML = `<img src="/eta/icon/${_T.busIMG(RT_dt.co,RT_dt.route)}.png" style="width:30px">`
 	
 	var stoplist = document.getElementById("stoptable");
-	RT_data.forEach((w,i)=>{
+	RT_dt.stopNickname = [];
+	RT_dt.stops.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
 		
@@ -342,7 +448,8 @@ function regen(){
 		}
 		if(RT_dt.co=="KMB" && lang=="en")displayName[0] = BusCrawling.toSentenceCase(displayName[0]);
 		const stopNumber = localStorage.getItem('stopNumber') === 'true';
-		
+		RT_dt.stopNickname.push(displayName[0]);
+
 		s.innerHTML = `<button onclick="click2('${w}' ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
 			<label class="stopname2"><big>${displayName[0]}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>" + _bundles.fare[lang]+": $"+RT_dt.data.fares[i]:""}<br><small><small>${displayName[1]} ${!stopNumber ? "" : w + (RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:"")}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
@@ -419,17 +526,25 @@ document.getElementById("stop_"+s).innerHTML = `
 }
 
 var initalized = [];
-function iframe_map_handler(s){
+function iframe_map_handler(s,t=null){
+	var element;
+	if(!t){
 	$('#iframe_stop_'+s).hide();
 	$('#div_stop_'+s).show();
 	
 	if(initalized.includes(s))return;
 	initalized.push(s);
 	// Where you want to render the map.
-	var element = document.getElementById('div_stop_'+s);
-
+	element = document.getElementById('div_stop_'+s);
 	// Height has to be set. You can do this in CSS too.
 	element.style = 'height:400px;';
+	}else{
+		element = document.getElementById("ROUTEMAP_container");
+		element.style = 'height:100%;';
+		s = RT_dt.stops[0];
+	}
+
+	
 
 	// Create Leaflet map on map element.
 	var map = L.map(element);
@@ -450,9 +565,17 @@ function iframe_map_handler(s){
 	//L.marker(target).addTo(map);
 	
 	var points = [];
+	var busstopIcon = L.icon({
+    iconUrl: 'icon/stop.png',
+
+    iconSize:     [20, 50], // size of the icon
+    iconAnchor:   [10, 50], // point of the icon which will correspond to marker's location
+    popupAnchor:  [0, -50] // point from which the popup should open relative to the iconAnchor
+	});
+
 	RT_data.forEach((w,id)=>{
 		let currstopdata = BusCrawling.getStopData(w);
-		var marker2 = L.marker(L.latLng(currstopdata.lat, currstopdata.long))
+		var marker2 = L.marker([currstopdata.lat, currstopdata.long],{icon: busstopIcon})
 		marker2.addTo(map);
 		points.push([currstopdata.lat, currstopdata.long]);
 	
@@ -461,12 +584,37 @@ function iframe_map_handler(s){
 	});
 	
 	console.log(points);
-	const line = L.polyline(points, {
+	if(!RT_dt.data.gtfsId){
+		L.polyline(points, {
             color: 'red',    // Line color
-            weight: 2,        // Line width
+            weight: 4,        // Line width
             opacity: 0.5      // Line opacity
-        }).addTo(map);
-		
+        	}).addTo(map);
+		return;
+	}
+
+
+	fetch(`https://hkbus.github.io/route-waypoints/${RT_dt.data.gtfsId}-${RT_dt.bound}.json`).then(g=>g.json()).then(g=>{
+		try{
+			g.features[0].geometry.coordinates.forEach(w=>{
+				//console.log(w);
+			L.polyline(w.map(g=>[g[1],g[0]]), {
+					color: 'red',    // Line color
+					weight: 4,        // Line width
+					opacity: 1      // Line opacity
+			}).addTo(map)
+			}
+			)
+		}catch(error){
+			console.log("Draw ERR: ",error);
+			L.polyline(points, {
+            color: 'red',    // Line color
+            weight: 4,        // Line width
+            opacity: 0.5      // Line opacity
+        	}).addTo(map);
+		}
+	})
+	
 }
 
 function iframe_handler(s,t,w){
