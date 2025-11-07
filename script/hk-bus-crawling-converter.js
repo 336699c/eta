@@ -110,7 +110,10 @@ function chkdiff(orig, newr, routing){
 
     //orig not same
 
-    if(orig_rtlist[0]!=new_rtlist[0])tmpstr = `<small>[${routing}] ${data.stopList[new_rtlist[0]].name.zh}開出</small>`;
+    if(orig_rtlist[0]!=new_rtlist[0] && data.stopList[new_rtlist[0]]){
+        //console.log(newr,routing,data.stopList[new_rtlist[0]]);
+        tmpstr = `<small>[${routing}] ${data.stopList[new_rtlist[0]].name.zh}開出</small>`;
+    }
 
     let stop=0,stopname="";
     try{

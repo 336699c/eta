@@ -136,34 +136,18 @@ height: auto; /* Maintain aspect ratio */
 }
 
 
-	
+div.flex-vert{
+	flex-direction:column;
+}	
+
 div.StopSelectionDIV{
-	width:calc(100%-10px);
+	display:flex;
+	width:100%;
 	background-color: #f0f0f0;
 	border: none; /* Remove default border */
 	border-radius: 6px; /* Rounded corners */
-	padding-top: 5px;
-	padding-left: 5px;
 }
 	
-td.StopSelectionTableCell{
-	padding-right: 10px;
-	padding-bottom:10px;
-}
-
-button.StopSelectionButton2{
-	width:100px;
-	height:30px;
-	background-color: #ccf9; /* Button background color */
-	color: black; /* Text color */
-	border: none; /* Remove default border */
-	border-radius: 6px; /* Rounded corners */
-	padding: 0px 0px; /* Padding inside the button */
-	font-size: 18px; /* Font size */
-	cursor: pointer; /* Pointer cursor on hover */
-	transition: background-color 0.3s, transform 0.2s; /* Smooth transition */
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-}
 	
 iframe{
 border: none; /* Remove default border */
@@ -189,6 +173,25 @@ button.bookmark{
 	text-align: left; width:100%; border:1px
 }
 
+.action-btn {
+	flex: 1;
+	background-color: #f8f9fa;
+	border: 1px solid #dee2e6;
+	border-radius: 8px;
+	padding: 10px;
+	text-align: center;
+	cursor: pointer;
+	transition: all 0.3s;
+	font-size: 14px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	margin-top: 5px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-bottom: 5px;
+}
 
 /*footer panel*/
 div.tab_panel{
@@ -254,14 +257,14 @@ button.footerButton{
 </head>
 <body>
 
-<div class="PRE-container content">
+<div class="PRE-container">
 <div id="ROUTESTOP_header" class="route">
 		<table id="rttable" class="rttable"></table>
 </div>
 <div class="tab_panel">
-	<div class="tab active" data-view="ROUTESTOP">路線</div>
-	<div class="tab" data-view="ROUTEMAP">地圖</div>
-	<div class="tab" data-view="ROUTENOTE">備註</div>
+	<div class="tab active" data-view="ROUTESTOP" id="TAB_ROUTESTOP">路線</div>
+	<div class="tab" data-view="ROUTEMAP" id="TAB_ROUTEMAP">地圖</div>
+	<div class="tab" data-view="ROUTENOTE" id="TAB_ROUTENOTE">備註</div>
 </div>
 <div class="content">
 	<div class="content_container active" id="ROUTESTOP">
@@ -295,29 +298,32 @@ button.footerButton{
 
 <script>
 var element_init = {"ROUTEMAP":false,"TEST":1}
+function changePage(viewId,element){
+	if(!element)element = document.getElementById("TAB_"+viewId);
+	const funcs = {
+	"ROUTESTOP": (()=>{}),
+	"ROUTEMAP": (()=>{iframe_map_handler("ROUTEMAP",true)}),
+	"ROUTENOTE": (()=>{
+		if(RT_dt.cos.includes("ctb"))$("#ROUTENOTE_iframe").attr("src",`https://mobile.citybus.com.hk/nwp3/getnotice.php?id=${RT_dt.route}`);
+	}),
+	}
+	// 移除所有活动状态
+	document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+	document.querySelectorAll('.content > div').forEach(view => view.classList.remove('active'));
+
+	// 添加当前活动状态
+	if(element)element.classList.add('active');
+	//Object.keys(funcs).forEach(g=>{$("#"+g).css("display",viewId==g?"block":"none")});
+	document.querySelector(`#${viewId}`).classList.add('active');
+
+	if(!element_init[viewId]){
+		element_init[viewId] = true;
+		funcs[viewId]();
+	}
+}
 document.querySelectorAll('.tab').forEach(tab => {
 	tab.addEventListener('click', function() {
-		const funcs = {
-		"ROUTESTOP": (()=>{}),
-		"ROUTEMAP": (()=>{iframe_map_handler("ROUTEMAP",true)}),
-		"ROUTENOTE": (()=>{
-			if(RT_dt.cos.includes("ctb"))$("#ROUTENOTE_iframe").attr("src",`https://mobile.citybus.com.hk/nwp3/getnotice.php?id=${RT_dt.route}`);
-		}),
-		}
-		// 移除所有活动状态
-		document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-		document.querySelectorAll('.content > div').forEach(view => view.classList.remove('active'));
-		
-		// 添加当前活动状态
-		this.classList.add('active');
-		const viewId = this.getAttribute('data-view');
-		//Object.keys(funcs).forEach(g=>{$("#"+g).css("display",viewId==g?"block":"none")});
-		document.querySelector(`#${viewId}`).classList.add('active');
-
-		if(!element_init[viewId]){
-			element_init[viewId] = true;
-			funcs[viewId]();
-		}
+		changePage(this.getAttribute('data-view'),this)
 		
 	});
 });
@@ -433,7 +439,8 @@ function regen(){
 	RT_dt.stops.forEach((w,i)=>{
 		var s = stoplist.insertRow().insertCell(0);
 		s.className = "rss";
-		
+		s.id = "rss_"+w;
+
 		var stopName = BusCrawlingData.stopList[w].name[lang2];
 		var k,displayName=[stopName,""];
 		
@@ -450,7 +457,7 @@ function regen(){
 		const stopNumber = localStorage.getItem('stopNumber') === 'true';
 		RT_dt.stopNickname.push(displayName[0]);
 
-		s.innerHTML = `<button onclick="click2('${w}' ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
+		s.innerHTML = `<button onclick="click2('${w}', ${i+1}, ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
 			<label class="stopname2"><big>${displayName[0]}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>" + _bundles.fare[lang]+": $"+RT_dt.data.fares[i]:""}<br><small><small>${displayName[1]} ${!stopNumber ? "" : w + (RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:"")}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
 	});
@@ -489,36 +496,24 @@ function apply_eta(s){
 }
 
 //MODE 1 
-function click2(s,w){
+function click2(s,n,w){
 document.getElementById("stop_"+s).innerHTML = `
+<div class="StopSelectionDIV flex-vert">
 <div class="StopSelectionDIV">
-<table class="StopSelectionTable">
-<tr>
-	<td class="StopSelectionTableCell">
-		<button onclick="overlay_on('${s}')" class="StopSelectionButton2">
-			書簽
+		<button onclick="overlay_on('${s}')" class="action-btn">
+			🔖<br>書簽
 		</button>
-	</td>
-	<td class="StopSelectionTableCell">
-		<button onclick="iframe_map_handler('${s}')" class="StopSelectionButton2">
-			地圖
+		<button onclick="changePage('ROUTEMAP'),__MARKER_STATS.markers[${n-1}].openPopup(),__MARKER_STATS.map.setView(__MARKER_STATS.markers[${n-1}].getLatLng(),16)" class="action-btn">
+			🗺️<br>地圖
 		</button>
-	</td>
-	</tr>
-	<tr>
-	<td class="StopSelectionTableCell">
-		<button onclick="iframe_handler('${s}',1,'${w}')" class="StopSelectionButton2">
+		<button onclick="iframe_handler('${s}',1,'${w}')" class="action-btn">
+			⇄<br>
 			同站路綫
 		</button>
-	</td>
-	<td class="StopSelectionTableCell">
-		<button onclick="iframe_handler('${s}',0,'${w}')" class="StopSelectionButton2">
-			到站順序
+		<button onclick="iframe_handler('${s}',0,'${w}')" class="action-btn">
+			⏱️<br>車程
 		</button>
-	</td>
-	</tr>
-</table>
-<label style="font-size:24px"></label>
+</div>
 <iframe src="${"/eta/v13/bystop.html?color=1&stops="+BusCrawling.getSameStop(s)+"&CHG="+RT_dt.co+"_"+RT_dt.route+"_"+RT_dt.bound}" id="iframe_stop_${s}"></iframe>
 <div id="div_stop_${s}"></div>
 </div>
@@ -526,6 +521,11 @@ document.getElementById("stop_"+s).innerHTML = `
 }
 
 var initalized = [];
+var __MARKER_STATS = {
+	stopClicked : null,
+	markers:[],
+	map:null
+}
 function iframe_map_handler(s,t=null){
 	var element;
 	if(!t){
@@ -548,7 +548,7 @@ function iframe_map_handler(s,t=null){
 
 	// Create Leaflet map on map element.
 	var map = L.map(element);
-
+	__MARKER_STATS.map=map;
 	// Add OSM tile layer to the Leaflet map.
 	L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 		attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -577,13 +577,25 @@ function iframe_map_handler(s,t=null){
 		let currstopdata = BusCrawling.getStopData(w);
 		var marker2 = L.marker([currstopdata.lat, currstopdata.long],{icon: busstopIcon})
 		marker2.addTo(map);
+		__MARKER_STATS.markers.push(marker2);
 		points.push([currstopdata.lat, currstopdata.long]);
 	
 		var popup = marker2.bindPopup((id+1)+". "+currstopdata.name_tc);
+		marker2.on('click',function(){
+			if(__MARKER_STATS.stopClicked&&__MARKER_STATS.stopClicked.stop==w){
+				changePage("ROUTESTOP",document.getElementById("TAB_ROUTESTOP"));
+				document.getElementById('rss_'+__MARKER_STATS.stopClicked.stop).scrollIntoView({
+				behavior: 'smooth', // 可选: 'auto' 或 'smooth'
+				block: 'start' // 可选: 'start', 'center', 'end', 或 'nearest'
+				});
+				__MARKER_STATS.stopClicked = null;
+			}else{
+				__MARKER_STATS.stopClicked = {"id":id,"stop":w};
+			}
+		});
 		if (s == w)popup.openPopup();
 	});
 	
-	console.log(points);
 	if(!RT_dt.data.gtfsId){
 		L.polyline(points, {
             color: 'red',    // Line color
@@ -594,7 +606,7 @@ function iframe_map_handler(s,t=null){
 	}
 
 
-	fetch(`https://hkbus.github.io/route-waypoints/${RT_dt.data.gtfsId}-${RT_dt.bound}.json`).then(g=>g.json()).then(g=>{
+	fetch(`https://hkbus.github.io/route-waypoints/${RT_dt.data.gtfsId}-${RT_dt.data.bound[RT_dt.data.co[0]]}.json`).then(g=>g.json()).then(g=>{
 		try{
 			g.features[0].geometry.coordinates.forEach(w=>{
 				//console.log(w);
