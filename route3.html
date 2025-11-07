@@ -457,7 +457,7 @@ function regen(){
 		const stopNumber = localStorage.getItem('stopNumber') === 'true';
 		RT_dt.stopNickname.push(displayName[0]);
 
-		s.innerHTML = `<button onclick="click2('${w}', ${i+1}, ${RT_dt.costops?",'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
+		s.innerHTML = `<button onclick="click2('${w}', ${i+1}, ${RT_dt.costops?"'"+RT_dt.costops[i]+"'":""})" class="rss"><table class="stoptable"><td class="stopid2"><label class="stopid">${i+1}</label></td><td class="stopname3">
 			<label class="stopname2"><big>${displayName[0]}</big>${RT_dt.data.fares&&RT_dt.data.fares[i]?"<br>" + _bundles.fare[lang]+": $"+RT_dt.data.fares[i]:""}<br><small><small>${displayName[1]} ${!stopNumber ? "" : w + (RT_dt.costops?" "+Object.values(RT_dt.data.stops)[1][i]:"")}</small></small></label></td></div>
 			<td class="bus" id="bus_${w}_${i+1}"> </td><td class="eta" id="eta_${w}_${i+1}"></td></table></button><div id="stop_${w}">`
 	});
