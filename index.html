@@ -351,7 +351,6 @@
         }
         
         .btn-remove {
-            padding: 5px 10px;
             background: #e74c3c;
             color: white;
             border: none;
@@ -361,6 +360,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
+
+            padding: 10px 12px !important; /* 增加按钮大小 */
+            min-width: 44px; /* 确保按钮符合移动设备可点击区域标准 */
+            min-height: 44px;
+            z-index: 10; /* 确保按钮在顶层 */
+            position: relative;
         }
         
         .btn-remove:hover {
@@ -503,70 +508,7 @@
         let isEditMode = false;
         let dragStartIndex = -1;
         
-       
-        // 渲染書籤列表
-        function renderBookmarks() {
-            const container = document.getElementById('bookmarks-container');
-            container.innerHTML = '';
-            
-            if (bookmarks.length === 0) {
-                container.innerHTML = '<p style="text-align: center; padding: 20px;">暫無書籤</p>';
-                return;
-            }
-            
-            bookmarks.forEach((bookmark, i) => {
-                const bookmarkEl = document.createElement('div');
-                bookmarkEl.className = 'bookmark';
-                bookmarkEl.setAttribute('draggable', isEditMode);
-                bookmarkEl.setAttribute('data-index', i);
-                
-                // 添加拖拽事件
-                if (isEditMode) {
-                    bookmarkEl.addEventListener('dragstart', handleDragStart);
-                    bookmarkEl.addEventListener('dragover', handleDragOver);
-                    bookmarkEl.addEventListener('dragenter', handleDragEnter);
-                    bookmarkEl.addEventListener('dragleave', handleDragLeave);
-                    bookmarkEl.addEventListener('dragend', handleDragEnd);
-                    bookmarkEl.addEventListener('drop', handleDrop);
-                }
-                
-                bookmarkEl.innerHTML = `
-                    <div class="bookmark-edit-actions">
-                        <button class="btn-remove" onclick="removeBookmark(${i})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div class="bookmark-content">
-                        <div class="station-info">
-                            <div class="station-name">${bookmark.name}</div>
-                            <div class="station-additional">${bookmark.stops.map(g => BusCrawling.getStopData(g[0]).name_tc).join("<br>")}</div>
-                        </div>
-                        <div class="bus-info">
-                            <ul class="bus-list" id="bus_list_${i}">
-                                <li class="bus-item">
-                                    <span class="bus-route">101 - 觀塘</span>
-                                    <span class="bus-time">5分鐘</span>
-                                </li>
-                                <li class="bus-item">
-                                    <span class="bus-route">104 - 白田</span>
-                                    <span class="bus-time soon">2分鐘</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                `;
-                
-                // 在編輯模式下，點擊書籤不進行導航
-                if (!isEditMode) {
-                    bookmarkEl.addEventListener('click', function() {
-                        window.location.href = "bystop.html?color=1&stops=" + bookmark.stops.flat().join(",");
-                    });
-                }
-                
-                container.appendChild(bookmarkEl);
-            });
-        }
-        
+
         // 切換編輯模式
         function toggleEditMode() {
             isEditMode = !isEditMode;
@@ -727,7 +669,6 @@ let touchStartY = 0;
 let touchCurrentY = 0;
 let touchDraggedIndex = -1;
 
-// 在renderBookmarks函数中添加触摸事件监听
 function renderBookmarks() {
     const container = document.getElementById('bookmarks-container');
     container.innerHTML = '';
@@ -760,7 +701,7 @@ function renderBookmarks() {
         
         bookmarkEl.innerHTML = `
             <div class="bookmark-edit-actions">
-                <button class="btn-remove" onclick="removeBookmark(${i})">
+                <button class="btn-remove" data-index="${i}">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -771,14 +712,12 @@ function renderBookmarks() {
                 </div>
                 <div class="bus-info">
                     <ul class="bus-list" id="bus_list_${i}">
-                        
+
                     </ul>
                 </div>
             </div>
         `;
-        
-            /*
-            <li class="bus-item">
+        /*                        <li class="bus-item">
                             <span class="bus-route">101 - 觀塘</span>
                             <span class="bus-time">5分鐘</span>
                         </li>
@@ -786,7 +725,26 @@ function renderBookmarks() {
                             <span class="bus-route">104 - 白田</span>
                             <span class="bus-time soon">2分鐘</span>
                         </li>*/
-
+        
+        // 为移除按钮添加事件监听
+        const removeBtn = bookmarkEl.querySelector('.btn-remove');
+        removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡到父元素
+            const index = parseInt(this.getAttribute('data-index'));
+            removeBookmark(index);
+        });
+        
+        // 为移除按钮添加触摸事件支持
+        removeBtn.addEventListener('touchstart', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡到父元素
+        });
+        
+        removeBtn.addEventListener('touchend', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡到父元素
+            const index = parseInt(this.getAttribute('data-index'));
+            //removeBookmark(index);
+        });
+        
         // 在編輯模式下，點擊書籤不進行導航
         if (!isEditMode) {
             bookmarkEl.addEventListener('click', function() {
@@ -797,10 +755,13 @@ function renderBookmarks() {
         container.appendChild(bookmarkEl);
     });
 }
-
-// 触摸事件处理函数
 function handleTouchStart(e) {
     if (!isEditMode) return;
+    
+    // 检查是否点击的是移除按钮
+    if (e.target.closest('.btn-remove')) {
+        return; // 如果是移除按钮，不处理拖拽逻辑
+    }
     
     e.preventDefault();
     const touch = e.touches[0];
@@ -844,12 +805,18 @@ function handleTouchMove(e) {
 function handleTouchEnd(e) {
     if (!isEditMode) return;
     
+    // 检查是否点击的是移除按钮
+    if (e.target.closest('.btn-remove')) {
+        return; // 如果是移除按钮，不处理拖拽逻辑
+    }
+    
     e.preventDefault();
     touchDraggedIndex = -1;
     document.querySelectorAll('.bookmark').forEach(el => {
         el.classList.remove('dragging');
     });
 }
+
 
 // 修改现有的拖拽事件处理函数，添加触摸事件支持
 function handleDragStart(e) {
