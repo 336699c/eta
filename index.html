@@ -6,6 +6,9 @@
     <title>巴士到站預報</title>
     <link rel="icon" type="image/x-icon" href="icon/icon.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="script/utils.js"></script>
+    <script src="script/hk-bus-crawling-converter.js"></script>
+
     <style>
         * {
             margin: 0;
@@ -127,6 +130,7 @@
             flex-direction: column;
             cursor: pointer;
             transition: all 0.2s ease;
+            position: relative;
         }
         
         .bookmark:hover {
@@ -323,6 +327,70 @@
             font-size: 14px;
         }
         
+        /* 新增：編輯模式樣式 */
+        .edit-mode .bookmark {
+            cursor: move;
+            border: 2px dashed #3498db;
+        }
+        
+        .edit-mode .bookmark:hover {
+            transform: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .bookmark-edit-actions {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            gap: 5px;
+        }
+        
+        .edit-mode .bookmark-edit-actions {
+            display: flex;
+        }
+        
+        .btn-remove {
+            padding: 5px 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-remove:hover {
+            background: #c0392b;
+        }
+        
+        .edit-controls {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .edit-hint {
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .edit-mode .edit-hint {
+            display: block;
+        }
+        
+        .bookmark.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+        
         @media (max-width: 480px) {
             h1 {
                 font-size: 24px;
@@ -364,10 +432,18 @@
             </button>
         </div>
         
-        <h2 class="section-title">巴士站書籤</h2>
+        <div class="edit-controls">
+            <h2 class="section-title">巴士站書籤</h2>
+            <button class="btn btn-tertiary" id="edit-bookmarks-btn" onclick="toggleEditMode()">
+                <i class="fas fa-edit"></i> 編輯書籤
+            </button>
+        </div>
         
         <div class="bookmarks" id="bookmarks-container">
+            <!-- 書籤內容將由JavaScript動態生成 -->
         </div>
+        
+        <p class="edit-hint" id="edit-hint">拖動書籤重新排序，點擊X按鈕刪除書籤</p>
         
         <div class="modal" id="settings-modal">
             <div class="modal-content">
@@ -390,16 +466,6 @@
                         <option value="hm">時:分</option>
                     </select>
                 </div>
-                <!--
-                <div class="form-group">
-                    <label>書籤設置</label>
-                    <div>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="openBookmarkSettings()">
-                            <i class="fas fa-external-link-alt"></i> 打開書籤設置
-                        </button>
-                    </div>
-                </div>
-                -->
                 <!-- 進階設置按鈕 -->
                 <div class="form-group">
                     <button class="btn btn-tertiary" style="width: 100%;" onclick="toggleAdvancedSettings()">
@@ -428,31 +494,17 @@
         
     </div>
 
-    <script src="script/utils.js"></script>
-    <script src="script/hk-bus-crawling-converter.js"></script>
-    
     <script>
         var BusCrawling = new BusCrawling();
         BusCrawling.data().then(res=>{renderBookmarks()});
         let bookmarks = localStorage.getItem('bookmarks') || "[]";
         bookmarks = JSON.parse(bookmarks);
+
+        let isEditMode = false;
+        let dragStartIndex = -1;
         
-        document.addEventListener('DOMContentLoaded', function() {
-            //renderBookmarks();
-            loadSettings();
-            
-            const bilingualCheckbox = document.getElementById('bilingual-setting');
-            const languageGroup = document.getElementById('language-group');
-            
-            bilingualCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    languageGroup.classList.add('collapsed');
-                } else {
-                    languageGroup.classList.remove('collapsed');
-                }
-            });
-        });
-        
+       
+        // 渲染書籤列表
         function renderBookmarks() {
             const container = document.getElementById('bookmarks-container');
             container.innerHTML = '';
@@ -462,39 +514,152 @@
                 return;
             }
             
-            bookmarks.forEach((bookmark,i) => {
+            bookmarks.forEach((bookmark, i) => {
                 const bookmarkEl = document.createElement('div');
                 bookmarkEl.className = 'bookmark';
+                bookmarkEl.setAttribute('draggable', isEditMode);
+                bookmarkEl.setAttribute('data-index', i);
+                
+                // 添加拖拽事件
+                if (isEditMode) {
+                    bookmarkEl.addEventListener('dragstart', handleDragStart);
+                    bookmarkEl.addEventListener('dragover', handleDragOver);
+                    bookmarkEl.addEventListener('dragenter', handleDragEnter);
+                    bookmarkEl.addEventListener('dragleave', handleDragLeave);
+                    bookmarkEl.addEventListener('dragend', handleDragEnd);
+                    bookmarkEl.addEventListener('drop', handleDrop);
+                }
                 
                 bookmarkEl.innerHTML = `
+                    <div class="bookmark-edit-actions">
+                        <button class="btn-remove" onclick="removeBookmark(${i})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                     <div class="bookmark-content">
                         <div class="station-info">
                             <div class="station-name">${bookmark.name}</div>
-                            <div class="station-additional">${bookmark.stops.map(g=>BusCrawling.getStopData(g[0]).name_tc).join("<br>")}</div>
+                            <div class="station-additional">${bookmark.stops.map(g => BusCrawling.getStopData(g[0]).name_tc).join("<br>")}</div>
                         </div>
                         <div class="bus-info">
                             <ul class="bus-list" id="bus_list_${i}">
-
+                                <li class="bus-item">
+                                    <span class="bus-route">101 - 觀塘</span>
+                                    <span class="bus-time">5分鐘</span>
+                                </li>
+                                <li class="bus-item">
+                                    <span class="bus-route">104 - 白田</span>
+                                    <span class="bus-time soon">2分鐘</span>
+                                </li>
                             </ul>
                         </div>
                     </div>
                 `;
                 
-                bookmarkEl.addEventListener('click', function() {
-                    window.location.href="bystop.html?color=1&stops="+bookmark.stops.flat().join(",");
-                    //window.location.href="bystop.html?color=1&bkmark="+i;
-                });
+                // 在編輯模式下，點擊書籤不進行導航
+                if (!isEditMode) {
+                    bookmarkEl.addEventListener('click', function() {
+                        window.location.href = "bystop.html?color=1&stops=" + bookmark.stops.flat().join(",");
+                    });
+                }
                 
                 container.appendChild(bookmarkEl);
             });
         }
         
+        // 切換編輯模式
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editBtn = document.getElementById('edit-bookmarks-btn');
+            const bookmarksContainer = document.getElementById('bookmarks-container');
+            const editHint = document.getElementById('edit-hint');
+            
+            if (isEditMode) {
+                editBtn.innerHTML = '<i class="fas fa-check"></i> 完成編輯';
+                editBtn.classList.remove('btn-tertiary');
+                editBtn.classList.add('btn-primary');
+                bookmarksContainer.classList.add('edit-mode');
+                editHint.style.display = 'block';
+            } else {
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> 編輯書籤';
+                editBtn.classList.remove('btn-primary');
+                editBtn.classList.add('btn-tertiary');
+                bookmarksContainer.classList.remove('edit-mode');
+                editHint.style.display = 'none';
+                
+                // 保存排序後的書籤
+                saveBookmarks();
+            }
+            
+            renderBookmarks();
+        }
+        
+        // 移除書籤
+        function removeBookmark(index) {
+            if (confirm('確定要刪除此書籤嗎？')) {
+                bookmarks.splice(index, 1);
+                renderBookmarks();
+                
+                // 如果沒有書籤了，退出編輯模式
+                if (bookmarks.length === 0) {
+                    toggleEditMode();
+                }
+            }
+        }
+        
+        // 拖拽相關函數
+        function handleDragStart(e) {
+            dragStartIndex = parseInt(this.getAttribute('data-index'));
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            return false;
+        }
+        
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        
+        function handleDragEnd(e) {
+            document.querySelectorAll('.bookmark').forEach(el => {
+                el.classList.remove('dragging');
+                el.classList.remove('drag-over');
+            });
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            const dragEndIndex = parseInt(this.getAttribute('data-index'));
+            
+            if (dragStartIndex !== dragEndIndex) {
+                // 交換書籤位置
+                const temp = bookmarks[dragStartIndex];
+                bookmarks[dragStartIndex] = bookmarks[dragEndIndex];
+                bookmarks[dragEndIndex] = temp;
+                
+                // 重新渲染
+                renderBookmarks();
+            }
+            
+            return false;
+        }
+        
+        // 保存書籤到本地存儲
+        function saveBookmarks() {
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+        }
+        
+        // 其他現有函數保持不變
         function f(header, sname, href, rtdata) {
             console.log('導航參數:', { header, sname, href, rtdata });
-            
             alert(`即將前往 ${header} 的詳細頁面\n站名: ${sname.join(', ')}`);
-            
-            // window.location.href = href;
         }
         
         function showSettings() {
@@ -504,10 +669,6 @@
         
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function openBookmarkSettings() {
-            alert('書籤設置功能將在後續版本中提供');
         }
         
         function toggleAdvancedSettings() {
@@ -556,17 +717,191 @@
             localStorage.setItem('stopNumber', stopNumber);
             
             closeModal('settings-modal');
-            
             alert('設置已保存！');
         }
-        
-
-                /*${bookmark.buses.map(bus => `
-        <li class="bus-item">
-            <span class="bus-route">${bus.route} - ${bus.destination}</span>
-            <span class="bus-time ${parseInt(bus.time) <= 3 ? 'soon' : ''}">${bus.time}</span>
-        </li>
-        `).join('')}*/
     </script>
+
+    <script>
+// 添加触摸事件支持
+let touchStartY = 0;
+let touchCurrentY = 0;
+let touchDraggedIndex = -1;
+
+// 在renderBookmarks函数中添加触摸事件监听
+function renderBookmarks() {
+    const container = document.getElementById('bookmarks-container');
+    container.innerHTML = '';
+    
+    if (bookmarks.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px;">暫無書籤</p>';
+        return;
+    }
+    
+    bookmarks.forEach((bookmark, i) => {
+        const bookmarkEl = document.createElement('div');
+        bookmarkEl.className = 'bookmark';
+        bookmarkEl.setAttribute('draggable', isEditMode);
+        bookmarkEl.setAttribute('data-index', i);
+        
+        // 添加拖拽事件（桌面设备）
+        if (isEditMode) {
+            bookmarkEl.addEventListener('dragstart', handleDragStart);
+            bookmarkEl.addEventListener('dragover', handleDragOver);
+            bookmarkEl.addEventListener('dragenter', handleDragEnter);
+            bookmarkEl.addEventListener('dragleave', handleDragLeave);
+            bookmarkEl.addEventListener('dragend', handleDragEnd);
+            bookmarkEl.addEventListener('drop', handleDrop);
+            
+            // 添加触摸事件（移动设备）
+            bookmarkEl.addEventListener('touchstart', handleTouchStart);
+            bookmarkEl.addEventListener('touchmove', handleTouchMove);
+            bookmarkEl.addEventListener('touchend', handleTouchEnd);
+        }
+        
+        bookmarkEl.innerHTML = `
+            <div class="bookmark-edit-actions">
+                <button class="btn-remove" onclick="removeBookmark(${i})">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="bookmark-content">
+                <div class="station-info">
+                    <div class="station-name">${bookmark.name}</div>
+                    <div class="station-additional">${bookmark.stops.map(g => BusCrawling.getStopData(g[0]).name_tc).join("<br>")}</div>
+                </div>
+                <div class="bus-info">
+                    <ul class="bus-list" id="bus_list_${i}">
+                        
+                    </ul>
+                </div>
+            </div>
+        `;
+        
+            /*
+            <li class="bus-item">
+                            <span class="bus-route">101 - 觀塘</span>
+                            <span class="bus-time">5分鐘</span>
+                        </li>
+                        <li class="bus-item">
+                            <span class="bus-route">104 - 白田</span>
+                            <span class="bus-time soon">2分鐘</span>
+                        </li>*/
+
+        // 在編輯模式下，點擊書籤不進行導航
+        if (!isEditMode) {
+            bookmarkEl.addEventListener('click', function() {
+                window.location.href = "bystop.html?color=1&stops=" + bookmark.stops.flat().join(",");
+            });
+        }
+        
+        container.appendChild(bookmarkEl);
+    });
+}
+
+// 触摸事件处理函数
+function handleTouchStart(e) {
+    if (!isEditMode) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchStartY = touch.clientY;
+    touchDraggedIndex = parseInt(this.getAttribute('data-index'));
+    this.classList.add('dragging');
+}
+
+function handleTouchMove(e) {
+    if (!isEditMode || touchDraggedIndex === -1) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    touchCurrentY = touch.clientY;
+    
+    // 计算移动距离
+    const deltaY = touchCurrentY - touchStartY;
+    
+    // 如果移动距离足够大，则执行拖拽操作
+    if (Math.abs(deltaY) > 30) {
+        const direction = deltaY > 0 ? 1 : -1;
+        const newIndex = touchDraggedIndex + direction;
+        
+        // 确保新索引在有效范围内
+        if (newIndex >= 0 && newIndex < bookmarks.length) {
+            // 交换书签位置
+            const temp = bookmarks[touchDraggedIndex];
+            bookmarks[touchDraggedIndex] = bookmarks[newIndex];
+            bookmarks[newIndex] = temp;
+            
+            // 更新触摸起始位置和索引
+            touchStartY = touchCurrentY;
+            touchDraggedIndex = newIndex;
+            
+            // 重新渲染
+            renderBookmarks();
+        }
+    }
+}
+
+function handleTouchEnd(e) {
+    if (!isEditMode) return;
+    
+    e.preventDefault();
+    touchDraggedIndex = -1;
+    document.querySelectorAll('.bookmark').forEach(el => {
+        el.classList.remove('dragging');
+    });
+}
+
+// 修改现有的拖拽事件处理函数，添加触摸事件支持
+function handleDragStart(e) {
+    // 如果是触摸设备，不处理鼠标事件
+    if ('ontouchstart' in window) return;
+    
+    dragStartIndex = parseInt(this.getAttribute('data-index'));
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+
+function handleDragOver(e) {
+    if ('ontouchstart' in window) return;
+    e.preventDefault();
+    return false;
+}
+
+function handleDragEnter(e) {
+    if ('ontouchstart' in window) return;
+    this.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    if ('ontouchstart' in window) return;
+    this.classList.remove('drag-over');
+}
+
+function handleDragEnd(e) {
+    if ('ontouchstart' in window) return;
+    document.querySelectorAll('.bookmark').forEach(el => {
+        el.classList.remove('dragging');
+        el.classList.remove('drag-over');
+    });
+}
+
+function handleDrop(e) {
+    if ('ontouchstart' in window) return;
+    e.preventDefault();
+    const dragEndIndex = parseInt(this.getAttribute('data-index'));
+    
+    if (dragStartIndex !== dragEndIndex) {
+        // 交換書籤位置
+        const temp = bookmarks[dragStartIndex];
+        bookmarks[dragStartIndex] = bookmarks[dragEndIndex];
+        bookmarks[dragEndIndex] = temp;
+        
+        // 重新渲染
+        renderBookmarks();
+    }
+    
+    return false;
+}
+</script>
 </body>
 </html>
