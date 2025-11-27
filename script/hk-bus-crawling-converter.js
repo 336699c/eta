@@ -177,7 +177,7 @@ this.gen = function(){
 
         id.setAttribute("id", "route_"+data.id);
                 id.innerHTML = 
-            `<div class="route-item" onclick="window.location.href='route3.html?${data.href}'">
+            `<div class="route-item" onclick="window.location.href='route3.html?${data.href.replace("'","\\'").replace("\"","\\\"")}'">
 
                 <div>
                     <img src="icon/${_T.busIMG(data.co, data.route)}.png" style="width:35px">
